@@ -9,8 +9,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
-import br.org.cdl_sc.ClienteWebServiceSPC;
-
 @Singleton
 @Startup
 public class RotinaAutomatica {
@@ -22,7 +20,7 @@ public class RotinaAutomatica {
 	@Schedule(minute = "30", hour = "5", dayOfWeek="Sun,Thu", month="*", persistent = false)
 	public void automaticTimeout() {
 
-		try {
+	/*	try {
 			System.out.println("Gerando CNAB DE ALUNOS AINDA NAO ENVIADOs Escolar");
 			cnab240.gerarCNABAlunos();
 		} catch (Exception e) {
@@ -34,27 +32,27 @@ public class RotinaAutomatica {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+*/	}
 
 	@Schedule(minute = "*/5", hour = "*", month="*", persistent = false)
 	public void gerarArquivos() {
-		try {
+/*		try {
 			System.out.println("Gerando Arquivo de Baixa Cancelados ");
 			cnab240.gerarBaixaBoletoAlunosCancelados();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@Schedule(minute = "*/5", hour = "*", persistent = false)
 	public void importarCNABPagmentos() {
-		try {
+		/*try {
 			System.out.println("Gerando Arquivo de Baixa Pagos ");
 			cnab240.importarPagamentosCNAB240();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+*/	}
 
 	@Schedule(minute = "*/2", hour = "*", persistent = false)
 	public void enviarSPC() {
@@ -88,7 +86,7 @@ public class RotinaAutomatica {
 	// Rotina que executa as 3:30 da manha.
 	@Schedule(minute = "30", hour = "4",dayOfMonth="2", month="*" , persistent = false)
 	public void enviarEmail() {
-		new Thread() {
+/*		new Thread() {
 			@Override
 			public void run() {
 				System.out.println("Enviando email do mes atual ");
@@ -97,6 +95,6 @@ public class RotinaAutomatica {
 			}
 
 		}.start();
-	}
+*/	}
 
 }

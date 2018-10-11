@@ -7,17 +7,17 @@
 		<description>EngineWeb Persistence Unit</description>
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<non-jta-data-source>java:/EscolarDS</non-jta-data-source>
-		<class>org.escola.model.Funcionario</class>
-		<class>org.escola.model.Aluno</class>
-		<class>org.escola.model.Carro</class>
-		<class>org.escola.model.AlunoCarro</class>
-		<class>org.escola.model.FuncionarioCarro</class>
-		<class>org.escola.model.Member</class>
-		<class>org.escola.model.Avaliacao</class>
-		<class>org.escola.model.AlunoAvaliacao</class>
-		<class>org.escola.model.Evento</class>
-		<class>org.escola.model.Custo</class>
-		<class>org.escola.model.ObjetoRota</class>
+		<class>org.escolar.model.Funcionario</class>
+		<class>org.escolar.model.Aluno</class>
+		<class>org.escolar.model.Carro</class>
+		<class>org.escolar.model.AlunoCarro</class>
+		<class>org.escolar.model.FuncionarioCarro</class>
+		<class>org.escolar.model.Member</class>
+		<class>org.escolar.model.Avaliacao</class>
+		<class>org.escolar.model.AlunoAvaliacao</class>
+		<class>org.escolar.model.Evento</class>
+		<class>org.escolar.model.Custo</class>
+		<class>org.escolar.model.ObjetoRota</class>
 		<properties>
 			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->
 			<property name="hibernate.hbm2ddl.auto" value="update" />

@@ -19,12 +19,12 @@ import org.aaf.financeiro.sicoob.util.CNAB240_RETORNO_SICOOB;
 import org.aaf.financeiro.util.ImportadorArquivo;
 import org.aaf.financeiro.util.OfficeUtil;
 import org.aaf.financeiro.util.constantes.Constante;
-import org.escola.enums.StatusBoletoEnum;
-import org.escola.model.Aluno;
-import org.escola.model.Boleto;
-import org.escola.service.ConfiguracaoService;
-import org.escola.service.FinanceiroService;
-import org.escola.util.Verificador;
+import org.escolar.enums.StatusBoletoEnum;
+import org.escolar.model.Aluno;
+import org.escolar.model.Boleto;
+import org.escolar.service.ConfiguracaoService;
+import org.escolar.service.FinanceiroService;
+import org.escolar.util.Verificador;
 
 /**
  *
@@ -205,7 +205,7 @@ public class CNAB240 {
 							"".replace("-", "").replace(".", ""));
 					if (numeroDocumento.matches("^[0-9]*$")) {
 						Long numeroDocumentoLong = Long.parseLong(numeroDocumento);
-						org.escola.model.Boleto boleto = null;
+						org.escolar.model.Boleto boleto = null;
 						if (!extratoBancario) {
 							numeroDocumentoLong -= 10000;
 							boleto = financeiroService.findBoletoByID(numeroDocumentoLong);

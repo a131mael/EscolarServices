@@ -3,7 +3,6 @@ package org.escolar.rotinasAutomaticas;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.ejb.LocalBean;
@@ -14,12 +13,12 @@ import javax.naming.NamingException;
 import org.aaf.financeiro.model.Pagador;
 import org.aaf.financeiro.sicoob.util.CNAB240_SICOOB;
 import org.aaf.financeiro.util.OfficeUtil;
-import org.escola.model.Aluno;
-import org.escola.model.Boleto;
-import org.escola.service.FinanceiroService;
-import org.escola.util.Formatador;
-import org.escola.util.ServiceLocator;
-import org.escola.util.Verificador;
+import org.escolar.model.Aluno;
+import org.escolar.model.Boleto;
+import org.escolar.service.FinanceiroService;
+import org.escolar.util.Formatador;
+import org.escolar.util.ServiceLocator;
+import org.escolar.util.Verificador;
 
 @Stateless
 @LocalBean

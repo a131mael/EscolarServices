@@ -26,6 +26,13 @@
 			<artifactId>Financeiro</artifactId>
 			<type>jar</type>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.aaf.escolar</groupId>
+			<artifactId>EscolarDTO</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
 
 		<!-- Annotation processor that raising compilation errors whenever constraint 
 			annotations are incorrectly used. -->
@@ -127,7 +134,6 @@
 			<version>1.4</version>
 		</dependency>
 
-
 	</dependencies>
 
 	<build>
@@ -213,4 +219,5 @@
 		<artifactId>EscolarEAR</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	<version>0.0.2-SNAPSHOT</version>
 </project>
