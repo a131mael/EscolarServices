@@ -40,6 +40,7 @@ org\escolar\enums\TipoMobilidadeEnum.class
 org\escolar\model\ObjetoRota.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSServiceSoapBindingStub.class
 org\escolar\model\Recado_.class
+org\escolar\model\TabelaPrecos_.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroBoletoWS.class
 org\escolar\service\UsuarioService.class
 org\escolar\model\Member.class
@@ -51,6 +52,7 @@ org\escolar\service\SQLs.class
 org\escolar\model\Avaliacao_.class
 org\escolar\util\JSONPRequestFilter$1$1.class
 org\escolar\enums\TipoDestinatario.class
+org\escolar\model\TabelaPrecos.class
 org\escolar\rotinasAutomaticas\CNAB240.class
 org\escolar\rotinasAutomaticas\EnviadorEmail.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConsumidorContato.class
@@ -79,6 +81,7 @@ org\escolar\model\Localizacao_.class
 org\escolar\model\Lote.class
 org\escolar\enums\PegarEntregarEnun.class
 org\escolar\model\AlunoAvaliacao_.class
+org\escolar\service\TabelaPrecoService.class
 org\escolar\enums\DisciplinaEnum.class
 org\escolar\model\ContratoFretamento_.class
 org\escolar\model\Configuracao_.class
@@ -111,6 +114,7 @@ br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroChequeWS.cl
 org\escolar\model\Carro.class
 org\escolar\service\AlunoService.class
 org\escolar\service\LocationService.class
+org\escolar\enums\BairroEnum.class
 org\escolar\model\Carro_.class
 br\org\cdl_sc\ClienteWebServiceSPC.class
 org\escolar\controller\OfficeDOCUtil.class

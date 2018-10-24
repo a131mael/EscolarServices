@@ -1,4 +1,4 @@
-package org.escolar.enums;
+ package org.escolar.enums;
 
 public enum BimestreEnum {
 

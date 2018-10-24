@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -37,6 +38,7 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.aaf.financeiro.util.OfficeUtil;
+import org.escolar.enums.BairroEnum;
 import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
@@ -51,13 +53,16 @@ public class Aluno implements Serializable {
     @GeneratedValue
     private Long id;
     
-    @OneToMany
+    @OneToMany(fetch=FetchType.LAZY)
+    @Deprecated
     private List<Boleto> boletos;
     
     @Column
+    @Deprecated
     private String nomeMaeResponsavel;
     
     @Column
+    @Deprecated
 	private Boolean vencimentoUltimoDia;
     
     @Column
@@ -97,24 +102,26 @@ public class Aluno implements Serializable {
     private String contatoNome5;
     
     @Column
+    @Deprecated
     private String nomePaiResponsavel;
     
     @Column
     private int anoLetivo;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Aluno irmao1;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Aluno irmao2;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Aluno irmao3;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Aluno irmao4;
     
     @Column
+    @Deprecated
     private Boolean cnabEnviado;
     
     @Column
@@ -135,10 +142,10 @@ public class Aluno implements Serializable {
     @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
     private String nomeAluno;
     
-    @OneToMany
+    @OneToMany(fetch=FetchType.LAZY)
     private List<AlunoCarro> alunosCarros;
     
-    @OneToMany
+    @OneToMany(fetch=FetchType.LAZY)
     private List<AlunoAvaliacao> avaliacoes;
     
     @Column
@@ -147,7 +154,7 @@ public class Aluno implements Serializable {
     @Column
     private String codigo;
 
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     private Member member;
     
     @Column
@@ -156,40 +163,50 @@ public class Aluno implements Serializable {
     @NotNull
     private Serie serie;
     
-    @Column
-    private String endereco;
+    @Column 
+    @Deprecated
+    private String endereco; //TODO REMOVER ja no contrato
     
     @Column
     private String enderecoAluno;
     
     @Column
+    @Deprecated
     private String bairro;
     
     @Column
+    @Deprecated
     private String cep;
     
     @Column
+    @Deprecated
     private String cidade;
     
     @NotNull
     private PerioddoEnum periodo;
     
     @Column
+    @Deprecated
     private Double anuidade;
     
     @Column
+    @Deprecated
     private Integer numeroParcelas;
     
     @Column
+    @Deprecated
     private String nomeResponsavel;
     
     @Column
+    @Deprecated
     private String cpfResponsavel;
     
     @Column
+    @Deprecated
     private String rgResponsavel;
     
     @Column
+    @Deprecated
     private double valorMensal;
     
     @Column
@@ -199,6 +216,7 @@ public class Aluno implements Serializable {
     private Date dataMatricula;
     
     @Column
+    @Deprecated
 	private Date dataCancelamento;
 
     @Column
@@ -206,6 +224,9 @@ public class Aluno implements Serializable {
     
     @Column
     private EscolaEnum escola;
+    
+    @Column
+    private BairroEnum bairroAluno;
     
     @Column
     private boolean trocaIDA;
@@ -225,28 +246,28 @@ public class Aluno implements Serializable {
     @Column
     private Boolean trocaVolta3;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroLevaParaEscola;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroLevaParaEscolaTroca;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroLevaParaEscolaTroca2;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroLevaParaEscolaTroca3;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroPegaEscola;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroPegaEscolaTroca;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroPegaEscolaTroca2;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Carro carroPegaEscolaTroca3;
     
     @Column
@@ -343,12 +364,15 @@ public class Aluno implements Serializable {
 	//DADOS PARA O FINANCEIRO
 	 
     @Column
+    @Deprecated
     private Boolean enviadoParaCobrancaCDL;
     
     @Column
+    @Deprecated
     private Boolean enviadoSPC;
     
     @Column
+    @Deprecated
     private Boolean contratoTerminado;
 
     @Transient
@@ -1172,6 +1196,14 @@ public class Aluno implements Serializable {
 
 	public void setEnderecoAluno(String enderecoAluno) {
 		this.enderecoAluno = enderecoAluno;
+	}
+
+	public BairroEnum getBairroAluno() {
+		return bairroAluno;
+	}
+
+	public void setBairroAluno(BairroEnum bairroAluno) {
+		this.bairroAluno = bairroAluno;
 	}
 	
 }

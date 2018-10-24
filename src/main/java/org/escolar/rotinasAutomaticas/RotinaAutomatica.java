@@ -20,7 +20,7 @@ public class RotinaAutomatica {
 	@Schedule(minute = "30", hour = "5", dayOfWeek="Sun,Thu", month="*", persistent = false)
 	public void automaticTimeout() {
 
-	/*	try {
+		try {
 			System.out.println("Gerando CNAB DE ALUNOS AINDA NAO ENVIADOs Escolar");
 			cnab240.gerarCNABAlunos();
 		} catch (Exception e) {
@@ -32,27 +32,27 @@ public class RotinaAutomatica {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-*/	}
+	}
 
 	@Schedule(minute = "*/5", hour = "*", month="*", persistent = false)
 	public void gerarArquivos() {
-/*		try {
+		try {
 			System.out.println("Gerando Arquivo de Baixa Cancelados ");
 			cnab240.gerarBaixaBoletoAlunosCancelados();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+		}
 	}
 
 	@Schedule(minute = "*/5", hour = "*", persistent = false)
 	public void importarCNABPagmentos() {
-		/*try {
+		try {
 			System.out.println("Gerando Arquivo de Baixa Pagos ");
 			cnab240.importarPagamentosCNAB240();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-*/	}
+	}
 
 	@Schedule(minute = "*/2", hour = "*", persistent = false)
 	public void enviarSPC() {

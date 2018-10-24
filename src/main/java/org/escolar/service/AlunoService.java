@@ -3,6 +3,7 @@ package org.escolar.service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
+import org.escolar.enums.BairroEnum;
 import org.escolar.enums.BimestreEnum;
 import org.escolar.enums.DisciplinaEnum;
 import org.escolar.enums.EscolaEnum;
@@ -79,6 +81,21 @@ public class AlunoService extends Service {
 		if (al.getIrmao4() != null) {
 			al.getIrmao4().getAnoLetivo();
 		}
+		
+		if(al.getCarroLevaParaEscola() != null){
+			al.getCarroLevaParaEscola().getId();
+		}
+		
+		if(al.getCarroLevaParaEscolaTroca() != null){
+			al.getCarroLevaParaEscolaTroca().getId();
+		}
+		if(al.getCarroPegaEscola() != null){
+			al.getCarroPegaEscola().getId();
+		}
+		if(al.getCarroPegaEscolaTroca() != null){
+			al.getCarroPegaEscolaTroca().getId();
+		}
+		
 		if(al.getBoletos() != null){
 			al.getBoletos().size();	
 		}
@@ -223,7 +240,7 @@ public class AlunoService extends Service {
 		sql.append(idCarro);
 		sql.append(" and al.removido = false ");
 		sql.append(" and al.anoLetivo = ");
-		sql.append(Constant.anoLetivoAtual);
+		sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
 
 		Query query = em.createQuery(sql.toString());
 		alunos = query.getResultList();
@@ -248,7 +265,7 @@ public class AlunoService extends Service {
 		sql.append(" ) ");
 		sql.append(" and al.removido = false ");
 		sql.append(" and al.anoLetivo = ");
-		sql.append(Constant.anoLetivoAtual);
+		sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
 		Query query = em.createQuery(sql.toString());
 
 		alunos = query.getResultList();
@@ -276,7 +293,7 @@ public class AlunoService extends Service {
 		sql.append(" ) ");
 		sql.append(" and al.removido = false ");
 		sql.append(" and al.anoLetivo = ");
-		sql.append(Constant.anoLetivoAtual);
+		sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
 
 		sql.append(" and (al.idaVolta = 0 or al.idaVolta = 2 )");
 		Query query = em.createQuery(sql.toString());
@@ -326,6 +343,18 @@ public class AlunoService extends Service {
 
 	public Aluno save(Aluno aluno) {
 		return saveAluno(aluno, true);
+	}
+	
+	public void saveAlunoEndereco(Aluno aluno) {
+		Aluno user = null;
+		
+		if (aluno.getId() != null && aluno.getId() != 0L) {
+			user = findById(aluno.getId());
+		} 
+		
+		user.setBairroAluno(aluno.getBairroAluno());
+		user.setEnderecoAluno(aluno.getEnderecoAluno());
+		em.merge(user);
 	}
 
 	public void clone(Aluno aluno, Aluno user) {
@@ -398,7 +427,7 @@ public class AlunoService extends Service {
 				user = findById(aluno.getId());
 			} else {
 				user = new Aluno();
-				user.setAnoLetivo(Constant.anoLetivoAtual);
+				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			}
 			user.setIdaVolta(aluno.getIdaVolta());
 			// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
@@ -413,6 +442,7 @@ public class AlunoService extends Service {
 			}
 			
 			user.setBairro(aluno.getBairro());
+			user.setBairroAluno(aluno.getBairroAluno());
 			user.setCep(aluno.getCep());
 			user.setCidade(aluno.getCidade());
 			// user.setNacionalidade(aluno.getNacionalidade());
@@ -513,9 +543,9 @@ public class AlunoService extends Service {
 					aniversario = new Evento();
 				}
 
-				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), Constant.anoLetivoAtual));
+				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
 				aniversario
-						.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), Constant.anoLetivoAtual));
+						.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
 				aniversario.setCodigo(user.getCodigo());
 				aniversario.setDescricao(" Aniversário do(a) aluno(a) " + user.getNomeAluno());
 				aniversario.setNome(
@@ -556,15 +586,23 @@ public class AlunoService extends Service {
 	}
 
 	public List<Boleto> gerarBoletos(Aluno user) {
+		return gerarBoletos(user,configuracaoService.getConfiguracao().getAnoLetivo());
+	}
+
+	public List<Boleto> gerarBoletos(Aluno user, int ano) {
+		int quantidadeParcelas = 12 - user.getNumeroParcelas();
+		return gerarBoletos(user,ano,quantidadeParcelas);
+	}
+	
+	public List<Boleto> gerarBoletos(Aluno user, int ano, int quantidadeParcelas) {
 		List<Boleto> boletos = new ArrayList<>();
-		int i = 12 - user.getNumeroParcelas();
 		long nossoNumero = getProximoNossoNumero();
-		while (i < 12) {
+		while (quantidadeParcelas < 12) {
 			Boleto boleto = new Boleto();
 			Calendar vencimento = Calendar.getInstance();
 			vencimento.set(Calendar.DAY_OF_MONTH, 10);
-			vencimento.set(Calendar.MONTH, i);
-			vencimento.set(Calendar.YEAR, Constant.anoLetivoAtual);
+			vencimento.set(Calendar.MONTH, quantidadeParcelas);
+			vencimento.set(Calendar.YEAR, ano);
 			vencimento.set(Calendar.HOUR, 0);
 			vencimento.set(Calendar.MINUTE, 0);
 			vencimento.set(Calendar.SECOND, 0);
@@ -577,18 +615,20 @@ public class AlunoService extends Service {
 			nossoNumero++;
 			boletos.add(boleto);
 
-			i++;
+			quantidadeParcelas++;
 		}
 		return boletos;
 	}
 
+	
 	public void gerarBoletos() {
 		List<Aluno> alunos = findAll();
+		int anoREmatricula = configuracaoService.getConfiguracao().getAnoRematricula();
 		for (Aluno al : alunos) {
 			
 			if (al.getRemovido() != null && !al.getRemovido()) {
 				if (al.getBoletos() == null || al.getBoletos().size() == 0) {
-					if((al.getAnoLetivo() == Constant.anoLetivoAtual) || (al.getRematricular() != null && al.getRematricular()) ){
+					if((al.getAnoLetivo() == configuracaoService.getConfiguracao().getAnoLetivo()) || (al.getRematricular() != null && al.getRematricular()) ){
 						if (!irmaoJaTemBoleto(al)) {
 							List<Boleto> boletos = gerarBoletos(al);
 							al.setBoletos(boletos);
@@ -612,12 +652,41 @@ public class AlunoService extends Service {
 							em.merge(b);
 						}
 					}
-				
 				}
 			}
+			gerarBoletosRematricula(al,anoREmatricula);
 		}
 	}
 	
+	private List<Boleto> gerarBoletosRematricula(Aluno al, int anoRematricula){
+		if (al.getRemovido() != null && !al.getRemovido()) {
+			if(al.getRematricular() != null && al.getRematricular()){
+				if(!possuiBoletoNoAno(al,anoRematricula)){
+					gerarBoletos(al, anoRematricula,0);
+				}
+			}
+		}
+		return null;
+	}
+	
+	private boolean possuiBoletoNoAno(Aluno al, int anoRematricula) {
+		boolean retorno = false;
+		List<Boleto> boletos = al.getBoletos();
+		Calendar calendar = new GregorianCalendar();
+		if(boletos != null && !boletos.isEmpty()){
+			for(Boleto boleto:boletos){
+				calendar.setTime(boleto.getVencimento());
+				int anoBoleto = calendar.get(Calendar.YEAR);
+				if(anoBoleto == anoRematricula){
+					retorno = true;
+				}
+			}
+		}else{
+			retorno = false;
+		}
+		return retorno;
+	}
+
 	private boolean todosBoletosBaixados(List<Boleto> boletos) {
 		boolean todosBaixados = true;
 		for (Boleto bol : boletos) {
@@ -835,7 +904,7 @@ public class AlunoService extends Service {
 
 			for (Aluno prof : target) {
 				AlunoCarro pt = new AlunoCarro();
-				pt.setAnoLetivo(Constant.anoLetivoAtual);
+				pt.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 				pt.setAluno(prof);
 				pt.setCarro(em.find(Carro.class, turma.getId()));
 				em.persist(pt);
@@ -1015,7 +1084,24 @@ public class AlunoService extends Service {
 			Query q = em.createQuery(criteria);
 			q.setFirstResult(first);
 			q.setMaxResults(size);
-			return (List<Aluno>) q.getResultList();
+			List<Aluno> alunos =  (List<Aluno>)q.getResultList();
+			for(Aluno al : alunos){
+				if(al.getCarroLevaParaEscola() != null){
+					al.getCarroLevaParaEscola().getId();
+				}
+				
+				if(al.getCarroLevaParaEscolaTroca() != null){
+					al.getCarroLevaParaEscolaTroca().getId();
+				}
+				if(al.getCarroPegaEscola() != null){
+					al.getCarroPegaEscola().getId();
+				}
+				if(al.getCarroPegaEscolaTroca() != null){
+					al.getCarroPegaEscolaTroca().getId();
+				}
+				
+			}
+			return alunos;
 
 		} catch (NoResultException nre) {
 			return new ArrayList<>();
@@ -1728,6 +1814,52 @@ public class AlunoService extends Service {
 		em.merge(b);
 	}
 
+	public Aluno findAlunoSemEndereco() {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
+			Root<Aluno> member = criteria.from(Aluno.class);
+
+			Predicate whereBairroNulo = cb.isNull(member.get("bairroAluno"));
+			Predicate whereRemovido = cb.equal(member.get("removido"), false);;
+			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"), configuracaoService.getConfiguracao().getAnoLetivo());
+			criteria.select(member).where(whereBairroNulo, whereRemovido,whereAnoLetivo);
+			
+			
+			criteria.select(member).orderBy(cb.asc(member.get("codigo")));
+			return em.createQuery(criteria).getResultList().get(0);
+
+		} catch (NoResultException nre) {
+			return new Aluno();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Aluno();
+		}
+	}
+
+	public Aluno findAlunoBairro(int indice) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
+			Root<Aluno> member = criteria.from(Aluno.class);
+
+			Predicate whereBairro = cb.equal(member.get("bairroAluno"),BairroEnum.PACHECOS);
+			Predicate whereRemovido = cb.equal(member.get("removido"), false);;
+			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"), configuracaoService.getConfiguracao().getAnoLetivo());
+			criteria.select(member).where(whereBairro, whereRemovido,whereAnoLetivo);
+			
+			
+			criteria.select(member).orderBy(cb.asc(member.get("codigo")));
+			return em.createQuery(criteria).getResultList().get(indice);
+
+		} catch (NoResultException nre) {
+			return new Aluno();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Aluno();
+		}
+	}
+	
 	public void remover(Aluno aluno) {
 		for(Boleto b : aluno.getBoletos()){
 			if(b.getManterAposRemovido() != null && b.getManterAposRemovido()){

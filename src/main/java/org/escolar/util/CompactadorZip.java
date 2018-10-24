@@ -68,7 +68,9 @@ public class CompactadorZip {
     public static boolean createDir(String pathToDir) {
 		Path path = Paths.get(pathToDir);
 		try {
-			Files.createDirectory(path);
+			if(!path.toFile().exists()){
+				Files.createDirectory(path);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

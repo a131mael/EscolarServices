@@ -14,6 +14,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 
+import org.escolar.enums.BairroEnum;
 import org.escolar.enums.BimestreEnum;
 import org.escolar.enums.CustoEnum;
 import org.escolar.enums.DisciplinaEnum;
@@ -178,6 +179,36 @@ public class CombosEspeciaisMB implements Serializable {
 
 		return items;
 	}
+	
+	public ArrayList<SelectItem> getBairroSelectIItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (BairroEnum m : BairroEnum.values()) {
+				items.add(new SelectItem(m, m.getName()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getEscolaSelectIItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (EscolaEnum m : EscolaEnum.values()) {
+				items.add(new SelectItem(m, m.getName()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
 
 	
 	public static Serie[] getSeries() {
@@ -193,6 +224,11 @@ public class CombosEspeciaisMB implements Serializable {
 	public static EscolaEnum[] getEscolas() {
 
 		return EscolaEnum.values();
+	}
+	
+	public static BairroEnum[] getBairros() {
+
+		return BairroEnum.values();
 	}
 
 	public static EspecialidadeEnum[] getEspecialidades() {

@@ -91,6 +91,7 @@ public class ConfiguracaoService extends Service {
 			
 			user.setAnoLetivo(configuracao.getAnoLetivo());
 			user.setSequencialArquivoCNAB(configuracao.getSequencialArquivoCNAB());
+			user.setAnoRematricula(configuracao.getAnoRematricula());
 			
 			em.persist(user);
 			

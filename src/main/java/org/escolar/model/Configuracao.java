@@ -26,6 +26,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
@@ -38,6 +39,9 @@ public class Configuracao implements Serializable {
 
     @Column
     private int anoLetivo;
+    
+    @Column
+    private Short anoRematricula;
     
     @Column
     private long sequencialArquivoCNAB;
@@ -66,6 +70,14 @@ public class Configuracao implements Serializable {
 
 	public void setSequencialArquivoCNAB(long sequencialArquivoCNAB) {
 		this.sequencialArquivoCNAB = sequencialArquivoCNAB;
+	}
+
+	public Short getAnoRematricula() {
+		return anoRematricula;
+	}
+
+	public void setAnoRematricula(Short anoRematricula) {
+		this.anoRematricula = anoRematricula;
 	}
 
 }
