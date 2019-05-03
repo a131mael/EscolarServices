@@ -2,10 +2,14 @@
 package org.escolar.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -20,9 +24,11 @@ import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
+import org.aaf.financeiro.util.Util;
 import org.escolar.enums.StatusBoletoEnum;
 import org.escolar.model.Aluno;
 import org.escolar.model.Boleto;
+import org.escolar.model.ContratoAluno;
 import org.escolar.model.Devedor;
 import org.escolar.util.Service;
 import org.escolar.util.UtilFinalizarAnoLetivo;
@@ -37,6 +43,13 @@ public class DevedorService extends Service {
 	@Inject
 	private UtilFinalizarAnoLetivo finalizarAnoLetivo;
 
+	@Inject
+	private ConfiguracaoService configuracaoService;
+	
+	private Date dataInicio;
+	
+	private Date dataFim;
+
 	@PersistenceContext(unitName = "EscolarDS")
 	private EntityManager em;
 
@@ -46,6 +59,12 @@ public class DevedorService extends Service {
 
 	public Aluno findById(Long id) {
 		Aluno dev = em.find(Aluno.class, id);
+		dev.getBoletos().size();
+		return dev;
+	}
+
+	public ContratoAluno findByIdContratoAluno(Long id) {
+		ContratoAluno dev = em.find(ContratoAluno.class, id);
 		dev.getBoletos().size();
 		return dev;
 	}
@@ -164,9 +183,135 @@ public class DevedorService extends Service {
 		 */
 		return "ok";
 	}
+	
+	public List<Aluno> findDevedor(Date dataInicio,Date dataFim){
+		StringBuilder sql = new StringBuilder();
+		sql.append("select al.* from aluno al ");   
+		sql.append("left join boleto bol ");
+		sql.append("on bol.pagador_id = al.id ");
+		sql.append("where ");
+		sql.append("bol.vencimento < '");
+		sql.append(new Date());
+		sql.append("'");
+		if(dataInicio != null){
+			sql.append(" and bol.vencimento > '");
+			sql.append(dataInicio);
+			sql.append("'");
+		}
+		
+		if(dataFim != null){
+			sql.append(" and bol.vencimento < '");
+			sql.append(dataFim);
+			sql.append("'");
+		}
+		sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
+		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
+		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		
+		
+		Query query = em.createNativeQuery(sql.toString(),Aluno.class);
+		List<Aluno> boletos = query.getResultList();
+		if(boletos == null){
+			boletos = new ArrayList<Aluno>();
+		}
+		boletos.size();
 
+		boolean atrasado = false;
+		List<Aluno> aux = new LinkedList<>();
+		Set<Aluno> ds = new LinkedHashSet(); 		
+		for (Aluno d : (List<Aluno>) boletos) {
+			d.getId();
+			d.getNomeAluno();
+			d.getContratos().size();
+			if(d.getIrmao1()!= null){
+				d.getIrmao1().getId();
+			}
+			if(d.getIrmao2()!= null){
+				d.getIrmao2().getId();
+			}
+			if(d.getIrmao3()!= null){
+				d.getIrmao3().getId();
+			}
+			if(d.getIrmao4()!= null){
+				d.getIrmao4().getId();
+			}
+
+			
+			for (ContratoAluno contrato : d.getContratos()) {
+				
+				contrato.getBoletos().size();
+				for (Boleto b : contrato.getBoletos()) {
+					
+					if (dataInicio != null  && dataFim != null) {
+						if(dataInicio.before(b.getVencimento()) && dataFim.after(b.getVencimento())){
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+							} else {
+								b.setAtrasado(false);
+							}
+
+						}
+						
+					}else if (dataInicio == null  && dataFim != null) {
+						if(dataFim.after(b.getVencimento())){
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+							} else {
+								b.setAtrasado(false);
+							}
+
+						}
+						
+					}else if (dataInicio != null  && dataFim == null) {
+						if(dataInicio.before(b.getVencimento())){
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+							} else {
+								b.setAtrasado(false);
+							}
+
+						}
+					}else{
+						if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+							b.setAtrasado(true);
+							atrasado = true;
+							contrato.setAtrasado(true);
+						} else {
+							b.setAtrasado(false);
+						}
+					}
+				}
+
+				if(contrato.getProtestado() != null && contrato.getProtestado()){
+					atrasado = false;
+				}
+			}
+			if (atrasado) {
+				
+				ds.add(d);
+			}
+			atrasado = false;
+		}
+		if(ds != null && !ds.isEmpty()){
+			aux.addAll(ds);
+		}
+
+		return aux;
+	}
+	
+	
 	@SuppressWarnings("unchecked")
-	public List<Aluno> find(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+	public List<Aluno> find(int first, int size, String orderBy, String order, Map<String, Object> filtros,Date dataInicio,Date dataFim) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
@@ -193,12 +338,386 @@ public class DevedorService extends Service {
 			Query q = em.createQuery(criteria);
 			q.setFirstResult(first);
 			// q.setMaxResults(size);
+			boolean atrasado = false;
 			List<Aluno> ds = new LinkedList<>();
 			for (Aluno d : (List<Aluno>) q.getResultList()) {
-				if (possuiBoletoAtrasado(d)) {
+				for (ContratoAluno contrato : d.getContratos()) {
+					
+					contrato.getBoletos().size();
+					for (Boleto b : contrato.getBoletos()) {
+						
+						if (dataInicio != null  && dataFim != null) {
+							if(dataInicio.before(b.getVencimento()) && dataFim.after(b.getVencimento())){
+								if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+									b.setAtrasado(true);
+									atrasado = true;
+									contrato.setAtrasado(true);
+								} else {
+									b.setAtrasado(false);
+								}
+	
+							}
+							
+						}else if (dataInicio == null  && dataFim != null) {
+							if(dataFim.after(b.getVencimento())){
+								if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+									b.setAtrasado(true);
+									atrasado = true;
+									contrato.setAtrasado(true);
+								} else {
+									b.setAtrasado(false);
+								}
+	
+							}
+							
+						}else if (dataInicio != null  && dataFim == null) {
+							if(dataInicio.before(b.getVencimento())){
+								if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+									b.setAtrasado(true);
+									atrasado = true;
+									contrato.setAtrasado(true);
+								} else {
+									b.setAtrasado(false);
+								}
+	
+							}
+						}else{
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+							} else {
+								b.setAtrasado(false);
+							}
+						}
+					}
+
+					if(contrato.getProtestado() != null && contrato.getProtestado()){
+						atrasado = false;
+					}
+				}
+				if (atrasado) {
+					
 					ds.add(d);
 				}
+				atrasado = false;
 			}
+
+			return ds;
+
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAnoLetivo(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
+			Root<Aluno> member = criteria.from(Aluno.class);
+			CriteriaQuery cq = criteria.select(member);
+
+			final List<Predicate> predicates = new ArrayList<Predicate>();
+
+			for (Map.Entry<String, Object> entry : filtros.entrySet()) {
+
+				Predicate pred = cb.and();
+				if (entry.getValue() instanceof String) {
+					pred = cb.and(pred, cb.like(member.<String> get(entry.getKey()), "%" + entry.getValue() + "%"));
+				} else {
+					pred = cb.equal(member.get(entry.getKey()), entry.getValue());
+				}
+
+				predicates.add(pred);
+				// cq.where(pred);
+			}
+
+			cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+			cq.orderBy((order.equals("asc") ? cb.asc(member.get(orderBy)) : cb.desc(member.get(orderBy))));
+			Query q = em.createQuery(criteria);
+			q.setFirstResult(first);
+			// q.setMaxResults(size);
+			boolean atrasado = false;
+			List<Aluno> ds = new LinkedList<>();
+			for (Aluno d : (List<Aluno>) q.getResultList()) {
+				for (ContratoAluno contrato : d.getContratos()) {
+					contrato.getBoletos().size();
+					if (contrato.getAno() == configuracaoService.getConfiguracao().getAnoLetivo()) {
+						contrato.getBoletos().size();
+						for (Boleto b : contrato.getBoletos()) {
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+
+							} else {
+								b.setAtrasado(false);
+							}
+						}
+					}
+				}
+				if (atrasado) {
+
+					ds.add(d);
+				}
+				atrasado = false;
+			}
+
+			return ds;
+
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAnoPassado(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
+			Root<Aluno> member = criteria.from(Aluno.class);
+			CriteriaQuery cq = criteria.select(member);
+
+			final List<Predicate> predicates = new ArrayList<Predicate>();
+
+			for (Map.Entry<String, Object> entry : filtros.entrySet()) {
+
+				Predicate pred = cb.and();
+				if (entry.getValue() instanceof String) {
+					pred = cb.and(pred, cb.like(member.<String> get(entry.getKey()), "%" + entry.getValue() + "%"));
+				} else {
+					pred = cb.equal(member.get(entry.getKey()), entry.getValue());
+				}
+
+				predicates.add(pred);
+				// cq.where(pred);
+			}
+
+			cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+			cq.orderBy((order.equals("asc") ? cb.asc(member.get(orderBy)) : cb.desc(member.get(orderBy))));
+			Query q = em.createQuery(criteria);
+			q.setFirstResult(first);
+			// q.setMaxResults(size);
+			boolean atrasado = false;
+			List<Aluno> ds = new LinkedList<>();
+			for (Aluno d : (List<Aluno>) q.getResultList()) {
+				for (ContratoAluno contrato : d.getContratos()) {
+					if (contrato.getAno() - 1 == configuracaoService.getConfiguracao().getAnoLetivo()) {
+						contrato.getBoletos().size();
+						for (Boleto b : contrato.getBoletos()) {
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+
+							} else {
+								b.setAtrasado(false);
+							}
+						}
+					}
+
+				}
+				if (atrasado) {
+
+					ds.add(d);
+				}
+				atrasado = false;
+			}
+
+			return ds;
+
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Aluno> find2AnosOuMais(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
+			Root<Aluno> member = criteria.from(Aluno.class);
+			CriteriaQuery cq = criteria.select(member);
+
+			final List<Predicate> predicates = new ArrayList<Predicate>();
+
+			for (Map.Entry<String, Object> entry : filtros.entrySet()) {
+
+				Predicate pred = cb.and();
+				if (entry.getValue() instanceof String) {
+					pred = cb.and(pred, cb.like(member.<String> get(entry.getKey()), "%" + entry.getValue() + "%"));
+				} else {
+					pred = cb.equal(member.get(entry.getKey()), entry.getValue());
+				}
+
+				predicates.add(pred);
+				// cq.where(pred);
+			}
+
+			cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+			cq.orderBy((order.equals("asc") ? cb.asc(member.get(orderBy)) : cb.desc(member.get(orderBy))));
+			Query q = em.createQuery(criteria);
+			q.setFirstResult(first);
+			// q.setMaxResults(size);
+			boolean atrasado = false;
+			List<Aluno> ds = new LinkedList<>();
+			for (Aluno d : (List<Aluno>) q.getResultList()) {
+				for (ContratoAluno contrato : d.getContratos()) {
+					if (contrato.getAno() < configuracaoService.getConfiguracao().getAnoLetivo() - 1) {
+						contrato.getBoletos().size();
+						for (Boleto b : contrato.getBoletos()) {
+							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+								b.setAtrasado(true);
+								atrasado = true;
+								contrato.setAtrasado(true);
+
+							} else {
+								b.setAtrasado(false);
+							}
+						}
+					}
+
+				}
+				if (atrasado) {
+
+					ds.add(d);
+				}
+				atrasado = false;
+			}
+
+			return ds;
+
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+
+	}
+	
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<ContratoAluno> findProtesto(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("select bol.* from boleto bol ");   
+			sql.append("left join contratoaluno ca ");
+			sql.append("on bol.contrato_id = ca.id ");
+			sql.append("where ");
+			sql.append("bol.vencimento < '");
+			sql.append(new Date());
+			sql.append("'");
+			if(dataInicio != null){
+				sql.append(" and bol.vencimento > '");
+				sql.append(dataInicio);
+				sql.append("'");
+			}
+			
+			if(dataFim != null){
+				sql.append(" and bol.vencimento < '");
+				sql.append(dataFim);
+				sql.append("'");
+			}
+			sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
+			sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
+			sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
+			sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+			sql.append(" and ca.protestado = true");
+			sql.append(" and (ca.enviadoProtestoDefinitivo is null or ca.enviadoProtestoDefinitivo = false)");
+			
+			Query query = em.createNativeQuery(sql.toString(),Boleto.class);
+			query.setFirstResult(first);
+			List<Boleto> boletos = query.getResultList();
+			if(boletos == null){
+				boletos = new ArrayList<Boleto>();
+			}
+			
+			Set<ContratoAluno> ds = new LinkedHashSet(); 
+			List<ContratoAluno> aux = new ArrayList<>(); 
+			for(Boleto b : boletos){
+				b.getContrato().getId();
+				b.getContrato().getBoletos().size();
+				ds.add(b.getContrato());
+				b.setAtrasado(true);
+				
+			}
+			if(ds != null && !ds.isEmpty()){
+				 aux.addAll(ds);
+			}
+			return aux;
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	public List<ContratoAluno> find2(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<ContratoAluno> criteria = cb.createQuery(ContratoAluno.class);
+			Root<ContratoAluno> member = criteria.from(ContratoAluno.class);
+			CriteriaQuery cq = criteria.select(member);
+
+			final List<Predicate> predicates = new ArrayList<Predicate>();
+
+			for (Map.Entry<String, Object> entry : filtros.entrySet()) {
+
+				Predicate pred = cb.and();
+				if (entry.getValue() instanceof String) {
+					pred = cb.and(pred, cb.like(member.<String> get(entry.getKey()), "%" + entry.getValue() + "%"));
+				} else {
+					pred = cb.equal(member.get(entry.getKey()), entry.getValue());
+				}
+
+				predicates.add(pred);
+				// cq.where(pred);
+			}
+
+			cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+			cq.orderBy((order.equals("asc") ? cb.asc(member.get(orderBy)) : cb.desc(member.get(orderBy))));
+			Query q = em.createQuery(criteria);
+			q.setFirstResult(first);
+			// q.setMaxResults(size);
+			boolean atrasado = false;
+			List<ContratoAluno> ds = new LinkedList<>();
+			for (ContratoAluno contrato : (List<ContratoAluno>) q.getResultList()) {
+				contrato.getBoletos().size();
+				for (Boleto b : contrato.getBoletos()) {
+					if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+						b.setAtrasado(true);
+						atrasado = true;
+
+					} else {
+						b.setAtrasado(false);
+					}
+				}
+				if (atrasado) {
+					ds.add(contrato);
+				}
+				atrasado = false;
+
+			}
+
 			return ds;
 
 		} catch (NoResultException nre) {
@@ -256,6 +775,38 @@ public class DevedorService extends Service {
 			return 0;
 		}
 	}
+	
+	public long countContratoAluno(Map<String, Object> filtros) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+			Root<ContratoAluno> member = countQuery.from(ContratoAluno.class);
+			countQuery.select(cb.count(member));
+
+			if (filtros != null) {
+				for (Map.Entry<String, Object> entry : filtros.entrySet()) {
+
+					Predicate pred = cb.and();
+					if (entry.getValue() instanceof String) {
+						pred = cb.and(pred, cb.like(member.<String> get(entry.getKey()), "%" + entry.getValue() + "%"));
+					} else {
+						pred = cb.equal(member.get(entry.getKey()), entry.getValue());
+					}
+					countQuery.where(pred);
+				}
+
+			}
+
+			Query q = em.createQuery(countQuery);
+			return (long) q.getSingleResult();
+
+		} catch (NoResultException nre) {
+			return 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
 
 	public void saveObservacao(Aluno alunod) {
 		Aluno aluno = findById(alunod.getId());
@@ -266,6 +817,101 @@ public class DevedorService extends Service {
 	public boolean isdevedor(Aluno aluno) {
 		boolean atrasado = possuiBoletoAtrasado(aluno);
 		return atrasado;
+	}
+
+	public Date getDataInicio() {
+		return dataInicio;
+	}
+
+	public void setDataInicio(Date dataInicio) {
+		this.dataInicio = dataInicio;
+	}
+
+	public Date getDataFim() {
+		return dataFim;
+	}
+
+	public void setDataFim(Date dataFim) {
+		this.dataFim = dataFim;
+	}
+
+	public void enviarParaProtesto(ContratoAluno ca) {
+		ContratoAluno caa = findByIdContratoAluno(ca.getId());
+		caa.setProtestado(true);
+		em.merge(caa);
+	}
+
+	public void enviarPodeEnviarProtestoFina(ContratoAluno ca) {
+		ContratoAluno caa = findByIdContratoAluno(ca.getId());
+		caa.setPodeProtestarFinal(true);
+		em.merge(caa);
+	}
+
+	public void enviadoProtestoDefinitivo(ContratoAluno ca) {
+		ContratoAluno caa = findByIdContratoAluno(ca.getId());
+		caa.setEnviadoProtestoDefinitivo(true);
+		em.merge(caa);		
+	}
+
+	public void saveComentario(ContratoAluno ca) {
+		ContratoAluno ca2 = findByIdContratoAluno(ca.getId());
+		ca2.setComentario(ca.getComentario());
+		em.merge(ca2);
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<ContratoAluno> findProtestoEnviado(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("select bol.* from boleto bol ");   
+			sql.append("left join contratoaluno ca ");
+			sql.append("on bol.contrato_id = ca.id ");
+			sql.append("where ");
+			sql.append("bol.vencimento < '");
+			sql.append(new Date());
+			sql.append("'");
+			if(dataInicio != null){
+				sql.append(" and bol.vencimento > '");
+				sql.append(dataInicio);
+				sql.append("'");
+			}
+			
+			if(dataFim != null){
+				sql.append(" and bol.vencimento < '");
+				sql.append(dataFim);
+				sql.append("'");
+			}
+			sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
+			sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
+			sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
+			sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+			sql.append(" and ca.protestado = true");
+			sql.append(" and (ca.enviadoProtestoDefinitivo = true)");
+			
+			Query query = em.createNativeQuery(sql.toString(),Boleto.class);
+			query.setFirstResult(first);
+			List<Boleto> boletos = query.getResultList();
+			if(boletos == null){
+				boletos = new ArrayList<Boleto>();
+			}
+			
+			Set<ContratoAluno> ds = new LinkedHashSet(); 
+			List<ContratoAluno> aux = new ArrayList<>(); 
+			for(Boleto b : boletos){
+				b.getContrato().getId();
+				b.getContrato().getBoletos().size();
+				ds.add(b.getContrato());
+				b.setAtrasado(true);
+				
+			}
+			if(ds != null && !ds.isEmpty()){
+				 aux.addAll(ds);
+			}
+			return aux;
+		}catch(Exception e){
+			return null;
+		}
 	}
 
 }

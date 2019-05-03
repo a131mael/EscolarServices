@@ -32,11 +32,11 @@ import org.escolar.model.Aluno;
 import org.escolar.model.AlunoCarro;
 import org.escolar.model.Boleto;
 import org.escolar.model.Carro;
+import org.escolar.model.ContratoAluno;
 import org.escolar.model.Custo;
 import org.escolar.model.Evento;
 import org.escolar.model.Funcionario;
 import org.escolar.model.ObjetoRota;
-import org.escolar.util.Constant;
 import org.escolar.util.Service;
 import org.escolar.util.UtilFinalizarAnoLetivo;
 
@@ -64,41 +64,135 @@ public class AlunoService extends Service {
 		return boleto;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunoDoAnoLetivo() {
+		List<Aluno> alunos = new ArrayList<>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT al from  Aluno al ");
+		sql.append("where 1=1 ");
+		sql.append(" and al.removido = false ");
+		sql.append(" and al.anoLetivo = ");
+		sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
+		Query query = em.createQuery(sql.toString());
+
+		alunos = query.getResultList();
+
+		return alunos;
+	}
+
+	
+	public ContratoAluno findContratoById(Long id){
+		ContratoAluno contrato = em.find(ContratoAluno.class, id);
+		contrato.getAluno().getAnoLetivo();
+		
+		if(contrato.getAluno().getIrmao1() != null){
+			contrato.getAluno().getIrmao1().getId();
+		}
+		if(contrato.getAluno().getIrmao2() != null){
+			contrato.getAluno().getIrmao2().getId();
+		}
+		if(contrato.getAluno().getIrmao3() != null){
+			contrato.getAluno().getIrmao3().getId();
+		}
+		if(contrato.getAluno().getIrmao4() != null){
+			contrato.getAluno().getIrmao4().getId();
+		}
+		carregarLazyCarro(contrato.getAluno());
+		carregarLazyCarro(contrato.getAluno().getIrmao1());
+		carregarLazyCarro(contrato.getAluno().getIrmao2());
+		carregarLazyCarro(contrato.getAluno().getIrmao3());
+		carregarLazyCarro(contrato.getAluno().getIrmao4());
+		
+		
+		
+		if(contrato.getAluno().getContratos() != null){
+			contrato.getAluno().getContratos().size();
+			for(ContratoAluno contratos : contrato.getAluno().getContratos()){
+				contratos.getBoletos().size();
+			}
+		}
+		
+		if(contrato.getBoletos() != null){
+			contrato.getBoletos().size();
+		}
+		return contrato;
+	}
+	
+	private void carregarLazyCarro(Aluno aluno) {
+		if(aluno != null){
+			if(aluno.getCarroLevaParaEscola() != null){
+				aluno.getCarroLevaParaEscola().getId();
+			}
+			
+			if(aluno.getCarroLevaParaEscolaTroca() != null){
+				aluno.getCarroLevaParaEscolaTroca().getId();
+			}
+			
+			if(aluno.getCarroLevaParaEscolaTroca2() != null){
+				aluno.getCarroLevaParaEscolaTroca2().getId();
+			}
+			
+			if(aluno.getCarroLevaParaEscolaTroca3() != null){
+				aluno.getCarroLevaParaEscolaTroca3().getId();
+			}
+			
+			if(aluno.getCarroPegaEscola() != null){
+				aluno.getCarroPegaEscola().getId();
+			}
+			
+			if(aluno.getCarroPegaEscolaTroca() != null){
+				aluno.getCarroPegaEscolaTroca().getId();
+			}
+			
+			if(aluno.getCarroLevaParaEscolaTroca2() != null){
+				aluno.getCarroPegaEscolaTroca2().getId();
+			}
+			
+			if(aluno.getCarroPegaEscolaTroca3() != null){
+				aluno.getCarroPegaEscolaTroca3().getId();
+			}
+		}
+		
+	}
+
 	public Aluno findById(Long id) {
 		Aluno al = em.find(Aluno.class, id);
-		if (al.getIrmao1() != null) {
-			al.getIrmao1().getAnoLetivo();
-		}
+		if(al != null){
+			if (al.getIrmao1() != null) {
+				al.getIrmao1().getAnoLetivo();
+			}
 
-		if (al.getIrmao2() != null) {
-			al.getIrmao2().getAnoLetivo();
-		}
+			if (al.getIrmao2() != null) {
+				al.getIrmao2().getAnoLetivo();
+			}
 
-		if (al.getIrmao3() != null) {
-			al.getIrmao3().getAnoLetivo();
-		}
+			if (al.getIrmao3() != null) {
+				al.getIrmao3().getAnoLetivo();
+			}
 
-		if (al.getIrmao4() != null) {
-			al.getIrmao4().getAnoLetivo();
+			if (al.getIrmao4() != null) {
+				al.getIrmao4().getAnoLetivo();
+			}
+			carregarLazyCarro(al);
+			carregarLazyCarro(al.getIrmao1());
+			carregarLazyCarro(al.getIrmao2());
+			carregarLazyCarro(al.getIrmao3());
+			carregarLazyCarro(al.getIrmao4());
+			
+			
+			if(al.getBoletos() != null){
+				al.getBoletos().size();	
+			}
+			
+			if(al.getContratos() != null){
+				 al.getContratos().size();
+				 for(ContratoAluno c : al.getContratos()){
+					 c.getBoletos().size();
+				 }
+			}
 		}
 		
-		if(al.getCarroLevaParaEscola() != null){
-			al.getCarroLevaParaEscola().getId();
-		}
-		
-		if(al.getCarroLevaParaEscolaTroca() != null){
-			al.getCarroLevaParaEscolaTroca().getId();
-		}
-		if(al.getCarroPegaEscola() != null){
-			al.getCarroPegaEscola().getId();
-		}
-		if(al.getCarroPegaEscolaTroca() != null){
-			al.getCarroPegaEscolaTroca().getId();
-		}
-		
-		if(al.getBoletos() != null){
-			al.getBoletos().size();	
-		}
 		
 		return al;
 	}
@@ -117,7 +211,11 @@ public class AlunoService extends Service {
 			// feature in JPA 2.0
 			// criteria.select(member).orderBy(cb.asc(member.get(Member_.name)));
 			criteria.select(member).orderBy(cb.asc(member.get("nomeAluno")));
-			return em.createQuery(criteria).getResultList();
+			List<Aluno> als =em.createQuery(criteria).getResultList(); 
+			for(Aluno al : als){
+				al.getBoletos().size();
+			}
+			return als;
 
 		} catch (NoResultException nre) {
 			return new ArrayList<>();
@@ -245,9 +343,8 @@ public class AlunoService extends Service {
 		Query query = em.createQuery(sql.toString());
 		alunos = query.getResultList();
 		return alunos;
-
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public List<Aluno> findAlunoByCarroIDA(long idCarro, PerioddoEnum periodo) {
 		List<Aluno> alunos = new ArrayList<>();
@@ -341,7 +438,7 @@ public class AlunoService extends Service {
 
 	}
 
-	public Aluno save(Aluno aluno) {
+	public Aluno save(Aluno aluno,ContratoAluno contrato) {
 		return saveAluno(aluno, true);
 	}
 	
@@ -359,17 +456,17 @@ public class AlunoService extends Service {
 
 	public void clone(Aluno aluno, Aluno user) {
 		// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
-		user.setValorMensal(aluno.getValorMensal());
+		//user.setValorMensal(aluno.getValorMensal());
 		user.setDataMatricula(aluno.getDataMatricula());
 		// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
 		user.setCodigo(aluno.getCodigo());
 
 		
-		user.setAnuidade(aluno.getAnuidade() != null ? aluno.getAnuidade() : 0);
+	//	user.setAnuidade(aluno.getAnuidade() != null ? aluno.getAnuidade() : 0);
 		user.setCpfMae(aluno.getCpfMae());
 		user.setCpfPai(aluno.getCpfPai());
-		user.setCpfResponsavel(aluno.getCpfResponsavel());
-		user.setRgResponsavel(aluno.getRgResponsavel());
+		//user.setCpfResponsavel(aluno.getCpfResponsavel());
+		//user.setRgResponsavel(aluno.getRgResponsavel());
 		user.setDataMatricula(aluno.getDataMatricula());
 		user.setEmailMae(aluno.getEmailMae());
 		user.setEmailPai(aluno.getEmailPai());
@@ -384,10 +481,10 @@ public class AlunoService extends Service {
 		user.setNomeAvoPaternoPai(aluno.getNomeAvoPaternoPai());
 		user.setNomeMaeAluno(aluno.getNomeMaeAluno());
 		user.setNomePaiAluno(aluno.getNomePaiAluno());
-		user.setNomeResponsavel(aluno.getNomeResponsavel());
-		user.setNumeroParcelas(aluno.getNumeroParcelas());
+		//user.setNomeResponsavel(aluno.getNomeResponsavel());
+		//user.setNumeroParcelas(aluno.getNumeroParcelas());
 		user.setObservacaoSecretaria(aluno.getObservacaoSecretaria());
-		user.setValorMensal(aluno.getValorMensal());
+		//user.setValorMensal(aluno.getValorMensal());
 		user.setTelefoneResidencialPai(aluno.getTelefoneResidencialPai());
 		user.setRgMae(aluno.getRgMae());
 		user.setRgPai(aluno.getRgPai());
@@ -395,16 +492,16 @@ public class AlunoService extends Service {
 		user.setTelefone(aluno.getTelefone());
 		//user.setEscola(aluno.getEscola());
 
-		user.setNomePaiResponsavel(aluno.getNomePaiResponsavel());
-		user.setNomeMaeResponsavel(aluno.getNomeMaeResponsavel());
-		user.setAnuidade(aluno.getAnuidade());
-		user.setBairro(aluno.getBairro());
-		user.setCep(aluno.getCep());
-		user.setCidade(aluno.getCidade());
+		//user.setNomePaiResponsavel(aluno.getNomePaiResponsavel());
+		//user.setNomeMaeResponsavel(aluno.getNomeMaeResponsavel());
+		//user.setAnuidade(aluno.getAnuidade());
+		//user.setBairro(aluno.getBairro());
+		//user.setCep(aluno.getCep());
+		//user.setCidade(aluno.getCidade());
 		user.setCpfMae(aluno.getCpfMae());
 		user.setCpfPai(aluno.getCpfPai());
-		user.setEndereco(aluno.getEndereco());
-		user.setRgResponsavel(aluno.getRgResponsavel());
+		//user.setEndereco(aluno.getEndereco());
+		//user.setRgResponsavel(aluno.getRgResponsavel());
 
 		if (aluno.getRemovido() == null) {
 			user.setRemovido(false);
@@ -419,8 +516,9 @@ public class AlunoService extends Service {
 		return texto;
 	}
 
-	private Aluno saveAluno(Aluno aluno, boolean saveBrother) {
+	public Aluno saveAluno(Aluno aluno, boolean saveBrother) {
 		Aluno user = null;
+		ContratoAluno contratoPersistence;
 		try {
 
 			if (aluno.getId() != null && aluno.getId() != 0L) {
@@ -429,40 +527,178 @@ public class AlunoService extends Service {
 				user = new Aluno();
 				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			}
+			
+			user.setNomeAluno(aluno.getNomeAluno().toUpperCase());
+			user.setPeriodo(aluno.getPeriodo());
+			user.setSerie(aluno.getSerie());
+			
+			user.setDataCancelamento(aluno.getDataCancelamento());
+			user.setDataNascimento(aluno.getDataNascimento());
+			user.setDataMatricula(aluno.getDataMatricula());
+
+			if (aluno.getRemovido() == null) {
+				user.setRemovido(false);
+			} else {
+				user.setRemovido(aluno.getRemovido());
+			}
+			user.setCodigo(aluno.getCodigo());
+			user.setNomeAvoHPaternoMae(aluno.getNomeAvoHPaternoMae());
+			user.setCpfMae(aluno.getCpfMae());
+			user.setDataMatricula(aluno.getDataMatricula());
+			user.setEmailMae(aluno.getEmailMae());
+			user.setEmailPai(aluno.getEmailPai());
+			user.setEmpresaTrabalhaMae(aluno.getEmpresaTrabalhaMae());
+			user.setEmpresaTrabalhaPai(aluno.getEmpresaTrabalhaPai());
+			user.setLogin(aluno.getLogin());
+			user.setNaturalidadeMae(aluno.getNaturalidadeMae());
+			user.setNaturalidadePai(aluno.getNaturalidadePai());
+			user.setNomeAvoHPaternoMae(aluno.getNomeAvoHPaternoMae());
+			user.setNomeAvoHPaternoPai(aluno.getNomeAvoHPaternoPai());
+			user.setNomeAvoPaternoMae(aluno.getNomeAvoPaternoMae());
+			user.setNomeAvoPaternoPai(aluno.getNomeAvoPaternoPai());
+			user.setNomeMaeAluno(aluno.getNomeMaeAluno());
+			user.setNomePaiAluno(aluno.getNomePaiAluno());
+			user.setTelefoneCelularPai(aluno.getTelefoneCelularPai());
+			user.setTelefoneEmpresaTrabalhaPai(aluno.getTelefoneEmpresaTrabalhaPai());
+			user.setTelefoneResidencialPai(aluno.getTelefoneResidencialPai());
+			user.setTelefoneCelularMae(aluno.getTelefoneCelularMae());
+			user.setTelefoneEmpresaTrabalhaMae(aluno.getTelefoneEmpresaTrabalhaMae());
+			user.setTelefoneResidencialMae(aluno.getTelefoneResidencialMae());
+			user.setEmpresaTrabalhaMae(aluno.getTelefoneEmpresaTrabalhaMae());
+			user.setEmpresaTrabalhaPai(aluno.getEmpresaTrabalhaPai());
+
+			user.setTelefoneResidencialPai(aluno.getTelefoneResidencialPai());
+			user.setRgMae(aluno.getRgMae());
+			user.setRgPai(aluno.getRgPai());
+			user.setSenha(aluno.getSenha());
+			user.setTelefone(aluno.getTelefone());
+
+			user.setObservacaoSecretaria(aluno.getObservacaoSecretaria());
+			
+			user.setRemovido(false);
+			user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
+			user.setEscola(aluno.getEscola());
+			
+			if(aluno.getEnderecoAluno() != null){
+				user.setEnderecoAluno(removeCaracteresEspeciais(aluno.getEnderecoAluno()));
+			}
+			
+			user.setBairroAluno(aluno.getBairroAluno());
+			user.setContatoEmail1(aluno.getContatoEmail1());
+			user.setContatoEmail2(aluno.getContatoEmail2());
+			user.setContatoNome1(aluno.getContatoNome1());
+			user.setContatoNome2(aluno.getContatoNome2());
+			user.setContatoNome3(aluno.getContatoNome3());
+			user.setContatoNome4(aluno.getContatoNome4());
+			user.setContatoNome5(aluno.getContatoNome5());
+
+			user.setContatoTelefone1(aluno.getContatoTelefone1());
+			user.setContatoTelefone2(aluno.getContatoTelefone2());
+			user.setContatoTelefone3(aluno.getContatoTelefone3());
+			user.setContatoTelefone4(aluno.getContatoTelefone4());
+			user.setContatoTelefone5(aluno.getContatoTelefone5());
+			
+			user.setTrocaIDA(aluno.isTrocaIDA());
+			user.setTrocaVolta(aluno.isTrocaVolta());
+			user.setCarroLevaParaEscola(aluno.getCarroLevaParaEscola());
+			user.setCarroLevaParaEscolaTroca(aluno.getCarroLevaParaEscolaTroca());
+			user.setCarroPegaEscola(aluno.getCarroPegaEscola());
+			user.setCarroPegaEscolaTroca(aluno.getCarroPegaEscolaTroca());
+			
+			user.setIdaVolta(aluno.getIdaVolta());
+			
+			em.persist(user);
+
+			if (user.getDataNascimento() != null) {
+				Evento aniversario = eventoService.findByCodigo(user.getCodigo());
+
+				if (aniversario == null) {
+					aniversario = new Evento();
+				}
+
+				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario
+						.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario.setCodigo(user.getCodigo());
+				aniversario.setDescricao(" Aniversário do(a) aluno(a) " + user.getNomeAluno());
+				aniversario.setNome(
+						" Aniversário do(a) aluno(a) " + user.getNomeAluno() + " " + aluno.getSerie().getName());
+				eventoService.save(aniversario);
+
+			}
+
+		} catch (ConstraintViolationException ce) {
+			// Handle bean validation issues
+			// builder = createViolationResponse(ce.getConstraintViolations());
+		} catch (ValidationException e) {
+			// Handle the unique constrain violation
+			Map<String, String> responseObj = new HashMap<>();
+			responseObj.put("email", "Email taken");
+
+		} catch (Exception e) {
+			// Handle generic exceptions
+			Map<String, String> responseObj = new HashMap<>();
+			responseObj.put("error", e.getMessage());
+
+			e.printStackTrace();
+		}
+
+		if (saveBrother) {
+			if(aluno.getContratos() != null)
+			for(ContratoAluno cont :aluno.getContratos()){
+				if(cont.getCancelado() != null && !cont.getCancelado()){
+					em.merge(cont);
+				}
+			}
+			salvarIrmaos(user, aluno);
+		}
+		
+
+		return user;
+	}
+
+	
+	
+	private Aluno saveAluno(Aluno aluno, boolean saveBrother, ContratoAluno contrato) {
+		Aluno user = null;
+		ContratoAluno contratoPersistence = null;
+		try {
+
+			if (aluno.getId() != null && aluno.getId() != 0L) {
+				user = findById(aluno.getId());
+			} else {
+				user = new Aluno();
+				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
+			}
+			
+			if (contrato.getId() != null && contrato.getId() != 0L) {
+				contratoPersistence = findContratoById(contrato.getId());
+			} else {
+				contratoPersistence = new ContratoAluno();
+			}
+			
+			
 			user.setIdaVolta(aluno.getIdaVolta());
 			// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
 			user.setNomeAluno(aluno.getNomeAluno().toUpperCase());
 			user.setPeriodo(aluno.getPeriodo());
 			user.setSerie(aluno.getSerie());
-			if (aluno.getEndereco() != null) {
-				user.setEndereco(removeCaracteresEspeciais(aluno.getEndereco()));
-			}
+			
 			if (aluno.getEnderecoAluno() != null) {
 				user.setEnderecoAluno(removeCaracteresEspeciais(aluno.getEnderecoAluno()));
 			}
 			
-			user.setBairro(aluno.getBairro());
-			user.setBairroAluno(aluno.getBairroAluno());
-			user.setCep(aluno.getCep());
-			user.setCidade(aluno.getCidade());
+			
+			
 			// user.setNacionalidade(aluno.getNacionalidade());
-			user.setValorMensal(aluno.getValorMensal());
 			user.setDataNascimento(aluno.getDataNascimento());
 			user.setDataMatricula(aluno.getDataMatricula());
 			// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
 			user.setCodigo(aluno.getCodigo());
 
 			user.setCodigo(aluno.getCodigo());
-			user.setAnuidade(aluno.getAnuidade() != null ? aluno.getAnuidade() : 0);
-			user.setBairro(aluno.getBairro());
-			user.setCep(aluno.getCep());
-			user.setCidade(aluno.getCidade());
 			user.setCpfMae(aluno.getCpfMae());
 			user.setCpfPai(aluno.getCpfPai());
-			if(aluno.getCpfResponsavel() != null){
-				user.setCpfResponsavel(aluno.getCpfResponsavel().replace(".", "").replace("-", ""));
-			}
-			user.setRgResponsavel(aluno.getRgResponsavel());
 			user.setDataMatricula(aluno.getDataMatricula());
 			user.setEmailMae(aluno.getEmailMae());
 			user.setEmailPai(aluno.getEmailPai());
@@ -481,13 +717,8 @@ public class AlunoService extends Service {
 			if (aluno.getNomePaiAluno() != null) {
 				user.setNomePaiAluno(aluno.getNomePaiAluno().toUpperCase());
 			}
-			if (aluno.getNomeResponsavel() != null) {
-				user.setNomeResponsavel(aluno.getNomeResponsavel().toUpperCase());
-			}
-			user.setNumeroParcelas(aluno.getNumeroParcelas());
 			user.setObservacaoSecretaria(aluno.getObservacaoSecretaria());
 			// if(saveBrother){
-			user.setValorMensal(aluno.getValorMensal());
 
 			// }else{
 			// user.setValorMensal(0);
@@ -498,12 +729,8 @@ public class AlunoService extends Service {
 			user.setSenha(aluno.getSenha());
 			user.setTelefone(aluno.getTelefone());
 			user.setEscola(aluno.getEscola());
-			if (aluno.getNomePaiResponsavel() != null) {
-				user.setNomePaiResponsavel(aluno.getNomePaiResponsavel().toUpperCase());
-			}
-			if (aluno.getNomeMaeResponsavel() != null) {
-				user.setNomeMaeResponsavel(aluno.getNomeMaeResponsavel().toUpperCase());
-			}
+		
+			user.setBairroAluno(aluno.getBairroAluno());
 			user.setContatoEmail1(aluno.getContatoEmail1());
 			user.setContatoEmail2(aluno.getContatoEmail2());
 			user.setContatoNome1(aluno.getContatoNome1());
@@ -518,8 +745,6 @@ public class AlunoService extends Service {
 			user.setContatoTelefone4(aluno.getContatoTelefone4());
 			user.setContatoTelefone5(aluno.getContatoTelefone5());
 
-			user.setDataCancelamento(aluno.getDataCancelamento());
-			user.setCnabEnviado(aluno.getCnabEnviado());
 			
 			if (aluno.getRemovido() == null) {
 				user.setRemovido(false);
@@ -533,7 +758,14 @@ public class AlunoService extends Service {
 			user.setCarroLevaParaEscolaTroca(aluno.getCarroLevaParaEscolaTroca());
 			user.setCarroPegaEscola(aluno.getCarroPegaEscola());
 			user.setCarroPegaEscolaTroca(aluno.getCarroPegaEscolaTroca());
+			
+			
+			popularContrato(contrato,contratoPersistence);
 
+			if(user.getAnoLetivo() == 0){
+				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
+			}
+			
 			em.persist(user);
 
 			if (user.getDataNascimento() != null) {
@@ -572,29 +804,62 @@ public class AlunoService extends Service {
 
 		List<Boleto> boletos = null;
 		if (saveBrother) {
-			salvarIrmaos(user, aluno);
+			salvarIrmaos(user, aluno, contratoPersistence);
 			if (aluno.getId() == null || aluno.getId() == 0L) {
-				boletos = gerarBoletos(user);
+				boletos = gerarBoletos(user,contrato);
 			}
 		}
 		if (aluno.getId() == null || aluno.getId() == 0L) {
-			user.setBoletos(boletos);
+			contratoPersistence.setBoletos(boletos);
 		}
 
 		return user;
 
 	}
 
-	public List<Boleto> gerarBoletos(Aluno user) {
-		return gerarBoletos(user,configuracaoService.getConfiguracao().getAnoLetivo());
+	private void popularContrato(ContratoAluno contrato, ContratoAluno contratoPersistence) {
+		if (contrato.getEndereco() != null) {
+			contratoPersistence.setEndereco(removeCaracteresEspeciais(contrato.getEndereco()));
+		}
+		contratoPersistence.setBairro(contrato.getBairro());
+		contratoPersistence.setCep(contrato.getCep());
+		contratoPersistence.setCidade(contrato.getCidade());
+		contratoPersistence.setValorMensal(contrato.getValorMensal());
+		contratoPersistence.setAnuidade(contrato.getAnuidade() != null ? contrato.getAnuidade() : 0);
+		contratoPersistence.setBairro(contrato.getBairro());
+		contratoPersistence.setCep(contrato.getCep());
+		contratoPersistence.setCidade(contrato.getCidade());
+		if(contrato.getCpfResponsavel() != null){
+			contratoPersistence.setCpfResponsavel(contrato.getCpfResponsavel().replace(".", "").replace("-", ""));
+		}
+		contratoPersistence.setNumeroParcelas(contrato.getNumeroParcelas());
+		contratoPersistence.setRgResponsavel(contrato.getRgResponsavel());
+		if (contrato.getNomeResponsavel() != null) {
+			contratoPersistence.setNomeResponsavel(contrato.getNomeResponsavel().toUpperCase());
+		}
+		contratoPersistence.setValorMensal(contrato.getValorMensal());
+		if (contrato.getNomePaiResponsavel() != null) {
+			contratoPersistence.setNomePaiResponsavel(contrato.getNomePaiResponsavel().toUpperCase());
+		}
+		if (contrato.getNomeMaeResponsavel() != null) {
+			contratoPersistence.setNomeMaeResponsavel(contrato.getNomeMaeResponsavel().toUpperCase());
+		}
+		contratoPersistence.setDataCancelamento(contrato.getDataCancelamento());
+		contratoPersistence.setCnabEnviado(contrato.getCnabEnviado());
+		
+		
 	}
 
-	public List<Boleto> gerarBoletos(Aluno user, int ano) {
-		int quantidadeParcelas = 12 - user.getNumeroParcelas();
-		return gerarBoletos(user,ano,quantidadeParcelas);
+	public List<Boleto> gerarBoletos(Aluno user, ContratoAluno contrato) {
+		return gerarBoletos(user,configuracaoService.getConfiguracao().getAnoLetivo(), contrato);
+	}
+
+	public List<Boleto> gerarBoletos(Aluno user, int ano, ContratoAluno contrato) {
+		int quantidadeParcelas = 12 - contrato.getNumeroParcelas();
+		return gerarBoletos(user,ano,quantidadeParcelas,contrato);
 	}
 	
-	public List<Boleto> gerarBoletos(Aluno user, int ano, int quantidadeParcelas) {
+	public List<Boleto> gerarBoletos(Aluno user, int ano, int quantidadeParcelas, ContratoAluno contrato) {
 		List<Boleto> boletos = new ArrayList<>();
 		long nossoNumero = getProximoNossoNumero();
 		while (quantidadeParcelas < 12) {
@@ -608,7 +873,7 @@ public class AlunoService extends Service {
 			vencimento.set(Calendar.SECOND, 0);
 			boleto.setVencimento(vencimento.getTime());
 			boleto.setEmissao(new Date());
-			boleto.setValorNominal(user.getValorMensal());
+			boleto.setValorNominal(contrato.getValorMensal());
 			boleto.setPagador(user);
 			boleto.setNossoNumero(nossoNumero);
 			em.persist(boleto);
@@ -623,52 +888,121 @@ public class AlunoService extends Service {
 	
 	public void gerarBoletos() {
 		List<Aluno> alunos = findAll();
-		int anoREmatricula = configuracaoService.getConfiguracao().getAnoRematricula();
 		for (Aluno al : alunos) {
-			
-			if (al.getRemovido() != null && !al.getRemovido()) {
-				if (al.getBoletos() == null || al.getBoletos().size() == 0) {
-					if((al.getAnoLetivo() == configuracaoService.getConfiguracao().getAnoLetivo()) || (al.getRematricular() != null && al.getRematricular()) ){
-						if (!irmaoJaTemBoleto(al)) {
-							List<Boleto> boletos = gerarBoletos(al);
-							al.setBoletos(boletos);
-							em.persist(al);
-						}	
-					}
-					
-				} else if (al.getBoletos() != null && al.getBoletos().size() > 0) {
-					List<Boleto> boletos = al.getBoletos();
-					
-					if(todosBoletosBaixados(boletos) && al.getRestaurada() != null && al.getRestaurada()){
-						List<Boleto> boletosGErados = gerarBoletos(al);
-						boletosGErados.addAll(al.getBoletos());
-						al.setBoletos(boletosGErados);
-						em.persist(al);
-					}else{
-						for (Boleto b : boletos) {
-							if(b.getAlteracaoBoletoManual() == null || !b.getAlteracaoBoletoManual()){
-								b.setValorNominal(al.getValorMensal());
+			correcaoModelagemAlunoContrato(al);	
+/*			for(ContratoAluno contrato :al.getContratosVigentes()){
+				if (al.getRemovido() != null && !al.getRemovido()) {
+					if (contrato.getBoletos() == null || contrato.getBoletos().size() == 0) {
+						if (contrato.getNumeroParcelas() != null && contrato.getNumeroParcelas() > 0) {
+							if((al.getAnoLetivo() == configuracaoService.getConfiguracao().getAnoLetivo()) || (al.getRematricular() != null && al.getRematricular()) ){
+								if (!irmaoJaTemBoleto(al)) {
+									List<Boleto> boletos = gerarBoletos(al,contrato);
+									contrato.setBoletos(boletos);
+									em.persist(contrato);
+								}	
 							}
-							em.merge(b);
+						}
+					} else if (contrato.getBoletos() != null && contrato.getBoletos().size() > 0) {
+						List<Boleto> boletos = contrato.getBoletos();
+						if(todosBoletosBaixados(boletos) && al.getRestaurada() != null && al.getRestaurada()){
+							List<Boleto> boletosGErados = gerarBoletos(al,contrato);
+							boletosGErados.addAll(contrato.getBoletos());
+							contrato.setBoletos(boletosGErados);
+							em.persist(contrato);
+						}else{
+							for (Boleto b : boletos) {
+								if(b.getAlteracaoBoletoManual() == null || !b.getAlteracaoBoletoManual()){
+									b.setValorNominal(contrato.getValorMensal());
+									Calendar c = Calendar.getInstance();
+									c.setTime(b.getVencimento());
+									if (contrato.getVencimentoUltimoDia() == null || !contrato.getVencimentoUltimoDia()) {
+										c.set(Calendar.DAY_OF_MONTH, contrato.getDiaVencimento());
+									} else {
+										int dia = c.getActualMaximum(Calendar.DAY_OF_MONTH);
+										c.set(Calendar.DAY_OF_MONTH, dia);
+									}
+									b.setVencimento(c.getTime());
+									em.merge(b);
+								}
+							}
 						}
 					}
 				}
-			}
-			gerarBoletosRematricula(al,anoREmatricula);
+				//gerarBoletosRematricula(al,anoREmatricula,contratoAluno);
+			}*/
+			
 		}
 	}
 	
-	private List<Boleto> gerarBoletosRematricula(Aluno al, int anoRematricula){
+	private List<Boleto> gerarBoletosRematricula(Aluno al, int anoRematricula,ContratoAluno contrato){
 		if (al.getRemovido() != null && !al.getRemovido()) {
 			if(al.getRematricular() != null && al.getRematricular()){
 				if(!possuiBoletoNoAno(al,anoRematricula)){
-					gerarBoletos(al, anoRematricula,0);
+					gerarBoletos(al, anoRematricula,0,contrato);
 				}
 			}
 		}
 		return null;
 	}
 	
+	private void correcaoModelagemAlunoContrato(Aluno al) {
+		if(al.getContratos() == null || al.getContratos().isEmpty()){
+			ContratoAluno contrato = new ContratoAluno();
+			contrato.setAluno(al);
+			contrato.setAno((short) 2018);
+			contrato.setAnuidade(al.getAnuidade());
+			contrato.setBairro(al.getBairro());
+			contrato.setBoletos(al.getBoletos());
+			contrato.setCep(al.getCep());
+			contrato.setCidade(al.getCidade());
+			contrato.setCnabEnviado(al.getCnabEnviado());
+			contrato.setContratoTerminado(al.getContratoTerminado());
+			contrato.setCpfResponsavel(al.getCpfResponsavel());
+			contrato.setDataCancelamento(al.getDataCancelamento());
+			contrato.setDataCriacaoContrato(al.getDataMatricula());
+			contrato.setDiaVencimento(al.getDiaVencimento());
+			contrato.setEndereco(al.getEndereco());
+			contrato.setEnviadoParaCobrancaCDL(al.getEnviadoParaCobrancaCDL());
+			contrato.setEnviadoSPC(al.getEnviadoSPC());
+			contrato.setNomeMaeResponsavel(al.getNomeMaeResponsavel());
+			contrato.setNomePaiResponsavel(al.getNomePaiResponsavel());
+			contrato.setNomeResponsavel(al.getNomeResponsavel());
+			
+			String ano = String.valueOf(contrato.getAno());
+			String finalANo = ano.substring(ano.length()-2 , ano.length());
+			String numeroUltimoContrato = "01";
+			
+			String numero = finalANo + contrato.getAluno().getCodigo()+numeroUltimoContrato;
+			contrato.setNumero(numero);
+			
+			contrato.setNumeroParcelas(al.getNumeroParcelas());
+			contrato.setRgResponsavel(al.getRgResponsavel());
+			contrato.setValorMensal(al.getValorMensal());
+			contrato.setVencimentoUltimoDia(al.isVencimentoUltimoDia());
+			contrato.setBoletos(findBoletoBy(al));
+			em.persist(contrato);
+			
+			List<ContratoAluno> contratos = new ArrayList<>();
+			contratos.add(contrato);
+			al.setContratos(contratos);
+			al.setBoletos(null);
+			em.persist(al);
+		}
+	}
+	
+	private List<Boleto> findBoletoBy(Aluno al) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT distinct(bol) from Boleto bol ");
+		sql.append(" where 1 = 1");
+		sql.append(" and bol.pagador.id= ");
+		sql.append(al.getId());
+		Query query = em.createQuery(sql.toString());
+		List<Boleto> t = (List<Boleto>) query.getResultList();
+
+		return t;
+	}
+
 	private boolean possuiBoletoNoAno(Aluno al, int anoRematricula) {
 		boolean retorno = false;
 		List<Boleto> boletos = al.getBoletos();
@@ -737,14 +1071,14 @@ public class AlunoService extends Service {
 		return false;
 	}
 
-	public List<Boleto> gerarBoletos(Aluno user, boolean setUser) {
-		user = findById(user.getId());
-		List<Boleto> boletos = gerarBoletos(user);
-		user.setBoletos(boletos);
-		em.persist(user);
+	public List<Boleto> gerarBoletos(Aluno user, ContratoAluno contrato, boolean setUser) {
+		contrato = findContratoById(contrato.getId());
+		List<Boleto> boletos = gerarBoletos(user,contrato);
+		contrato.setBoletos(boletos);
+		em.persist(contrato);
 		return boletos;
 	}
-
+	
 	private void salvarIrmaos(Aluno aluno, Aluno unMerge) {
 		Aluno irmao1 = unMerge.getIrmao1();
 		boolean tem1Irmao = irmao1 != null ? true : false;
@@ -870,10 +1204,136 @@ public class AlunoService extends Service {
 		}
 	}
 
+
+	private void salvarIrmaos(Aluno aluno, Aluno unMerge, ContratoAluno contrato) {
+		Aluno irmao1 = unMerge.getIrmao1();
+		boolean tem1Irmao = irmao1 != null ? true : false;
+		Aluno irmao2 = unMerge.getIrmao2();
+		boolean tem2Irmao = irmao2 != null ? true : false;
+		Aluno irmao3 = unMerge.getIrmao3();
+		boolean tem3Irmao = irmao3 != null ? true : false;
+		Aluno irmao4 = unMerge.getIrmao4();
+		boolean tem4Irmao = irmao4 != null ? true : false;
+
+		if (tem1Irmao) {
+			clone(aluno, irmao1);
+			irmao1 = saveAluno(irmao1, false, contrato);
+
+			aluno.setIrmao1(irmao1);
+			irmao1.setIrmao1(aluno);
+
+			if (tem2Irmao) {
+				clone(aluno, irmao2);
+				irmao2 = saveAluno(irmao2, false, contrato);
+				aluno.setIrmao2(irmao2);
+				irmao1.setIrmao1(aluno);
+				irmao1.setIrmao2(irmao2);
+				irmao2.setIrmao1(aluno);
+				irmao2.setIrmao2(irmao1);
+			}
+			if (tem3Irmao) {
+				clone(aluno, irmao3);
+				irmao3 = saveAluno(irmao3, false, contrato);
+				aluno.setIrmao3(irmao3);
+				irmao3.setIrmao1(aluno);
+				irmao3.setIrmao2(irmao1);
+				irmao3.setIrmao3(irmao2);
+
+				irmao1.setIrmao1(aluno);
+				irmao1.setIrmao2(irmao2);
+				irmao1.setIrmao3(irmao3);
+				irmao2.setIrmao1(aluno);
+				irmao2.setIrmao2(irmao1);
+				irmao2.setIrmao3(irmao3);
+			}
+			if (tem4Irmao) {
+				clone(aluno, irmao4);
+				irmao4 = saveAluno(irmao4, false, contrato);
+				aluno.setIrmao4(irmao4);
+				irmao4.setIrmao1(aluno);
+				irmao4.setIrmao2(irmao1);
+				irmao4.setIrmao3(irmao2);
+				irmao4.setIrmao4(irmao3);
+
+				irmao1.setIrmao1(aluno);
+				irmao1.setIrmao2(irmao2);
+				irmao1.setIrmao3(irmao3);
+				irmao1.setIrmao4(irmao4);
+				irmao2.setIrmao1(aluno);
+				irmao2.setIrmao2(irmao1);
+				irmao2.setIrmao3(irmao3);
+				irmao2.setIrmao4(irmao4);
+
+				irmao3.setIrmao1(aluno);
+				irmao3.setIrmao2(irmao1);
+				irmao3.setIrmao3(irmao2);
+				irmao3.setIrmao4(irmao4);
+			}
+		}
+
+		if (tem2Irmao) {
+			clone(aluno, irmao2);
+			irmao2 = saveAluno(irmao2, false, contrato);
+			aluno.setIrmao2(irmao2);
+			irmao2.setIrmao1(aluno);
+
+			if (tem3Irmao) {
+				clone(aluno, irmao3);
+				irmao3 = saveAluno(irmao3, false, contrato);
+				aluno.setIrmao3(irmao3);
+				irmao3.setIrmao1(aluno);
+				irmao3.setIrmao3(irmao2);
+
+				irmao2.setIrmao1(aluno);
+				irmao2.setIrmao3(irmao3);
+			}
+			if (tem4Irmao) {
+				clone(aluno, irmao4);
+				irmao4 = saveAluno(irmao4, false, contrato);
+				aluno.setIrmao4(irmao4);
+				irmao4.setIrmao1(aluno);
+				irmao4.setIrmao3(irmao2);
+				irmao4.setIrmao4(irmao3);
+
+				irmao2.setIrmao1(aluno);
+				irmao2.setIrmao3(irmao3);
+				irmao2.setIrmao4(irmao4);
+
+				irmao3.setIrmao1(aluno);
+				irmao3.setIrmao3(irmao2);
+				irmao3.setIrmao4(irmao4);
+			}
+
+		}
+		if (tem3Irmao) {
+			clone(aluno, irmao3);
+			irmao3 = saveAluno(irmao3, false, contrato);
+			aluno.setIrmao3(irmao3);
+			irmao3.setIrmao1(aluno);
+
+			if (tem4Irmao) {
+				clone(aluno, irmao4);
+				irmao4 = saveAluno(irmao4, false, contrato);
+				aluno.setIrmao4(irmao4);
+				irmao4.setIrmao1(aluno);
+				irmao4.setIrmao4(irmao3);
+				irmao3.setIrmao1(aluno);
+				irmao3.setIrmao4(irmao4);
+			}
+		}
+
+		if (tem4Irmao) {
+			clone(aluno, irmao4);
+			irmao4 = saveAluno(irmao4, false, contrato);
+			aluno.setIrmao4(irmao4);
+			irmao4.setIrmao1(aluno);
+		}
+	}
+
 	public String remover(Long idAluno) {
 		Aluno al = findById(idAluno);
 		al.setRemovido(true);
-		al.setDataCancelamento(new Date());
+		al.getContratoVigente().setDataCancelamento(new Date());
 		em.persist(al);
 		return "ok";
 	}
@@ -882,7 +1342,7 @@ public class AlunoService extends Service {
 		Aluno al = findById(idAluno);
 		al.setRemovido(false);
 		al.setRestaurada(true);
-		al.setCnabEnviado(false);
+		al.getContratoVigente().setCnabEnviado(false);
 		em.persist(al);
 		return "ok";
 	}
@@ -1086,19 +1546,8 @@ public class AlunoService extends Service {
 			q.setMaxResults(size);
 			List<Aluno> alunos =  (List<Aluno>)q.getResultList();
 			for(Aluno al : alunos){
-				if(al.getCarroLevaParaEscola() != null){
-					al.getCarroLevaParaEscola().getId();
-				}
-				
-				if(al.getCarroLevaParaEscolaTroca() != null){
-					al.getCarroLevaParaEscolaTroca().getId();
-				}
-				if(al.getCarroPegaEscola() != null){
-					al.getCarroPegaEscola().getId();
-				}
-				if(al.getCarroPegaEscolaTroca() != null){
-					al.getCarroPegaEscolaTroca().getId();
-				}
+				carregarLazyCarro(al);
+				carregarLazyContrato(al);
 				
 			}
 			return alunos;
@@ -1109,7 +1558,15 @@ public class AlunoService extends Service {
 			e.printStackTrace();
 			return new ArrayList<>();
 		}
+	}
 
+	private void carregarLazyContrato(Aluno al) {
+		if(al.getContratosSux() != null){
+			al.getContratosSux().size();
+			for(ContratoAluno c: al.getContratosSux()){
+				c.getBoletos().size();
+			}
+		}
 	}
 
 	public long count(Map<String, Object> filtros) {
@@ -1682,7 +2139,7 @@ public class AlunoService extends Service {
 		rematriculado.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 		rematriculado.setRestaurada(true);
 		rematriculado.setRemovido(false);
-		rematriculado.setCnabEnviado(false);
+		rematriculado.getContratoVigente().setCnabEnviado(false);
 		em.merge(rematriculado);
 		
 	}
@@ -1768,7 +2225,7 @@ public class AlunoService extends Service {
 		@SuppressWarnings("unchecked")
 		List<Aluno> alunos = query.getResultList();
 		for (Aluno al : alunos) {
-			al.getBoletos().size();
+			carregarLazyContrato(al);
 		}
 
 		return alunos;
@@ -1776,13 +2233,13 @@ public class AlunoService extends Service {
 	
 	public void removerCnabEnviado(Long id) {
 		Aluno aluno = findById(id);
-		aluno.setCnabEnviado(false);
+		aluno.getContratoVigente().setCnabEnviado(false);
 		em.merge(aluno);
 	}
 
 	public void enviarCnab(Long id) {
 		Aluno aluno = findById(id);
-		aluno.setCnabEnviado(true);
+		aluno.getContratoVigente().setCnabEnviado(true);
 		em.merge(aluno);
 	}
 
@@ -1837,6 +2294,28 @@ public class AlunoService extends Service {
 		}
 	}
 
+	public Aluno adicionarContrato(Aluno aluno, ContratoAluno novoContrato) {
+		if(aluno.getAnoLetivo() == 0){
+			aluno.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
+		}
+		if(aluno.getId() != null){
+			aluno = findById(aluno.getId());
+		}else{
+			saveAluno(aluno, true);
+		}
+		novoContrato.setAluno(aluno);
+		em.persist(novoContrato);
+		List<ContratoAluno> contratos =aluno.getContratos();
+		if(contratos == null){
+			contratos = new ArrayList<>();
+		}
+		contratos.add(novoContrato);
+		aluno.setContratos(contratos);
+		em.merge(aluno);
+		return aluno;
+		
+	}
+	
 	public Aluno findAlunoBairro(int indice) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -1860,6 +2339,15 @@ public class AlunoService extends Service {
 		}
 	}
 	
+	public ContratoAluno criarBoletos(Aluno aluno, short ano, Integer numeroParcelas, ContratoAluno contrato) {
+		int numPa = 12 -contrato.getNumeroParcelas();
+		contrato = findContratoById(contrato.getId());
+		em.persist(contrato);
+		List<Boleto> boletos = this.gerarBoletos(aluno, ano, numPa, contrato);
+		contrato.setBoletos(boletos);	
+		return contrato;
+	}
+	
 	public void remover(Aluno aluno) {
 		for(Boleto b : aluno.getBoletos()){
 			if(b.getManterAposRemovido() != null && b.getManterAposRemovido()){
@@ -1872,4 +2360,86 @@ public class AlunoService extends Service {
 		remover(aluno.getId());
 	}
 
+	public ContratoAluno saveContrato(ContratoAluno contrato) {
+		ContratoAluno c = new ContratoAluno();
+		if(contrato.getId() != null){
+			c = findContratoById(contrato.getId());
+		}
+		c.setAno(contrato.getAno());
+		c.setAnuidade(contrato.getAnuidade());
+		c.setBairro(contrato.getBairro());
+		c.setCancelado(contrato.getCancelado());
+		c.setCep(contrato.getCep());
+		c.setCidade(contrato.getCidade());
+		c.setCnabEnviado(contrato.getCnabEnviado());
+		c.setContratoTerminado(contrato.getContratoTerminado());
+		c.setCpfResponsavel(contrato.getCpfResponsavel());
+		c.setDataCancelamento(contrato.getDataCancelamento());
+		c.setDataCriacaoContrato(contrato.getDataCriacaoContrato());
+		c.setDiaVencimento(contrato.getDiaVencimento());
+		c.setVencimentoUltimoDia(contrato.getVencimentoUltimoDia());
+		c.setValorMensal(contrato.getValorMensal());
+		c.setRgResponsavel(contrato.getRgResponsavel());
+		c.setNumeroParcelas(contrato.getNumeroParcelas());
+		c.setNomeResponsavel(contrato.getNomeResponsavel());
+		c.setNomePaiResponsavel(contrato.getNomePaiResponsavel());
+		c.setNomeMaeResponsavel(contrato.getNomeMaeResponsavel());
+		c.setEnviadoSPC(contrato.getEnviadoSPC());
+		c.setEnviadoParaCobrancaCDL(contrato.getEnviadoSPC());
+		c.setEndereco(contrato.getEndereco());
+		
+		String ano = String.valueOf(contrato.getAno());
+		String finalANo = ano.substring(ano.length()-2 , ano.length());
+		String numeroUltimoContrato = "01";
+		int numeroNovo = 1;
+		for(ContratoAluno contratt : contrato.getAluno().getContratos()){
+			if(contratt.getNumero() != null && !contratt.getNumero().equalsIgnoreCase("")){
+				if(contratt.getAno() == contrato.getAno() ){
+					if(contrato.getId() != null && contrato.getId() != contratt.getId() ){
+						String numeroContratt = contratt.getNumero();
+						numeroContratt = numeroContratt.substring(numeroContratt.length()-2 , numeroContratt.length());
+						if(Integer.parseInt(numeroContratt) > Integer.parseInt(numeroUltimoContrato) ){
+							numeroUltimoContrato = numeroContratt;
+						}	
+						numeroNovo = Integer.parseInt(numeroUltimoContrato);
+						numeroNovo++; 
+					}
+					
+				}
+				
+				numeroUltimoContrato = String.valueOf(numeroNovo);
+			}	
+		}
+		
+		String numero = finalANo + contrato.getAluno().getCodigo()+"0"+numeroUltimoContrato;
+		c.setNumero(numero);
+	
+
+		em.merge(c);
+		return c;
+	}
+
+	public void removerContrato(ContratoAluno contrat) {
+		for(Boleto b : contrat.getBoletos()){
+			if(b.getManterAposRemovido() != null && b.getManterAposRemovido()){
+				manterBoleto(b.getId());
+			}else{
+				removerBoleto(b.getId());
+			}
+		}
+		Aluno al = findById(contrat.getAluno().getId());
+		ContratoAluno contratoPersistence = findContratoById(contrat.getId());
+		contratoPersistence.setDataCancelamento(new Date());
+		contratoPersistence.setCancelado(true);
+		contratoPersistence.setAluno(al);
+		contratoPersistence.setBoletos(contrat.getBoletos());
+		try{
+			em.merge(contratoPersistence);
+		}catch(Exception e){
+			e.printStackTrace();
+			em.persist(contratoPersistence);
+		}
+	}
+	
+		
 }

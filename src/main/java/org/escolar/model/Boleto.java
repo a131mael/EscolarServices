@@ -29,35 +29,39 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.aaf.financeiro.util.OfficeUtil;
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
-public class Boleto  implements Serializable{
+public class Boleto implements Serializable, Comparable<Boleto> {
 
 	@Id
-    @GeneratedValue
-    private Long id;
+	@GeneratedValue
+	private Long id;
 
 	@Column
-    private Date vencimento;
-    
-	@Column
-    private Date emissao;
-    
-	@Column
-    private double valorNominal;
+	private Date vencimento;
+
+	@ManyToOne
+	private ContratoAluno contrato;
 
 	@Column
-    private long nossoNumero;
-	
+	private Date emissao;
+
+	@Column
+	private double valorNominal;
+
+	@Column
+	private long nossoNumero;
+
 	@Column
 	private Double valorPago;
-	
+
 	@Column
 	private Date dataPagamento;
-	
+
 	@ManyToOne
 	private Aluno pagador;
 
@@ -66,21 +70,30 @@ public class Boleto  implements Serializable{
 
 	@Column
 	private Boolean alteracaoBoletoManual;
-	
+
 	@Column
 	private Boolean baixaManual;
-	
+
 	@Column
 	private Boolean manterAposRemovido;
-	
+
 	@Column
 	private Boolean conciliacaoPorExtrato;
-	
+
 	@Column
 	private Boolean baixaGerada;
-	
+
+	@Column
+	private Boolean enviadoParaBanco;
+
 	@Column
 	private Boolean cancelado;
+	
+	@Column
+	private Boolean cnabCanceladoEnviado;
+
+	@Column
+	private Boolean cnabEnviado;
 	
 	public Long getId() {
 		return id;
@@ -202,5 +215,59 @@ public class Boleto  implements Serializable{
 		this.manterAposRemovido = manterAposRemovido;
 	}
 
-    
+	public ContratoAluno getContrato() {
+		return contrato;
+	}
+
+	public void setContrato(ContratoAluno contrato) {
+		this.contrato = contrato;
+	}
+
+	@Override
+	public int compareTo(Boleto o) {
+		if (this.getId() > o.getId()) {
+			return -1;
+		} else if (this.getId() < o.getId()) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+	public Boolean getEnviadoParaBanco() {
+		return enviadoParaBanco;
+	}
+
+	public void setEnviadoParaBanco(Boolean enviadoParaBanco) {
+		this.enviadoParaBanco = enviadoParaBanco;
+	}
+
+	public org.aaf.financeiro.model.Boleto getBoletoFinanceiro() {
+		org.aaf.financeiro.model.Boleto boletoFinanceiro = new org.aaf.financeiro.model.Boleto();
+		boletoFinanceiro.setEmissao(getEmissao());
+		boletoFinanceiro.setId(getId());
+		boletoFinanceiro.setValorNominal(getValorNominal());
+		boletoFinanceiro.setVencimento(getVencimento());
+		boletoFinanceiro.setNossoNumero(String.valueOf(getNossoNumero()));
+		boletoFinanceiro.setDataPagamento(OfficeUtil.retornaDataSomenteNumeros(getDataPagamento()));
+		boletoFinanceiro.setValorPago(getValorPago());
+		return boletoFinanceiro;
+	}
+
+	public Boolean getCnabEnviado() {
+		return cnabEnviado;
+	}
+
+	public void setCnabEnviado(Boolean cnabEnviado) {
+		this.cnabEnviado = cnabEnviado;
+	}
+
+	public Boolean getCnabCanceladoEnviado() {
+		return cnabCanceladoEnviado;
+	}
+
+	public void setCnabCanceladoEnviado(Boolean cnabCanceladoEnviado) {
+		this.cnabCanceladoEnviado = cnabCanceladoEnviado;
+	}
+
 }

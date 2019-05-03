@@ -48,6 +48,7 @@ org\escolar\model\Evento_.class
 org\escolar\model\ContratoFretamento.class
 org\escolar\controller\OfficePDFUtil.class
 org\escolar\util\ImpressoesUtils.class
+org\escolar\model\ContratoAluno.class
 org\escolar\service\SQLs.class
 org\escolar\model\Avaliacao_.class
 org\escolar\util\JSONPRequestFilter$1$1.class
@@ -109,6 +110,7 @@ org\escolar\util\JSONPRequestFilter$1.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSService_Service.class
 org\escolar\model\FuncionarioCarro.class
 org\escolar\service\CustoService.class
+org\escolar\model\ContratoAluno_.class
 org\escolar\model\Aluno.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroChequeWS.class
 org\escolar\model\Carro.class

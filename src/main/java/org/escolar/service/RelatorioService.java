@@ -133,29 +133,29 @@ public class RelatorioService extends Service {
 				if(al.getIdaVolta() == 0){
 					if(!al.isTrocaIDA()){
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 					}else{
 						if(al.getCarroLevaParaEscola()!= null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal())/4;
+							total+= (al.getContratoVigente().getValorMensal())/4;
 						}
 						
 						if(al.getCarroLevaParaEscolaTroca() != null && al.getCarroLevaParaEscolaTroca().equals(filtros.get("carroLevaParaEscolaTroca"))){
-							total+= (al.getValorMensal())/4;
+							total+= (al.getContratoVigente().getValorMensal())/4;
 						}
 					}
 					
 					if(!al.isTrocaVolta()){
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 					}else{
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal())/4;
+							total+= (al.getContratoVigente().getValorMensal())/4;
 						}
 						
 						if(al.getCarroPegaEscolaTroca() != null && al.getCarroPegaEscolaTroca().equals(filtros.get("carroPegaEscolaTroca"))){
-							total+= (al.getValorMensal())/4;
+							total+= (al.getContratoVigente().getValorMensal())/4;
 						}
 					}
 					
@@ -165,30 +165,30 @@ public class RelatorioService extends Service {
 				}else if(al.getIdaVolta() == 1){
 					if(!al.isTrocaIDA()){
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal());
+							total+= (al.getContratoVigente().getValorMensal());
 						}
 					}else{
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 						
 						if(al.getCarroLevaParaEscolaTroca() != null && al.getCarroLevaParaEscolaTroca().equals(filtros.get("carroLevaParaEscolaTroca"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 					}
 				//SOMENTE Volta
 				}else{
 					if(!al.isTrocaVolta()){
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal());
+							total+= (al.getContratoVigente().getValorMensal());
 						}
 					}else{
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 						
 						if(al.getCarroPegaEscolaTroca() != null && al.getCarroPegaEscolaTroca().equals(filtros.get("carroPegaEscolaTroca"))){
-							total+= (al.getValorMensal())/2;
+							total+= (al.getContratoVigente().getValorMensal())/2;
 						}
 					}
 				}
@@ -238,10 +238,10 @@ public class RelatorioService extends Service {
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato"  + "- " + al.getId());
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 							}
 							
 						}
@@ -249,20 +249,20 @@ public class RelatorioService extends Service {
 						if(al.getCarroLevaParaEscola()!= null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato"  + "- " + al.getId());
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/4;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/4;
 							}
 						}
 						
 						if(al.getCarroLevaParaEscolaTroca() != null && al.getCarroLevaParaEscolaTroca() != null && al.getCarroLevaParaEscolaTroca().equals(filtros.get("carroLevaParaEscolaTroca"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato"  + "- " + al.getId());
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/4;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/4;
 							}
 						}
 					}
@@ -271,20 +271,20 @@ public class RelatorioService extends Service {
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato"  + "- " + al.getId());
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 							}
 						}
 					}else{
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato"  + "- " + al.getId());
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/4;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/4;
 								
 							}
 						}
@@ -292,10 +292,10 @@ public class RelatorioService extends Service {
 						if(al.getCarroPegaEscolaTroca() != null && al.getCarroPegaEscolaTroca().equals(filtros.get("carroPegaEscolaTroca"))){
 							if(al == null){
 								System.out.println("al ta nulo");
-							}else if(al.getNumeroParcelas() == null){
+							}else if(al.getContratoVigente().getNumeroParcelas() == null){
 								System.out.println("O aluno : " + al.getNomeAluno() +al.getCodigo() + "  Nao tem o valor do contrato");
 							}else{
-								total+= (al.getValorMensal()*al.getNumeroParcelas())/4;
+								total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/4;
 							}
 						}
 					}
@@ -306,30 +306,30 @@ public class RelatorioService extends Service {
 				}else if(al.getIdaVolta() == 1){
 					if(!al.isTrocaIDA()){
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas());
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas());
 						}
 					}else{
 						if(al.getCarroLevaParaEscola() != null && al.getCarroLevaParaEscola().equals(filtros.get("carroLevaParaEscola"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 						}
 						
 						if(al.getCarroLevaParaEscolaTroca() != null && al.getCarroLevaParaEscolaTroca().equals(filtros.get("carroLevaParaEscolaTroca"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 						}
 					}
 				//SOMENTE Volta
 				}else{
 					if(!al.isTrocaVolta()){
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas());
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas());
 						}
 					}else{
 						if(al.getCarroPegaEscola() != null && al.getCarroPegaEscola().equals(filtros.get("carroPegaEscola"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 						}
 						
 						if(al.getCarroPegaEscolaTroca() != null && al.getCarroPegaEscolaTroca().equals(filtros.get("carroPegaEscolaTroca"))){
-							total+= (al.getValorMensal()*al.getNumeroParcelas())/2;
+							total+= (al.getContratoVigente().getValorMensal()*al.getContratoVigente().getNumeroParcelas())/2;
 						}
 					}
 				}

@@ -62,7 +62,11 @@ public enum EscolaEnum {
 	
 	NICOLINA("Nicolina Tancredo","Alto Aririu",BairroEnum.ALTO_ARIRIU),
 	
-	MUNDO_ENCANTADO("Mundo Encantado","Bela Vista",BairroEnum.BELA_VISTA);
+	MUNDO_ENCANTADO("Mundo Encantado","Bela Vista",BairroEnum.BELA_VISTA),
+	
+	RAIZES("Raizes","Bela Vista",BairroEnum.BELA_VISTA),
+	
+	CIRANDA_COLORIDA("Ciranda Colorida","Pachecos",BairroEnum.PACHECOS);
 	
 	
 	private String name;

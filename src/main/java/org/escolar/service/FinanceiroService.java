@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -17,6 +18,7 @@ import javax.persistence.criteria.Root;
 
 import org.aaf.financeiro.model.Boleto;
 import org.escolar.model.Aluno;
+import org.escolar.model.ContratoAluno;
 import org.escolar.util.Service;
 
 @Stateless
@@ -25,8 +27,10 @@ public class FinanceiroService extends Service {
 	@PersistenceContext(unitName = "EscolarDS")
 	private EntityManager em;
 
-	// TODO pegar da configuracao
-	private int anoLetivo = 2018;
+	
+	@Inject
+	private ConfiguracaoService configuracaoService;
+
 
 	public Boleto findBoletoByNumero(String numeroBoleto) {
 		try {
@@ -69,6 +73,14 @@ public class FinanceiroService extends Service {
 			return null;
 		}
 	}
+	
+	public org.escolar.model.ContratoAluno findContratoALunoByID(Long id) {
+		try {
+			return em.find(org.escolar.model.ContratoAluno.class, id);
+		} catch (NoResultException nre) {
+			return null;
+		}
+	}
 
 	public void save(org.escolar.model.Boleto boleto) {
 		if (boleto.getId() != null) {
@@ -78,6 +90,8 @@ public class FinanceiroService extends Service {
 			bol.setBaixaManual(boleto.getBaixaManual());
 			bol.setConciliacaoPorExtrato(boleto.getConciliacaoPorExtrato());
 			bol.setBaixaGerada(boleto.getBaixaGerada());
+			bol.setCnabCanceladoEnviado(boleto.getCnabCanceladoEnviado());
+			
 			em.merge(bol);
 		}
 	}
@@ -86,9 +100,9 @@ public class FinanceiroService extends Service {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(anoLetivo, mes, 1, 0, 0, 0);
+				c.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, 1, 0, 0, 0);
 				Calendar c2 = Calendar.getInstance();
-				c2.set(anoLetivo, mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
+				c2.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
 
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT bol from Boleto bol ");
@@ -135,20 +149,33 @@ public class FinanceiroService extends Service {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(anoLetivo, mes, 1, 0, 0, 0);
-				Calendar c2 = Calendar.getInstance();
-				c2.set(anoLetivo, mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
+				c.set(Calendar.MONTH, mes-1);
+				c.getActualMaximum(Calendar.DAY_OF_MONTH);
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append(configuracaoService.getConfiguracao().getAnoLetivo());
+				sb.append("-");
+				sb.append(mes);
+				sb.append("-");
+				sb.append("01");
+				StringBuilder sb2 = new StringBuilder();
+				sb2.append(configuracaoService.getConfiguracao().getAnoLetivo());
+				sb2.append("-");
+				sb2.append(mes);
+				sb2.append("-");
+				sb2.append(c.getActualMaximum(Calendar.DAY_OF_MONTH));
 
 				StringBuilder sql = new StringBuilder();
-				sql.append("SELECT sum(bol.valorNominal-20) from Boleto bol ");
+				sql.append("SELECT sum(bol.valorNominal) from Boleto bol ");
 				sql.append("where 1=1 ");
 				sql.append(" and bol.vencimento >= '");
-				sql.append(c.getTime());
+				sql.append(sb);
 				sql.append("'");
 				sql.append(" and bol.vencimento < '");
-				sql.append(c2.getTime());
+				sql.append(sb2);
 				sql.append("'");
-				sql.append(" AND bol.pagador.removido = false ");
+				sql.append(" and (bol.cancelado = false");
+				sql.append(" or  bol.cancelado is null)");
 
 				Query query = em.createQuery(sql.toString());
 				Double boleto = (Double) query.getSingleResult();
@@ -161,13 +188,37 @@ public class FinanceiroService extends Service {
 
 	}
 
+	
+	public int countContratos(int mes) {
+		if (mes >= 0) {
+			try {
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT count(id) from ContratoAluno bol ");
+				sql.append("where 1=1 ");
+				sql.append(" and bol.ano = ");
+				sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
+				sql.append(" and (bol.cancelado = false");
+				sql.append(" or  bol.cancelado is null)");
+
+				Query query = em.createQuery(sql.toString());
+				Long boleto = (Long) query.getSingleResult();
+				return boleto.intValue();
+			} catch (NoResultException nre) {
+				return 0;
+			}
+		}
+		return 0;
+
+	}
+
+	
 	public Double getPago(int mes) {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(anoLetivo, mes, 1, 0, 0, 0);
+				c.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, 1, 0, 0, 0);
 				Calendar c2 = Calendar.getInstance();
-				c2.set(anoLetivo, mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
+				c2.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
 
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT sum(bol.valorPago) from Boleto bol ");
@@ -281,10 +332,10 @@ public class FinanceiroService extends Service {
 	public List<Aluno> getAlunosCNABNaoEnviado() {
 		try {
 			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT distinct(al) from  Aluno al ");
+			sql.append("SELECT distinct(al) from  ContratoAluno al ");
 			sql.append("where 1=1 ");
 			sql.append("and (al.cnabEnviado = false or al.cnabEnviado is null )");
-			sql.append("and al.removido=false");
+			sql.append("and al.cancelado=false");
 
 			Query query = em.createQuery(sql.toString());
 
@@ -299,25 +350,25 @@ public class FinanceiroService extends Service {
 
 	public void saveCNABENviado(Aluno aluno) {
 		Aluno al = em.find(Aluno.class, aluno.getId());
-		al.setCnabEnviado(true);
+		al.getContratoVigente().setCnabEnviado(true);
 		em.merge(al);
 	}
 
-	public List<Aluno> getAlunosRemovidos() {
+	public List<ContratoAluno> getAlunosRemovidos() {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT distinct(al) from  Boleto bol ");
-		sql.append("left join bol.pagador al ");
+		sql.append("left join bol.contrato al ");
 		sql.append("where 1=1 ");
-		sql.append(" and al.removido = true ");
+		sql.append(" and al.cancelado = true ");
 		sql.append(" and (bol.baixaGerada = false or bol.baixaGerada is null)");
 
 		Query query = em.createQuery(sql.toString());
 
 		@SuppressWarnings("unchecked")
-		List<Aluno> alunos = query.getResultList();
-		for (Aluno al : alunos) {
-			al.getBoletos().size();
-		}
+		List<ContratoAluno> alunos = query.getResultList();
+			for(ContratoAluno contrato : alunos){
+				contrato.getBoletos().size();
+			}
 
 		return alunos;
 	}
@@ -326,7 +377,7 @@ public class FinanceiroService extends Service {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(Calendar.YEAR, anoLetivo);
+				c.set(Calendar.YEAR, configuracaoService.getConfiguracao().getAnoLetivo());
 				c.set(Calendar.MONTH, mes);
 				c.set(Calendar.MINUTE, 59);
 				c.set(Calendar.HOUR, 23);
@@ -366,7 +417,7 @@ public class FinanceiroService extends Service {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(Calendar.YEAR, anoLetivo);
+				c.set(Calendar.YEAR, configuracaoService.getConfiguracao().getAnoLetivo());
 				c.set(Calendar.MONTH, mes);
 				c.set(Calendar.MINUTE, 59);
 				c.set(Calendar.HOUR, 23);
@@ -411,9 +462,9 @@ public class FinanceiroService extends Service {
 		if (mes >= 0) {
 			try {
 				Calendar c = Calendar.getInstance();
-				c.set(anoLetivo, mes, 1, 0, 0, 0);
+				c.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, 1, 0, 0, 0);
 				Calendar c2 = Calendar.getInstance();
-				c2.set(anoLetivo, mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
+				c2.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, c.getMaximum(Calendar.MONTH), 23, 59, 59);
 
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT bol from Boleto bol ");
@@ -439,4 +490,26 @@ public class FinanceiroService extends Service {
 
 	}
 
+	public void saveProtestar(org.escolar.model.Boleto boleto) {
+		if (boleto.getId() != null) {
+			ContratoAluno ca = findContratoALunoByID(boleto.getContrato().getId());
+			ca.setProtestado(true);
+			em.merge(ca);
+			
+			org.escolar.model.Boleto bol = findBoletoByID(boleto.getId());
+			bol.setValorPago(boleto.getValorPago());
+			bol.setDataPagamento(boleto.getDataPagamento());
+			bol.setBaixaManual(boleto.getBaixaManual());
+			bol.setConciliacaoPorExtrato(boleto.getConciliacaoPorExtrato());
+			bol.setBaixaGerada(boleto.getBaixaGerada());
+			bol.setCnabCanceladoEnviado(boleto.getCnabCanceladoEnviado());
+			
+			em.merge(bol);
+		}
+		
+	}
+
+	
+	
+	
 }

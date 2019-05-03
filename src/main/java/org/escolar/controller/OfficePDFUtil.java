@@ -234,7 +234,7 @@ public class OfficePDFUtil {
 		colunas.add("Valor total");
 		Table tabela = criaTabela(colunas);
 		
-		for(Aluno aluno : alunos){
+		/*for(Aluno aluno : alunos){
 			tabela.addCell(criaCell(aluno.getNomeResponsavel(),6));
 			tabela.addCell(criaCell(aluno.getCpfResponsavel(),6));
 			String telefones = "";
@@ -259,7 +259,7 @@ public class OfficePDFUtil {
 			tabela.addCell(criaCell(entrada,6));
 			tabela.addCell(criaCell(vencimento,6));
 			tabela.addCell(criaCell("R$ " + valorTotalDevido+"",7));
-		}
+		}*/
 		
 		document.add(tabela);
 		document.add(new Paragraph("Quantidade Crianças : " + alunos.size()));
@@ -271,25 +271,25 @@ public class OfficePDFUtil {
 	
 	private static Double getValorTotal(java.util.List<Aluno> alunos) {
 		Double quantidade = 0D;
-		for(Aluno al : alunos){
+		/*for(Aluno al : alunos){
 			for(Boleto b : al.getBoletos()){
 				if(b.getAtrasado() != null && b.getAtrasado()){
 					quantidade+=  Verificador.getValorFinal(b);
 				}
 			}
-		}
+		}*/
 		return quantidade;
 	}
 
 	private static int getQuantidadeBoletos(java.util.List<Aluno> alunos) {
 		int quantidade = 0;
-		for(Aluno al : alunos){
+		/*for(Aluno al : alunos){
 			for(Boleto b : al.getBoletos()){
 				if(b.getAtrasado() != null && b.getAtrasado()){
 					quantidade+= 1;
 				}
 			}
-		}
+		}*/
 		return quantidade;
 	}
 

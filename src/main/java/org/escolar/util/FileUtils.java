@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.aaf.financeiro.model.Pagador;
@@ -20,6 +21,8 @@ import org.aaf.financeiro.sicoob.util.CNAB240_REMESSA_SICOOB;
 import org.apache.poi.util.IOUtils;
 import org.escolar.enums.StatusBoletoEnum;
 import org.escolar.model.Aluno;
+import org.escolar.model.Boleto;
+import org.escolar.model.ContratoAluno;
 
 /**
  * metodos estaticos tipo handle de arquivos e dados
@@ -189,7 +192,7 @@ public class FileUtils {
 		return bf.toString();
 	}
 
-	public static InputStream gerarCNB240(String sequencialArquivo, String nomeArquivo, Aluno aluno) {
+	public static InputStream gerarCNB240(String sequencialArquivo, String nomeArquivo, ContratoAluno aluno) {
 		try {
 
 			Pagador pagador = new Pagador();
@@ -199,7 +202,7 @@ public class FileUtils {
 			pagador.setCpfCNPJ(aluno.getCpfResponsavel());
 			pagador.setEndereco(aluno.getEndereco());
 			pagador.setNome(aluno.getNomeResponsavel());
-			pagador.setNossoNumero(aluno.getCodigo());
+			pagador.setNossoNumero(aluno.getNumero());
 			pagador.setUF("SC");
   			pagador.setBoletos(Formatador.getBoletosFinanceiro(getBoletosParaPagar(aluno)));
 			CNAB240_REMESSA_SICOOB remessaCNAB240 = new CNAB240_REMESSA_SICOOB(1);
@@ -218,8 +221,48 @@ public class FileUtils {
 		}
 		return null;
 	}
+	
+	public static InputStream gerarCNB240(String sequencialArquivo, ContratoAluno aluno, int mes, String caminhoArquivo) {
+		try {
 
-	public static List<org.escolar.model.Boleto> getBoletosParaPagar(Aluno aluno) {
+			Pagador pagador = new Pagador();
+			pagador.setBairro(aluno.getBairro());
+			pagador.setCep(aluno.getCep());
+			pagador.setCidade(aluno.getCidade() != null ? aluno.getCidade() : "PALHOCA");
+			pagador.setCpfCNPJ(aluno.getCpfResponsavel());
+			pagador.setEndereco(aluno.getEndereco());
+			pagador.setNome(aluno.getNomeResponsavel());
+			pagador.setNossoNumero(aluno.getNumero());
+			pagador.setUF("SC");
+			
+			for(Boleto b :aluno.getBoletos()){
+				Calendar c = Calendar.getInstance();
+				c.setTime(b.getVencimento());
+				if(c.get(Calendar.MONTH) == mes-1){
+					List<org.aaf.financeiro.model.Boleto> boletos = new ArrayList<>();
+					boletos.add(b.getBoletoFinanceiro());
+					pagador.setBoletos(boletos);
+				}
+			}
+			
+			CNAB240_REMESSA_SICOOB remessaCNAB240 = new CNAB240_REMESSA_SICOOB(1);
+			byte[] arquivo = remessaCNAB240.geraRemessa(pagador, sequencialArquivo, caminhoArquivo);
+
+			try {
+				InputStream stream = new ByteArrayInputStream(arquivo);
+				return stream;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static List<org.escolar.model.Boleto> getBoletosParaPagar(ContratoAluno aluno) {
 		List<org.escolar.model.Boleto> boletosParaPagar = new ArrayList<>();
 		if (aluno.getBoletos() != null) {
 			for (org.escolar.model.Boleto b : aluno.getBoletos()) {
@@ -241,7 +284,6 @@ public class FileUtils {
 			IOUtils.closeQuietly(initialStream);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

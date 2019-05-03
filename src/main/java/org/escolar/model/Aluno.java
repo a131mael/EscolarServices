@@ -18,9 +18,11 @@ package org.escolar.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -37,7 +39,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.aaf.financeiro.util.OfficeUtil;
 import org.escolar.enums.BairroEnum;
 import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
@@ -49,336 +50,337 @@ import org.escolar.enums.Serie;
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
 public class Aluno implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private Long id;
-    
-    @OneToMany(fetch=FetchType.LAZY)
-    @Deprecated
-    private List<Boleto> boletos;
-    
-    @Column
-    @Deprecated
-    private String nomeMaeResponsavel;
-    
-    @Column
-    @Deprecated
-	private Boolean vencimentoUltimoDia;
-    
-    @Column
-    private String contatoEmail1;
-    
-    @Column
-    private String contatoEmail2;
-    
-    @Column
-    private String contatoTelefone1;
-    
-    @Column
-    private String contatoNome1;
-    
-    @Column
-    private String contatoTelefone2;
-    
-    @Column
-    private String contatoNome2;
-    
-    @Column
-    private String contatoTelefone3;
-    
-    @Column
-    private String contatoNome3;
-    
-    @Column
-    private String contatoTelefone4;
-    
-    @Column
-    private String contatoNome4;
-    
-    @Column
-    private String contatoTelefone5;
-    
-    @Column
-    private String contatoNome5;
-    
-    @Column
-    @Deprecated
-    private String nomePaiResponsavel;
-    
-    @Column
-    private int anoLetivo;
+	@Id
+	@GeneratedValue
+	private Long id;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Aluno irmao1;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Aluno irmao2;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Aluno irmao3;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Aluno irmao4;
-    
-    @Column
-    @Deprecated
-    private Boolean cnabEnviado;
-    
-    @Column
-    private Boolean verificadoOk;
-    
-    @Column
-    private Boolean removido;
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<ContratoAluno> contratos;
 
-    @Column
-    private Boolean restaurada;
-    
-    @Column
-    private Boolean rematricular;
+	@Column
+	private String contatoEmail1;
 
-    /**DADOS DO ALUNO*/
-    @NotNull
-    @Size(min = 1, max = 250)
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeAluno;
-    
-    @OneToMany(fetch=FetchType.LAZY)
-    private List<AlunoCarro> alunosCarros;
-    
-    @OneToMany(fetch=FetchType.LAZY)
-    private List<AlunoAvaliacao> avaliacoes;
-    
-    @Column
-    private String login;
-    
-    @Column
-    private String codigo;
+	@Column
+	private String contatoEmail2;
 
-    @OneToOne(fetch=FetchType.LAZY)
-    private Member member;
-    
-    @Column
-    private String senha;
-    
-    @NotNull
-    private Serie serie;
-    
-    @Column 
-    @Deprecated
-    private String endereco; //TODO REMOVER ja no contrato
-    
-    @Column
-    private String enderecoAluno;
-    
-    @Column
-    @Deprecated
-    private String bairro;
-    
-    @Column
-    @Deprecated
-    private String cep;
-    
-    @Column
-    @Deprecated
-    private String cidade;
-    
-    @NotNull
-    private PerioddoEnum periodo;
-    
-    @Column
-    @Deprecated
-    private Double anuidade;
-    
-    @Column
-    @Deprecated
-    private Integer numeroParcelas;
-    
-    @Column
-    @Deprecated
-    private String nomeResponsavel;
-    
-    @Column
-    @Deprecated
-    private String cpfResponsavel;
-    
-    @Column
-    @Deprecated
-    private String rgResponsavel;
-    
-    @Column
-    @Deprecated
-    private double valorMensal;
-    
-    @Column
-    private String telefone;
-    
-    @Column
-    private Date dataMatricula;
-    
-    @Column
-    @Deprecated
+	@Column
+	private String contatoTelefone1;
+
+	@Column
+	private String contatoNome1;
+
+	@Column
+	private String contatoTelefone2;
+
+	@Column
+	private String contatoNome2;
+
+	@Column
+	private String contatoTelefone3;
+
+	@Column
+	private String contatoNome3;
+
+	@Column
+	private String contatoTelefone4;
+
+	@Column
+	private String contatoNome4;
+
+	@Column
+	private String contatoTelefone5;
+
+	@Column
+	private String contatoNome5;
+
+	@Column
+	private int anoLetivo;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Aluno irmao1;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Aluno irmao2;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Aluno irmao3;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Aluno irmao4;
+
+	@Column
+	private Boolean verificadoOk;
+
+	@Column
+	private Boolean removido;
+
+	@Column
+	private Boolean restaurada;
+
+	@Column
+	private Boolean rematricular;
+
+	/** DADOS DO ALUNO */
+	@NotNull
+	@Size(min = 1, max = 250)
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeAluno;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<AlunoCarro> alunosCarros;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<AlunoAvaliacao> avaliacoes;
+
+	@Column
+	private String login;
+
+	@Column
+	private String codigo;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	private Member member;
+
+	@Column
+	private String senha;
+
+	@NotNull
+	private Serie serie;
+
+	@Column
+	private String enderecoAluno;
+
+	@NotNull
+	private PerioddoEnum periodo;
+
+	@Column
+	private String telefone;
+
+	@Column
+	private Date dataMatricula;
+
+	@Column
+	private Date dataNascimento;
+
+	@Column
+	private EscolaEnum escola;
+
+	@Column
+	private BairroEnum bairroAluno;
+
+	@Column
+	private boolean trocaIDA;
+
+	@Column
+	private Boolean trocaIDA2;
+
+	@Column
+	private Boolean trocaIDA3;
+
+	@Column
+	private boolean trocaVolta;
+
+	@Column
+	private Boolean trocaVolta2;
+
+	@Column
+	private Boolean trocaVolta3;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroLevaParaEscola;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroLevaParaEscolaTroca;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroLevaParaEscolaTroca2;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroLevaParaEscolaTroca3;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroPegaEscola;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroPegaEscolaTroca;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroPegaEscolaTroca2;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Carro carroPegaEscolaTroca3;
+
+	@Column
+	private int idaVolta;
+
+	@Column
+	private String horaPegar;
+
+	@Column
+	private String horaEntregar;
+
+	/** DADOS DO PAI */
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomePaiAluno;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeAvoPaternoPai;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeAvoHPaternoPai;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String naturalidadePai;
+
+	@Column
+	private String cpfPai;
+
+	@Column
+	private String rgPai;
+
+	@Column
+	private String telefoneCelularPai;
+
+	@Column
+	private String telefoneResidencialPai;
+
+	@Column
+	private String emailPai;
+
+	@Column
+	private String empresaTrabalhaPai;
+
+	@Column
+	private String telefoneEmpresaTrabalhaPai;
+
+	/** DADOS DA MAE */
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeMaeAluno;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeAvoPaternoMae;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String nomeAvoHPaternoMae;
+
+	@Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
+	private String naturalidadeMae;
+
+	@Column
+	private String cpfMae;
+
+	@Column
+	private String rgMae;
+
+	@Column
+	private String telefoneCelularMae;
+
+	@Column
+	private String telefoneResidencialMae;
+
+	@Column
+	private String emailMae;
+
+	@Column
+	private String empresaTrabalhaMae;
+
+	@Column
+	private String telefoneEmpresaTrabalhaMae;
+
+	/* DADOS DE CONTATOS PARA SAIDAS */
+
+	@Column
+	private boolean ativo;
+
+	@Column
+	private String observacaoSecretaria;
+
+	@Column
+	private String observacaoMotorista;
+
+	@Transient
+	private Double valorTotalDevido;
+
+	@Column
+	private int diaVencimento = 10;
+
+	@Column
+	@Deprecated
+	private String endereco; // TODO REMOVER ja no contrato
+
+	@Column
+	@Deprecated
+	private Boolean cnabEnviado;
+
+	@Column
+	@Deprecated
+	private String nomePaiResponsavel;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Boleto> boletos;
+
+	@Column
+	@Deprecated
+	private String nomeMaeResponsavel;
+
+	@Column
+	@Deprecated
+	private boolean vencimentoUltimoDia;
+
+	@Column
+	@Deprecated
+	private String bairro;
+
+	@Column
+	@Deprecated
+	private String cep;
+
+	@Column
+	@Deprecated
+	private String cidade;
+
+	@Column
+	@Deprecated
+	private Double anuidade;
+
+	@Column
+	@Deprecated
+	private Integer numeroParcelas;
+
+	@Column
+	@Deprecated
+	private String nomeResponsavel;
+
+	@Column
+	@Deprecated
+	private String cpfResponsavel;
+
+	@Column
+	@Deprecated
+	private String rgResponsavel;
+
+	@Column
+	@Deprecated
+	private double valorMensal;
+
+	@Column
+	@Deprecated
 	private Date dataCancelamento;
 
-    @Column
-    private Date dataNascimento;
-    
-    @Column
-    private EscolaEnum escola;
-    
-    @Column
-    private BairroEnum bairroAluno;
-    
-    @Column
-    private boolean trocaIDA;
-    
-    @Column
-    private Boolean trocaIDA2;
-    
-    @Column
-    private Boolean trocaIDA3;
-    
-    @Column
-    private boolean trocaVolta;
-    
-    @Column
-    private Boolean trocaVolta2;
-    
-    @Column
-    private Boolean trocaVolta3;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroLevaParaEscola;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroLevaParaEscolaTroca;
+	// DADOS PARA O FINANCEIRO
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroLevaParaEscolaTroca2;
+	@Column
+	@Deprecated
+	private Boolean enviadoParaCobrancaCDL;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroLevaParaEscolaTroca3;
+	@Column
+	@Deprecated
+	private Boolean enviadoSPC;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroPegaEscola;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroPegaEscolaTroca;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroPegaEscolaTroca2;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    private Carro carroPegaEscolaTroca3;
-    
-    @Column
-    private int idaVolta;
-    
-    @Column
-    private String horaPegar;
-    
-    @Column
-    private String horaEntregar;
-    
-    
-    /**DADOS DO PAI*/
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomePaiAluno;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeAvoPaternoPai;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeAvoHPaternoPai;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String naturalidadePai;
-    
-    @Column
-    private String cpfPai;
-    
-    @Column
-    private String rgPai;
-        
-    @Column
-    private String telefoneCelularPai;
-    
-    @Column
-    private String telefoneResidencialPai;
-    
-    @Column
-    private String emailPai;
-    
-    @Column
-    private String empresaTrabalhaPai;
-    
-    @Column
-    private String telefoneEmpresaTrabalhaPai;
-    
-    /**DADOS DA MAE*/
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeMaeAluno;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeAvoPaternoMae;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String nomeAvoHPaternoMae;
-    
-    @Pattern(regexp = "[^0-9]*", message = "Must not contain numbers")
-    private String naturalidadeMae;
-    
-    @Column
-    private String cpfMae;
-    
-    @Column
-    private String rgMae;
-    
-    @Column
-    private String telefoneCelularMae;
-    
-    @Column
-    private String telefoneResidencialMae;
-    
-    @Column
-    private String emailMae;
-    
-    @Column
-    private String empresaTrabalhaMae;
-    
-    @Column
-    private String telefoneEmpresaTrabalhaMae;
-    
-    /*DADOS DE CONTATOS PARA SAIDAS*/
+	@Column
+	@Deprecated
+	private Boolean contratoTerminado;
 
-    
-    @Column
-    private boolean ativo;
-    
-    @Column
-    private String observacaoSecretaria;
-
-    @Column
-    private String observacaoMotorista;
-    
-
-	//DADOS PARA O FINANCEIRO
-	 
-    @Column
-    @Deprecated
-    private Boolean enviadoParaCobrancaCDL;
-    
-    @Column
-    @Deprecated
-    private Boolean enviadoSPC;
-    
-    @Column
-    @Deprecated
-    private Boolean contratoTerminado;
-
-    @Transient
-    private Double valorTotalDevido;
-	
-    
 	public Long getId() {
 		return id;
 	}
@@ -386,11 +388,11 @@ public class Aluno implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	public Serie getSerie() {
 		return serie;
 	}
-	
+
 	public void setSerie(Serie serie) {
 		this.serie = serie;
 	}
@@ -403,8 +405,6 @@ public class Aluno implements Serializable {
 		this.ativo = ativo;
 	}
 
-	
-	
 	public String getTelefoneEmpresaTrabalhaMae() {
 		return telefoneEmpresaTrabalhaMae;
 	}
@@ -656,9 +656,9 @@ public class Aluno implements Serializable {
 	public double getValorMensal() {
 		return valorMensal;
 	}
-	
+
 	public double getValorMensalComDesconto() {
-		return valorMensal-20;
+		return valorMensal - 20;
 	}
 
 	public void setValorMensal(double valorMensal) {
@@ -705,7 +705,6 @@ public class Aluno implements Serializable {
 		this.avaliacoes = avaliacoes;
 	}
 
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -714,12 +713,13 @@ public class Aluno implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		
+
 		Aluno other = (Aluno) obj;
 		if (nomeAluno == null) {
 			if (other.nomeAluno != null)
 				return false;
-		} if (serie == null) {
+		}
+		if (serie == null) {
 			if (other.serie != null)
 				return false;
 		} else if (!periodo.equals(other.periodo))
@@ -729,7 +729,7 @@ public class Aluno implements Serializable {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		
+
 		return true;
 
 	}
@@ -861,11 +861,13 @@ public class Aluno implements Serializable {
 	public void setEscola(EscolaEnum escola) {
 		this.escola = escola;
 	}
-	
+
 	@Override
 	public String toString() {
-		
-		return nomeAluno + " - " + escola.getName();
+		if (escola != null) {
+			return nomeAluno + " - " + escola.getName();
+		}
+		return nomeAluno;
 	}
 
 	public String getRgResponsavel() {
@@ -1023,22 +1025,32 @@ public class Aluno implements Serializable {
 	public List<Boleto> getBoletos() {
 		return boletos;
 	}
-	
+
+	public List<Boleto> getBoletos2() {
+		List<Boleto> boletos = new ArrayList<>();
+		for (ContratoAluno contrato : contratos) {
+			boletos.addAll(contrato.getBoletos());
+		}
+		return boletos;
+	}
+
+	@Deprecated
 	public List<org.aaf.financeiro.model.Boleto> getBoletosFinanceiro() {
 		List<org.aaf.financeiro.model.Boleto> boletosFinanceiro = new ArrayList<>();
-		if(boletos!= null){
-			for(Boleto boleto : boletos){
-				org.aaf.financeiro.model.Boleto boletoFinanceiro = new org.aaf.financeiro.model.Boleto();
-				boletoFinanceiro.setEmissao(boleto.getEmissao());
-				boletoFinanceiro.setId(boleto.getId());
-				boletoFinanceiro.setValorNominal(boleto.getValorNominal());
-				boletoFinanceiro.setVencimento(boleto.getVencimento());
-				boletoFinanceiro.setNossoNumero(String.valueOf(boleto.getNossoNumero()));
-				boletoFinanceiro.setDataPagamento(OfficeUtil.retornaDataSomenteNumeros(boleto.getDataPagamento()));
-				boletoFinanceiro.setValorPago(boleto.getValorPago());
-				boletosFinanceiro.add(boletoFinanceiro);
-			}
-		}
+		/*
+		 * if(boletos!= null){ for(Boleto boleto : boletos){
+		 * org.aaf.financeiro.model.Boleto boletoFinanceiro = new
+		 * org.aaf.financeiro.model.Boleto();
+		 * boletoFinanceiro.setEmissao(boleto.getEmissao());
+		 * boletoFinanceiro.setId(boleto.getId());
+		 * boletoFinanceiro.setValorNominal(boleto.getValorNominal());
+		 * boletoFinanceiro.setVencimento(boleto.getVencimento());
+		 * boletoFinanceiro.setNossoNumero(String.valueOf(boleto.getNossoNumero(
+		 * ))); boletoFinanceiro.setDataPagamento(OfficeUtil.
+		 * retornaDataSomenteNumeros(boleto.getDataPagamento()));
+		 * boletoFinanceiro.setValorPago(boleto.getValorPago());
+		 * boletosFinanceiro.add(boletoFinanceiro); } }
+		 */
 		return boletosFinanceiro;
 	}
 
@@ -1166,14 +1178,6 @@ public class Aluno implements Serializable {
 		this.dataCancelamento = dataCancelamento;
 	}
 
-	public Boolean getVencimentoUltimoDia() {
-		return vencimentoUltimoDia;
-	}
-
-	public void setVencimentoUltimoDia(Boolean vencimentoUltimoDia) {
-		this.vencimentoUltimoDia = vencimentoUltimoDia;
-	}
-
 	public Boolean getRestaurada() {
 		return restaurada;
 	}
@@ -1205,5 +1209,83 @@ public class Aluno implements Serializable {
 	public void setBairroAluno(BairroEnum bairroAluno) {
 		this.bairroAluno = bairroAluno;
 	}
-	
+
+	public List<ContratoAluno> getContratos() {
+		if (contratos != null) {
+			Collections.sort(contratos);
+		}
+		return contratos;
+	}
+
+	public List<ContratoAluno> getContratosSux() {
+		return contratos;
+	}
+
+	public void setContratos(List<ContratoAluno> contratos) {
+		this.contratos = contratos;
+	}
+
+	public List<Boleto> getBoletos(int ano) {
+		List<Boleto> boletos = new ArrayList<>();
+		for (ContratoAluno contrato : contratos) {
+			if (contrato.getAno() == ano) {
+				boletos.addAll(contrato.getBoletos());
+			}
+		}
+		return boletos;
+	}
+
+	public ContratoAluno getContratoVigente() {
+		ContratoAluno contratoAtivo = null;
+		if (contratos != null) {
+			for (ContratoAluno contrato : contratos) {
+				if (contrato.isContratoAtivo()) {
+					contratoAtivo = contrato;
+				}
+			}
+		}
+
+		return contratoAtivo;
+	}
+
+	public List<ContratoAluno> getContratosVigentes() {
+		List<ContratoAluno> contratosAtivo = new ArrayList<>();
+		for (ContratoAluno contrato : contratos) {
+			if (contrato.isContratoAtivo()) {
+				contratosAtivo.add(contrato);
+			}
+		}
+		return contratosAtivo;
+	}
+
+	public ContratoAluno getUltimoContrato() {
+		ContratoAluno conts = null;
+		if (contratos != null) {
+			for (ContratoAluno contrato : contratos) {
+				if (contrato.getNumero() != null && !contrato.getNumero().equalsIgnoreCase("")) {
+					if (conts == null || Integer.parseInt(contrato.getNumero()) > Integer.parseInt(conts.getNumero())) {
+						conts = contrato;
+					}
+				}
+			}
+		}
+
+		return conts;
+	}
+
+	public int getDiaVencimento() {
+		return diaVencimento;
+	}
+
+	public void setDiaVencimento(int diaVencimento) {
+		this.diaVencimento = diaVencimento;
+	}
+
+	public boolean isVencimentoUltimoDia() {
+		return vencimentoUltimoDia;
+	}
+
+	public void setVencimentoUltimoDia(boolean vencimentoUltimoDia) {
+		this.vencimentoUltimoDia = vencimentoUltimoDia;
+	}
 }
