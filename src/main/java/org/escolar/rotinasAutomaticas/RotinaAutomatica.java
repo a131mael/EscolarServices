@@ -20,9 +20,10 @@ public class RotinaAutomatica {
 	@Schedule(minute = "30", hour = "5", dayOfWeek="Sun,Thu", month="*", persistent = false)
 	public void automaticTimeout() {
 
+		//cnab240.gerarCNABAlunos();
 	/*	try {
 			System.out.println("Gerando CNAB DE ALUNOS AINDA NAO ENVIADOs Escolar");
-			//cnab240.gerarCNABAlunos();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
