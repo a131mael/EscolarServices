@@ -2,6 +2,8 @@
 package org.escolar.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -217,98 +219,328 @@ public class DevedorService extends Service {
 		}
 		boletos.size();
 
-		boolean atrasado = false;
 		List<Aluno> aux = new LinkedList<>();
-		Set<Aluno> ds = new LinkedHashSet(); 		
+		Set<Aluno> ds = new LinkedHashSet();
 		for (Aluno d : (List<Aluno>) boletos) {
 			d.getId();
 			d.getNomeAluno();
 			d.getContratos().size();
-			if(d.getIrmao1()!= null){
+			if (d.getIrmao1() != null) {
 				d.getIrmao1().getId();
 			}
-			if(d.getIrmao2()!= null){
+			if (d.getIrmao2() != null) {
 				d.getIrmao2().getId();
 			}
-			if(d.getIrmao3()!= null){
+			if (d.getIrmao3() != null) {
 				d.getIrmao3().getId();
 			}
-			if(d.getIrmao4()!= null){
+			if (d.getIrmao4() != null) {
 				d.getIrmao4().getId();
 			}
 
-			
-			for (ContratoAluno contrato : d.getContratos()) {
-				
-				contrato.getBoletos().size();
-				for (Boleto b : contrato.getBoletos()) {
-					
-					if (dataInicio != null  && dataFim != null) {
-						if(dataInicio.before(b.getVencimento()) && dataFim.after(b.getVencimento())){
-							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
-								b.setAtrasado(true);
-								atrasado = true;
-								contrato.setAtrasado(true);
-							} else {
-								b.setAtrasado(false);
-							}
-
-						}
-						
-					}else if (dataInicio == null  && dataFim != null) {
-						if(dataFim.after(b.getVencimento())){
-							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
-
-								b.setAtrasado(true);
-								atrasado = true;
-								contrato.setAtrasado(true);
-							} else {
-								b.setAtrasado(false);
-							}
-
-						}
-						
-					}else if (dataInicio != null  && dataFim == null) {
-						if(dataInicio.before(b.getVencimento())){
-							if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
-
-								b.setAtrasado(true);
-								atrasado = true;
-								contrato.setAtrasado(true);
-							} else {
-								b.setAtrasado(false);
-							}
-
-						}
-					}else{
-						if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
-
-							b.setAtrasado(true);
-							atrasado = true;
-							contrato.setAtrasado(true);
-						} else {
-							b.setAtrasado(false);
-						}
-					}
-				}
-
-				if(contrato.getProtestado() != null && contrato.getProtestado()){
-					atrasado = false;
-				}
-			}
-			if (atrasado) {
-				
+			boolean devedor = possuiContratoComBoletoAtrasado(d.getContratos(), dataInicio, dataFim);
+			if (devedor) {
 				ds.add(d);
 			}
-			atrasado = false;
 		}
-		if(ds != null && !ds.isEmpty()){
+
+		if (ds != null && !ds.isEmpty()) {
 			aux.addAll(ds);
 		}
 
 		return aux;
 	}
 	
+	public List<Aluno> findAtrasados(Date dataIncio,Date dataFim, String orderByParam, String orderParam, int first, int pageSize, Map<String, Object> where){
+		StringBuilder sql = new StringBuilder();
+		sql.append("select al.* from aluno al ");   
+		sql.append("left join boleto bol ");
+		sql.append("on bol.pagador_id = al.id ");
+		sql.append("where ");
+		sql.append("bol.vencimento < '");
+		sql.append(new Date());
+		sql.append("'");
+		if(dataInicio != null){
+			sql.append(" and bol.vencimento > '");
+			sql.append(dataInicio);
+			sql.append("'");
+		}
+		
+		if(dataFim != null){
+			sql.append(" and bol.vencimento < '");
+			sql.append(dataFim);
+			sql.append("'");
+		}
+		sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
+		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
+		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		
+		sql.append(" and (al.contactado is null or al.contactado = false) ");
+		
+		
+		Query query = em.createNativeQuery(sql.toString(),Aluno.class);
+		List<Aluno> boletos = query.getResultList();
+		if(boletos == null){
+			boletos = new ArrayList<Aluno>();
+		}
+		boletos.size();
+
+		List<Aluno> aux = new LinkedList<>();
+		Set<Aluno> ds = new LinkedHashSet();
+		
+		Set<Aluno> sAux = new LinkedHashSet();
+		sAux.addAll(boletos);
+		List<Aluno> mAux = new LinkedList<>();
+		mAux.addAll(sAux);
+		
+		for (Aluno d :  sAux) {
+			d.getId();
+			d.getNomeAluno();
+			d.getContratos().size();
+			if (d.getIrmao1() != null) {
+				d.getIrmao1().getId();
+			}
+			if (d.getIrmao2() != null) {
+				d.getIrmao2().getId();
+			}
+			if (d.getIrmao3() != null) {
+				d.getIrmao3().getId();
+			}
+			if (d.getIrmao4() != null) {
+				d.getIrmao4().getId();
+			}
+			
+			boolean devedor = possuiContratoComBoletoAtrasado(d, d.getContratos(), dataInicio, dataFim);
+			if(d.getId()==10118){
+				System.out.println("a");
+			}
+			if (devedor) {
+				ds.add(d);
+			}
+		}
+
+		if (ds != null && !ds.isEmpty()) {
+			aux.addAll(ds);
+			Collections.sort(aux, new Comparator<Aluno>() {
+			    @Override
+			    public int compare(Aluno o1, Aluno o2) {
+			        return Integer.valueOf(o2.getQuantidadeMesAtrasado()).compareTo( o1.getQuantidadeMesAtrasado());
+			    }
+			});
+		}
+		
+		int ultimoIndice = first+pageSize;
+		if(ultimoIndice > aux.size()){
+			ultimoIndice = aux.size();
+		}
+		return aux.subList(first, ultimoIndice);
+	}
+	
+	public List<Aluno> findAtrasadosContactado(Date dataInicio,Date dataFim, String orderByParam, String orderParam, int first, int pageSize, Map<String, Object> where){
+		StringBuilder sql = new StringBuilder();
+		sql.append("select al.* from aluno al ");   
+		sql.append("left join boleto bol ");
+		sql.append("on bol.pagador_id = al.id ");
+		sql.append("where ");
+		sql.append("bol.vencimento < '");
+		sql.append(new Date());
+		sql.append("'");
+		if(dataInicio != null){
+			sql.append(" and bol.vencimento > '");
+			sql.append(dataInicio);
+			sql.append("'");
+		}
+		
+		if(dataFim != null){
+			sql.append(" and bol.vencimento < '");
+			sql.append(dataFim);
+			sql.append("'");
+		}
+		sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
+		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
+		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		
+		sql.append(" and (al.contactado = true) ");
+		
+		
+		Query query = em.createNativeQuery(sql.toString(),Aluno.class);
+		List<Aluno> boletos = query.getResultList();
+		if(boletos == null){
+			boletos = new ArrayList<Aluno>();
+		}
+		boletos.size();
+
+		List<Aluno> aux = new LinkedList<>();
+		Set<Aluno> ds = new LinkedHashSet();
+		
+		Set<Aluno> sAux = new LinkedHashSet();
+		sAux.addAll(boletos);
+		List<Aluno> mAux = new LinkedList<>();
+		mAux.addAll(sAux);
+		
+		for (Aluno d :  sAux) {
+			d.getId();
+			d.getNomeAluno();
+			d.getContratos().size();
+			if (d.getIrmao1() != null) {
+				d.getIrmao1().getId();
+			}
+			if (d.getIrmao2() != null) {
+				d.getIrmao2().getId();
+			}
+			if (d.getIrmao3() != null) {
+				d.getIrmao3().getId();
+			}
+			if (d.getIrmao4() != null) {
+				d.getIrmao4().getId();
+			}
+			
+			boolean devedor = possuiContratoComBoletoAtrasado(d, d.getContratos(), dataInicio, dataFim);
+			if (devedor) {
+				ds.add(d);
+			}
+		}
+
+		if (ds != null && !ds.isEmpty()) {
+			aux.addAll(ds);
+			Collections.sort(aux, new Comparator<Aluno>() {
+			    @Override
+			    public int compare(Aluno o1, Aluno o2) {
+			        return Integer.valueOf(o2.getQuantidadeMesAtrasado()).compareTo( o1.getQuantidadeMesAtrasado());
+			    }
+			});
+		}
+		
+		int ultimoIndice = first+pageSize;
+		if(ultimoIndice > aux.size()){
+			ultimoIndice = aux.size();
+		}
+		return aux.subList(first, ultimoIndice);
+	}
+	
+	private boolean possuiContratoComBoletoAtrasado(List<ContratoAluno> contratos, Date dataInicio2, Date dataFim2) {
+		return possuiContratoComBoletoAtrasado(null,contratos,dataInicio2,dataFim2);
+	}
+
+	
+	private boolean possuiContratoComBoletoAtrasado(Aluno aluno ,List<ContratoAluno> contratos, Date dataInicio2, Date dataFim2) {
+		
+		boolean atrasadoB = false;
+		boolean verdade = false;
+		
+		for (ContratoAluno contrato : contratos) {
+			contrato.getBoletos().size();
+
+			if (!(contrato.getProtestado() != null && contrato.getProtestado())) {
+				atrasadoB = possuiBoletoAtrasado(aluno,contrato, dataInicio, dataFim);
+			}
+			if(atrasadoB){
+				verdade = true;
+			}
+		}
+
+		return verdade;
+	}
+
+	private boolean possuiBoletoAtrasado(ContratoAluno contrato, Date dataInicio2, Date dataFim2) {
+		return possuiBoletoAtrasado(null,contrato,dataFim2,dataFim2);
+	}
+
+	private boolean possuiBoletoAtrasado(Aluno aluno, ContratoAluno contrato, Date dataInicio, Date dataFim) {
+		boolean atrasado = false;
+		
+		for (Boleto b : contrato.getBoletos()) {
+
+			if (dataInicio != null && dataFim != null) {
+				if (dataInicio.before(b.getVencimento()) && dataFim.after(b.getVencimento())) {
+					if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+						b.setAtrasado(true);
+						atrasado = true;
+						contrato.setAtrasado(true);
+					} else {
+						b.setAtrasado(false);
+					}
+
+				}
+
+			} else if (dataInicio == null && dataFim != null) {
+				if (dataFim.after(b.getVencimento())) {
+					if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+						b.setAtrasado(true);
+						atrasado = true;
+						contrato.setAtrasado(true);
+					} else {
+						b.setAtrasado(false);
+					}
+
+				}
+
+			} else if (dataInicio != null && dataFim == null) {
+				if (dataInicio.before(b.getVencimento())) {
+					if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+						b.setAtrasado(true);
+						atrasado = true;
+						contrato.setAtrasado(true);
+					} else {
+						b.setAtrasado(false);
+					}
+
+				}
+			} else {
+				if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+
+					b.setAtrasado(true);
+					atrasado = true;
+					contrato.setAtrasado(true);
+				} else {
+					b.setAtrasado(false);
+				}
+			}
+			if(aluno != null){
+				if(b.getAtrasado()){
+					if(aluno.getValorTotalDevido() == null){
+						aluno.setValorTotalDevido(0D);
+					}
+					if(aluno.getMesesAtrasados() == null){
+						aluno.setMesesAtrasados("");
+					}
+
+					double valorTotalDevido = aluno.getValorTotalDevido() + Verificador.getValorFinal(b);
+					String mesesAtrasados = aluno.getMesesAtrasados() + (b.getVencimento().getMonth() +1) +", ";
+					int quantidadeMesAtrasado = aluno.getQuantidadeMesAtrasado() + 1;
+					
+					aluno.setValorTotalDevido(valorTotalDevido);
+					aluno.setMesesAtrasados(mesesAtrasados);
+					aluno.setQuantidadeMesAtrasado(quantidadeMesAtrasado);
+					aluno.setNomeResponsavel(contrato.getNomeResponsavel());
+					initIrmaos(aluno);
+				}				
+			}
+			
+		}
+		
+		
+		return atrasado;
+	}
+
+	private void initIrmaos(Aluno al){
+		if(al.getIrmao1() != null){
+			al.getIrmao1().getId();
+		}
+		if(al.getIrmao2() != null){
+			al.getIrmao2().getId();
+		}
+		if(al.getIrmao3() != null){
+			al.getIrmao4().getId();
+		}
+		if(al.getIrmao4() != null){
+			al.getIrmao4().getId();
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Aluno> find(int first, int size, String orderBy, String order, Map<String, Object> filtros,Date dataInicio,Date dataFim) {
@@ -731,16 +963,18 @@ public class DevedorService extends Service {
 
 	private boolean possuiBoletoAtrasado(Aluno al) {
 		boolean atrasado = false;
-		al.getBoletos().size();
-		for (Boleto b : al.getBoletos()) {
-			if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
-				b.setAtrasado(true);
-				atrasado = true;
+		for(ContratoAluno ca : al.getContratos()){
+			for (Boleto b : ca.getBoletos()) {
+				if (Verificador.getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)) {
+					b.setAtrasado(true);
+					atrasado = true;
 
-			} else {
-				b.setAtrasado(false);
+				} else {
+					b.setAtrasado(false);
+				}
 			}
 		}
+	
 		return atrasado;
 	}
 
@@ -774,6 +1008,10 @@ public class DevedorService extends Service {
 			e.printStackTrace();
 			return 0;
 		}
+	}
+	
+	public long countAtrasados(Map<String, Object> filtros) {
+		return 100;
 	}
 	
 	public long countContratoAluno(Map<String, Object> filtros) {
@@ -911,6 +1149,17 @@ public class DevedorService extends Service {
 			return aux;
 		}catch(Exception e){
 			return null;
+		}
+	}
+
+	public void enviarParaProtesto(Aluno al) {
+		for(ContratoAluno ca : al.getContratos()){
+			boolean atras = possuiBoletoAtrasado(ca, null, null);
+			if(atras){
+				ContratoAluno caa = findByIdContratoAluno(ca.getId());
+				caa.setProtestado(true);
+				em.merge(caa);
+			}
 		}
 	}
 

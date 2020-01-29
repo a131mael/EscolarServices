@@ -17,6 +17,7 @@
 package org.escolar.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -42,6 +43,9 @@ public class Localizacao implements Serializable {
     private String nome;
     
     @Column
+    private String nomeMapa;
+    
+    @Column
     private double latitude;
     
     @Column
@@ -50,6 +54,8 @@ public class Localizacao implements Serializable {
     @Column
     private String androidID;
     
+    @Column
+    private Date dataUltimaAtualizacao;
     
     
     public LocationDTO getDTO(){
@@ -59,6 +65,8 @@ public class Localizacao implements Serializable {
     	dto.setLongitude(longitude);
     	dto.setNome(nome);
     	dto.setAndroidID(androidID);
+    	dto.setNomeMapa(nomeMapa);
+    	dto.setDataUltimaAtualizacao(dataUltimaAtualizacao);
     	
     	return dto;
     }
@@ -101,6 +109,22 @@ public class Localizacao implements Serializable {
 
 	public void setAndroidID(String androidID) {
 		this.androidID = androidID;
+	}
+
+	public String getNomeMapa() {
+		return nomeMapa;
+	}
+
+	public void setNomeMapa(String nomeMapa) {
+		this.nomeMapa = nomeMapa;
+	}
+
+	public Date getDataUltimaAtualizacao() {
+		return dataUltimaAtualizacao;
+	}
+
+	public void setDataUltimaAtualizacao(Date dataUltimaAtualizacao) {
+		this.dataUltimaAtualizacao = dataUltimaAtualizacao;
 	}
 
 }

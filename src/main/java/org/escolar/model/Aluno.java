@@ -158,6 +158,21 @@ public class Aluno implements Serializable {
 
 	@Column
 	private Date dataMatricula;
+	
+	@Column
+	private Date dataPrometeuPagar;
+	
+	@Column
+	private String observacaoAtrasado;
+	
+	@Column
+	private Boolean contactado;
+	
+	@Column
+	private Date dataContato;
+	
+	@Column
+	private Integer quantidadeContatos = 0;
 
 	@Column
 	private Date dataNascimento;
@@ -298,9 +313,6 @@ public class Aluno implements Serializable {
 	@Column
 	private String observacaoMotorista;
 
-	@Transient
-	private Double valorTotalDevido;
-
 	@Column
 	private int diaVencimento = 10;
 
@@ -381,6 +393,18 @@ public class Aluno implements Serializable {
 	@Deprecated
 	private Boolean contratoTerminado;
 
+	@Transient
+	private Double valorTotalDevido;
+
+	@Transient
+	private int quantidadeMesAtrasado;
+	
+	@Transient
+	private String mesesAtrasados;
+
+	@Transient
+	private String contatos;
+	
 	public Long getId() {
 		return id;
 	}
@@ -1287,5 +1311,72 @@ public class Aluno implements Serializable {
 
 	public void setVencimentoUltimoDia(boolean vencimentoUltimoDia) {
 		this.vencimentoUltimoDia = vencimentoUltimoDia;
+	}
+
+	public int getQuantidadeMesAtrasado() {
+		return quantidadeMesAtrasado;
+	}
+
+	public void setQuantidadeMesAtrasado(int quantidadeMesAtrasado) {
+		this.quantidadeMesAtrasado = quantidadeMesAtrasado;
+	}
+
+	public String getMesesAtrasados() {
+		return mesesAtrasados;
+	}
+
+	public void setMesesAtrasados(String mesesAtrasados) {
+		this.mesesAtrasados = mesesAtrasados;
+	}
+
+	public String getContatos() {
+		return contatos;
+	}
+
+	public void setContatos(String contatos) {
+		this.contatos = contatos;
+	}
+
+	public Boolean getContactado() {
+		return contactado;
+	}
+
+	public void setContactado(Boolean contactado) {
+		this.contactado = contactado;
+	}
+
+	public Date getDataContato() {
+		return dataContato;
+	}
+
+	public void setDataContato(Date dataContato) {
+		this.dataContato = dataContato;
+	}
+
+	public Integer getQuantidadeContatos() {
+		if(quantidadeContatos == null){
+			return 0; 
+		}
+		return quantidadeContatos;
+	}
+
+	public void setQuantidadeContatos(Integer quantidadeContatos) {
+		this.quantidadeContatos = quantidadeContatos;
+	}
+
+	public Date getDataPrometeuPagar() {
+		return dataPrometeuPagar;
+	}
+
+	public void setDataPrometeuPagar(Date dataPrometeuPagar) {
+		this.dataPrometeuPagar = dataPrometeuPagar;
+	}
+
+	public String getObservacaoAtrasado() {
+		return observacaoAtrasado;
+	}
+
+	public void setObservacaoAtrasado(String observacaoAtrasado) {
+		this.observacaoAtrasado = observacaoAtrasado;
 	}
 }

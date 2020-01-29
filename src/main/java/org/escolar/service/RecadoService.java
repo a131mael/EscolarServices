@@ -37,9 +37,6 @@ public class RecadoService extends Service implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@Inject
-	private Logger log;
-
 	@PersistenceContext(unitName = "EscolarDS")
 	private EntityManager em;
 
@@ -125,7 +122,6 @@ public class RecadoService extends Service implements Serializable {
 		Recado user = null;
 		try {
 
-			log.info("Registering " + recado.getNome());
 		
 			if (recado.getId() != null && recado.getId() != 0L) {
 				user = findById(recado.getId());
@@ -258,7 +254,6 @@ public class RecadoService extends Service implements Serializable {
 			RecadoDestinatarioDTO recDes = findRecadoDestinatario(dto.getRecado().getId()+"", dto.getDestinatario().getId()+"");
 
 			if(recDes == null){
-				log.info("Registering recadoDestinatario" + dto.getId());
 				
 				if (dto.getId() != null && dto.getId() != 0L) {
 					user = findByIdRecadoDestinatario(dto.getId());

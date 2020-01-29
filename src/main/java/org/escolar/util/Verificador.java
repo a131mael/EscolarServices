@@ -6,6 +6,7 @@ import java.util.InputMismatchException;
 
 import org.escolar.enums.StatusBoletoEnum;
 import org.escolar.model.Boleto;
+import org.escolar.model.ContratoAluno;
 
 public class Verificador {
 
@@ -168,5 +169,21 @@ public class Verificador {
 		} catch (InputMismatchException erro) {
 			return (false);
 		}
+	}
+
+	public static boolean possuiBoletoAberto(ContratoAluno ca) {
+		boolean ativo = false;
+		for(Boleto b : ca.getBoletos()){
+			if(getStatusEnum(b).equals(StatusBoletoEnum.A_VENCER)){
+				ativo = true;
+			}
+			if(getStatusEnum(b).equals(StatusBoletoEnum.ATRASADO)){
+				ativo = true;
+			}
+			if(getStatusEnum(b).equals(StatusBoletoEnum.VENCE_HOJE)){
+				ativo = true;
+			}
+		}
+		return ativo;
 	}
 }

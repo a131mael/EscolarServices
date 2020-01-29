@@ -38,6 +38,23 @@ public class MemberRegistration {
 	@PersistenceContext(unitName = "EscolarDS")
     private EntityManager em;
 
+	 public void register(MemberDTO member) throws Exception {
+	        Member m = new Member();
+	        if(member.getId() != null){
+	        	m = findById(member.getId());
+	        }
+	        m.setEmail(member.getEmail());
+	        m.setLogin(member.getLogin());
+	        m.setName(member.getName());
+	        m.setSenha(member.getSenha());
+	        m.setAlertaProximidade(member.isAlertaProximidade());
+	        m.setDistanciaAlerta(member.getDistanciaAlerta());
+	        m.setEnviarBoletosEmail(member.isEnviarBoletosEmail());
+	        m.setQuantidadeAcessos(member.getQuantidadeAcessos());
+	        
+	        em.persist(m);
+	        /*memberEventSrc.fire(member);*/
+	    }
 
     public void register(Member member) throws Exception {
         em.persist(member);
@@ -56,6 +73,7 @@ public class MemberRegistration {
     
     public MemberDTO findByLoginSenha(String login, String senha) {
 		try {
+			System.out.println("ENTRANDO NO REGISTRATION USUARIO E SENHA");
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
 			Root<Member> member = criteria.from(Member.class);

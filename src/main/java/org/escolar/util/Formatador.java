@@ -39,6 +39,7 @@ public class Formatador {
 	}
 	
 	public static CharSequence getMes(Date vencimento) {
+		System.out.println(vencimento + " :Vencimento do boleto");
 		Calendar c = Calendar.getInstance();
 		int mes = c.get(Calendar.MONTH);
 		String mesString = "";

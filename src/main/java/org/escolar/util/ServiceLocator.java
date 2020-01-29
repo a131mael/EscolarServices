@@ -54,6 +54,16 @@ public class ServiceLocator {
             return (MemberRegistration) ejbHome2;
         }
     
+    public Object getEjb2(String simpleNameImpl, String nameInterface) throws NamingException {
+		Constant c = new Constant();
+	
+		Object ejbHome2 = (Object) jndiContext.lookup(Constant.ContextoGlobalEJB + Constant.barra
+                            + Constant.Projeto + Constant.barra 
+                            + simpleNameImpl +"!"  + nameInterface);
+
+        return ejbHome2;
+ }
+    
     public LocationService getLocationService(String simpleNameImpl, String nameInterface) throws NamingException {
 		Constant c = new Constant();
 	

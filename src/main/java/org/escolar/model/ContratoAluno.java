@@ -77,6 +77,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	
 	@Column
 	private Boolean cancelado;
+	
+	@Column
+	private Boolean usuarioAppCriado;
 
 	@Column
 	private String numero;
@@ -134,6 +137,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	
 	@Column
     private Boolean enviadoProtestoDefinitivo;
+	
+	@Column
+    private Boolean enviadoPorEmailProtesto;
 	
 	@Lob
 	private String comentario;
@@ -493,6 +499,22 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 
 	public void setComentario(String comentario) {
 		this.comentario = comentario;
+	}
+
+	public Boolean getEnviadoPorEmailProtesto() {
+		return enviadoPorEmailProtesto;
+	}
+
+	public void setEnviadoPorEmailProtesto(Boolean enviadoPorEmailProtesto) {
+		this.enviadoPorEmailProtesto = enviadoPorEmailProtesto;
+	}
+
+	public Boolean getUsuarioAppCriado() {
+		return usuarioAppCriado;
+	}
+
+	public void setUsuarioAppCriado(Boolean usuarioAppCriado) {
+		this.usuarioAppCriado = usuarioAppCriado;
 	}
 	
 }

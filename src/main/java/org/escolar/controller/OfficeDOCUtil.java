@@ -1,5 +1,6 @@
 package org.escolar.controller;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class OfficeDOCUtil {
 			POIFSFileSystem fs = new POIFSFileSystem(
 					new FileInputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath(endereco)));
 			HWPFDocument doc = new HWPFDocument(fs);
-			writer = new FileOutputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + "\\"
+			writer = new FileOutputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + File.separator
 					+ nomeArquivoSaida + ".doc");
 
 			// remove as clausulas nao utilizadas - Contrato escolar
@@ -126,8 +127,13 @@ public class OfficeDOCUtil {
 		try {
 			XWPFDocument docx = new XWPFDocument(
 					new FileInputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath(endereco)));
-			writer = new FileOutputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + "\\"
+			
+			//System.out.println("OUTPUT:  " +FacesContext.getCurrentInstance().getExternalContext().getRealPath(endereco));
+			
+			writer = new FileOutputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + File.separator
 					+ nomeArquivoSaida + ".doc");
+			
+			//System.out.println("OUTPUT:  " + FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + File.separator	+ nomeArquivoSaida + ".doc");
 			// faz o replace do que esta no map
 			for (Map.Entry<String, String> entry : trocas.entrySet()) {
 				for(XWPFTable table :docx.getTables()){
@@ -144,8 +150,10 @@ public class OfficeDOCUtil {
 			docx.write(writer);
 
 		}catch (OLE2NotOfficeXmlFileException ole2){
+			System.out.println("CATCH PA PA PA RA PA PA ");
 			editDoc(endereco, trocas, nomeArquivoSaida);
 		}catch (Exception e) {
+			System.out.println("CATCH XA CA CA XA XA XA ");
 			e.printStackTrace();
 		} finally {
 			try {

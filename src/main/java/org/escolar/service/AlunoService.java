@@ -1,5 +1,6 @@
 package org.escolar.service;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,6 +22,9 @@ import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
+import org.aaf.financeiro.model.Pagador;
+import org.aaf.financeiro.sicoob.util.CNAB240_SICOOB;
+import org.aaf.financeiro.util.OfficeUtil;
 import org.escolar.enums.BairroEnum;
 import org.escolar.enums.BimestreEnum;
 import org.escolar.enums.DisciplinaEnum;
@@ -39,6 +43,7 @@ import org.escolar.model.Funcionario;
 import org.escolar.model.ObjetoRota;
 import org.escolar.util.Service;
 import org.escolar.util.UtilFinalizarAnoLetivo;
+import org.escolar.util.Verificador;
 
 @Stateless
 public class AlunoService extends Service {
@@ -48,7 +53,7 @@ public class AlunoService extends Service {
 
 	@Inject
 	private UtilFinalizarAnoLetivo finalizarAnoLetivo;
-	
+
 	@Inject
 	private ConfiguracaoService configuracaoService;
 
@@ -59,11 +64,11 @@ public class AlunoService extends Service {
 		return em.find(Aluno.class, id);
 	}
 
-	public Boleto findBoletoById(Long id){
+	public Boleto findBoletoById(Long id) {
 		Boleto boleto = em.find(Boleto.class, id);
 		return boleto;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<Aluno> findAlunoDoAnoLetivo() {
 		List<Aluno> alunos = new ArrayList<>();
@@ -81,21 +86,20 @@ public class AlunoService extends Service {
 		return alunos;
 	}
 
-	
-	public ContratoAluno findContratoById(Long id){
+	public ContratoAluno findContratoById(Long id) {
 		ContratoAluno contrato = em.find(ContratoAluno.class, id);
 		contrato.getAluno().getAnoLetivo();
-		
-		if(contrato.getAluno().getIrmao1() != null){
+
+		if (contrato.getAluno().getIrmao1() != null) {
 			contrato.getAluno().getIrmao1().getId();
 		}
-		if(contrato.getAluno().getIrmao2() != null){
+		if (contrato.getAluno().getIrmao2() != null) {
 			contrato.getAluno().getIrmao2().getId();
 		}
-		if(contrato.getAluno().getIrmao3() != null){
+		if (contrato.getAluno().getIrmao3() != null) {
 			contrato.getAluno().getIrmao3().getId();
 		}
-		if(contrato.getAluno().getIrmao4() != null){
+		if (contrato.getAluno().getIrmao4() != null) {
 			contrato.getAluno().getIrmao4().getId();
 		}
 		carregarLazyCarro(contrato.getAluno());
@@ -103,62 +107,60 @@ public class AlunoService extends Service {
 		carregarLazyCarro(contrato.getAluno().getIrmao2());
 		carregarLazyCarro(contrato.getAluno().getIrmao3());
 		carregarLazyCarro(contrato.getAluno().getIrmao4());
-		
-		
-		
-		if(contrato.getAluno().getContratos() != null){
+
+		if (contrato.getAluno().getContratos() != null) {
 			contrato.getAluno().getContratos().size();
-			for(ContratoAluno contratos : contrato.getAluno().getContratos()){
+			for (ContratoAluno contratos : contrato.getAluno().getContratos()) {
 				contratos.getBoletos().size();
 			}
 		}
-		
-		if(contrato.getBoletos() != null){
+
+		if (contrato.getBoletos() != null) {
 			contrato.getBoletos().size();
 		}
 		return contrato;
 	}
-	
+
 	private void carregarLazyCarro(Aluno aluno) {
-		if(aluno != null){
-			if(aluno.getCarroLevaParaEscola() != null){
+		if (aluno != null) {
+			if (aluno.getCarroLevaParaEscola() != null) {
 				aluno.getCarroLevaParaEscola().getId();
 			}
-			
-			if(aluno.getCarroLevaParaEscolaTroca() != null){
+
+			if (aluno.getCarroLevaParaEscolaTroca() != null) {
 				aluno.getCarroLevaParaEscolaTroca().getId();
 			}
-			
-			if(aluno.getCarroLevaParaEscolaTroca2() != null){
+
+			if (aluno.getCarroLevaParaEscolaTroca2() != null) {
 				aluno.getCarroLevaParaEscolaTroca2().getId();
 			}
-			
-			if(aluno.getCarroLevaParaEscolaTroca3() != null){
+
+			if (aluno.getCarroLevaParaEscolaTroca3() != null) {
 				aluno.getCarroLevaParaEscolaTroca3().getId();
 			}
-			
-			if(aluno.getCarroPegaEscola() != null){
+
+			if (aluno.getCarroPegaEscola() != null) {
 				aluno.getCarroPegaEscola().getId();
 			}
-			
-			if(aluno.getCarroPegaEscolaTroca() != null){
+
+			if (aluno.getCarroPegaEscolaTroca() != null) {
 				aluno.getCarroPegaEscolaTroca().getId();
 			}
-			
-			if(aluno.getCarroLevaParaEscolaTroca2() != null){
+
+			if (aluno.getCarroLevaParaEscolaTroca2() != null) {
 				aluno.getCarroPegaEscolaTroca2().getId();
 			}
-			
-			if(aluno.getCarroPegaEscolaTroca3() != null){
+
+			if (aluno.getCarroPegaEscolaTroca3() != null) {
 				aluno.getCarroPegaEscolaTroca3().getId();
 			}
 		}
-		
+
 	}
 
 	public Aluno findById(Long id) {
 		Aluno al = em.find(Aluno.class, id);
-		if(al != null){
+		if (al != null) {
 			if (al.getIrmao1() != null) {
 				al.getIrmao1().getAnoLetivo();
 			}
@@ -179,21 +181,19 @@ public class AlunoService extends Service {
 			carregarLazyCarro(al.getIrmao2());
 			carregarLazyCarro(al.getIrmao3());
 			carregarLazyCarro(al.getIrmao4());
-			
-			
-			if(al.getBoletos() != null){
-				al.getBoletos().size();	
+
+			if (al.getBoletos() != null) {
+				al.getBoletos().size();
 			}
-			
-			if(al.getContratos() != null){
-				 al.getContratos().size();
-				 for(ContratoAluno c : al.getContratos()){
-					 c.getBoletos().size();
-				 }
+
+			if (al.getContratos() != null) {
+				al.getContratos().size();
+				for (ContratoAluno c : al.getContratos()) {
+					c.getBoletos().size();
+				}
 			}
 		}
-		
-		
+
 		return al;
 	}
 
@@ -211,9 +211,26 @@ public class AlunoService extends Service {
 			// feature in JPA 2.0
 			// criteria.select(member).orderBy(cb.asc(member.get(Member_.name)));
 			criteria.select(member).orderBy(cb.asc(member.get("nomeAluno")));
-			List<Aluno> als =em.createQuery(criteria).getResultList(); 
+			List<Aluno> als = em.createQuery(criteria).getResultList();
+			/*
+			 * for(Aluno al : als){ al.getBoletos().size(); }
+			 */
 			for(Aluno al : als){
-				al.getBoletos().size();
+				if(al.getIrmao1() != null){
+					al.getIrmao1().getId();	
+					for(ContratoAluno ca1 : al.getIrmao1().getContratosSux()){
+						ca1.getId();
+					}
+				}
+				if(al.getIrmao2() != null){
+					al.getIrmao2().getId();
+					for(ContratoAluno ca2 : al.getIrmao2().getContratosSux()){
+						ca2.getId();
+					}
+				}
+				for(ContratoAluno ca : al.getContratosSux()){
+					ca.getId();
+				}
 			}
 			return als;
 
@@ -225,14 +242,13 @@ public class AlunoService extends Service {
 		}
 	}
 
-	
 	public List<Aluno> findAll(Map<String, Object> filtros) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
 			Root<Aluno> member = criteria.from(Aluno.class);
 			criteria.select(member).orderBy(cb.asc(member.get("nomeAluno")));
-			
+
 			final List<Predicate> predicates = new ArrayList<Predicate>();
 			for (Map.Entry<String, Object> entry : filtros.entrySet()) {
 
@@ -245,11 +261,16 @@ public class AlunoService extends Service {
 				predicates.add(pred);
 				// cq.where(pred);
 			}
-			List<Aluno> als =em.createQuery(criteria).getResultList(); 
+			List<Aluno> als = em.createQuery(criteria).getResultList();
 			List<Aluno> aux = new ArrayList<>();
-			for(Aluno al: als){
-				al.getBoletos().size();
-				aux.add(al);
+			for (Aluno al : als) {
+				al.getContratos().size();
+				for(ContratoAluno ca : al.getContratos()){
+					ca.getBoletos().size();
+				}
+				if(temContratoAtivo(al)){
+					aux.add(al);
+				}
 			}
 			return aux;
 
@@ -344,7 +365,7 @@ public class AlunoService extends Service {
 		alunos = query.getResultList();
 		return alunos;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<Aluno> findAlunoByCarroIDA(long idCarro, PerioddoEnum periodo) {
 		List<Aluno> alunos = new ArrayList<>();
@@ -438,17 +459,17 @@ public class AlunoService extends Service {
 
 	}
 
-	public Aluno save(Aluno aluno,ContratoAluno contrato) {
+	public Aluno save(Aluno aluno, ContratoAluno contrato) {
 		return saveAluno(aluno, true);
 	}
-	
+
 	public void saveAlunoEndereco(Aluno aluno) {
 		Aluno user = null;
-		
+
 		if (aluno.getId() != null && aluno.getId() != 0L) {
 			user = findById(aluno.getId());
-		} 
-		
+		}
+
 		user.setBairroAluno(aluno.getBairroAluno());
 		user.setEnderecoAluno(aluno.getEnderecoAluno());
 		em.merge(user);
@@ -456,17 +477,17 @@ public class AlunoService extends Service {
 
 	public void clone(Aluno aluno, Aluno user) {
 		// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
-		//user.setValorMensal(aluno.getValorMensal());
+		// user.setValorMensal(aluno.getValorMensal());
 		user.setDataMatricula(aluno.getDataMatricula());
 		// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
 		user.setCodigo(aluno.getCodigo());
 
-		
-	//	user.setAnuidade(aluno.getAnuidade() != null ? aluno.getAnuidade() : 0);
+		// user.setAnuidade(aluno.getAnuidade() != null ? aluno.getAnuidade() :
+		// 0);
 		user.setCpfMae(aluno.getCpfMae());
 		user.setCpfPai(aluno.getCpfPai());
-		//user.setCpfResponsavel(aluno.getCpfResponsavel());
-		//user.setRgResponsavel(aluno.getRgResponsavel());
+		// user.setCpfResponsavel(aluno.getCpfResponsavel());
+		// user.setRgResponsavel(aluno.getRgResponsavel());
 		user.setDataMatricula(aluno.getDataMatricula());
 		user.setEmailMae(aluno.getEmailMae());
 		user.setEmailPai(aluno.getEmailPai());
@@ -481,27 +502,27 @@ public class AlunoService extends Service {
 		user.setNomeAvoPaternoPai(aluno.getNomeAvoPaternoPai());
 		user.setNomeMaeAluno(aluno.getNomeMaeAluno());
 		user.setNomePaiAluno(aluno.getNomePaiAluno());
-		//user.setNomeResponsavel(aluno.getNomeResponsavel());
-		//user.setNumeroParcelas(aluno.getNumeroParcelas());
+		// user.setNomeResponsavel(aluno.getNomeResponsavel());
+		// user.setNumeroParcelas(aluno.getNumeroParcelas());
 		user.setObservacaoSecretaria(aluno.getObservacaoSecretaria());
-		//user.setValorMensal(aluno.getValorMensal());
+		// user.setValorMensal(aluno.getValorMensal());
 		user.setTelefoneResidencialPai(aluno.getTelefoneResidencialPai());
 		user.setRgMae(aluno.getRgMae());
 		user.setRgPai(aluno.getRgPai());
 		user.setSenha(aluno.getSenha());
 		user.setTelefone(aluno.getTelefone());
-		//user.setEscola(aluno.getEscola());
+		// user.setEscola(aluno.getEscola());
 
-		//user.setNomePaiResponsavel(aluno.getNomePaiResponsavel());
-		//user.setNomeMaeResponsavel(aluno.getNomeMaeResponsavel());
-		//user.setAnuidade(aluno.getAnuidade());
-		//user.setBairro(aluno.getBairro());
-		//user.setCep(aluno.getCep());
-		//user.setCidade(aluno.getCidade());
+		// user.setNomePaiResponsavel(aluno.getNomePaiResponsavel());
+		// user.setNomeMaeResponsavel(aluno.getNomeMaeResponsavel());
+		// user.setAnuidade(aluno.getAnuidade());
+		// user.setBairro(aluno.getBairro());
+		// user.setCep(aluno.getCep());
+		// user.setCidade(aluno.getCidade());
 		user.setCpfMae(aluno.getCpfMae());
 		user.setCpfPai(aluno.getCpfPai());
-		//user.setEndereco(aluno.getEndereco());
-		//user.setRgResponsavel(aluno.getRgResponsavel());
+		// user.setEndereco(aluno.getEndereco());
+		// user.setRgResponsavel(aluno.getRgResponsavel());
 
 		if (aluno.getRemovido() == null) {
 			user.setRemovido(false);
@@ -511,7 +532,7 @@ public class AlunoService extends Service {
 
 	}
 
-	public String removeCaracteresEspeciais(String texto){
+	public String removeCaracteresEspeciais(String texto) {
 		texto = texto.replaceAll("[^aA-zZ-Z0-9 ]", "");
 		return texto;
 	}
@@ -527,11 +548,11 @@ public class AlunoService extends Service {
 				user = new Aluno();
 				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			}
-			
+
 			user.setNomeAluno(aluno.getNomeAluno().toUpperCase());
 			user.setPeriodo(aluno.getPeriodo());
 			user.setSerie(aluno.getSerie());
-			
+
 			user.setDataCancelamento(aluno.getDataCancelamento());
 			user.setDataNascimento(aluno.getDataNascimento());
 			user.setDataMatricula(aluno.getDataMatricula());
@@ -574,15 +595,15 @@ public class AlunoService extends Service {
 			user.setTelefone(aluno.getTelefone());
 
 			user.setObservacaoSecretaria(aluno.getObservacaoSecretaria());
-			
+
 			user.setRemovido(false);
 			user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			user.setEscola(aluno.getEscola());
-			
-			if(aluno.getEnderecoAluno() != null){
+
+			if (aluno.getEnderecoAluno() != null) {
 				user.setEnderecoAluno(removeCaracteresEspeciais(aluno.getEnderecoAluno()));
 			}
-			
+
 			user.setBairroAluno(aluno.getBairroAluno());
 			user.setContatoEmail1(aluno.getContatoEmail1());
 			user.setContatoEmail2(aluno.getContatoEmail2());
@@ -597,16 +618,20 @@ public class AlunoService extends Service {
 			user.setContatoTelefone3(aluno.getContatoTelefone3());
 			user.setContatoTelefone4(aluno.getContatoTelefone4());
 			user.setContatoTelefone5(aluno.getContatoTelefone5());
-			
+
 			user.setTrocaIDA(aluno.isTrocaIDA());
 			user.setTrocaVolta(aluno.isTrocaVolta());
 			user.setCarroLevaParaEscola(aluno.getCarroLevaParaEscola());
 			user.setCarroLevaParaEscolaTroca(aluno.getCarroLevaParaEscolaTroca());
 			user.setCarroPegaEscola(aluno.getCarroPegaEscola());
 			user.setCarroPegaEscolaTroca(aluno.getCarroPegaEscolaTroca());
-			
+
+			user.setContactado(aluno.getContactado());
+			user.setDataContato(aluno.getDataContato());
+			user.setQuantidadeContatos(aluno.getQuantidadeContatos());
+
 			user.setIdaVolta(aluno.getIdaVolta());
-			
+
 			em.persist(user);
 
 			if (user.getDataNascimento() != null) {
@@ -616,9 +641,10 @@ public class AlunoService extends Service {
 					aniversario = new Evento();
 				}
 
-				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
-				aniversario
-						.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(),
+						configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(),
+						configuracaoService.getConfiguracao().getAnoLetivo()));
 				aniversario.setCodigo(user.getCodigo());
 				aniversario.setDescricao(" Aniversário do(a) aluno(a) " + user.getNomeAluno());
 				aniversario.setNome(
@@ -644,21 +670,18 @@ public class AlunoService extends Service {
 		}
 
 		if (saveBrother) {
-			if(aluno.getContratos() != null)
-			for(ContratoAluno cont :aluno.getContratos()){
-				if(cont.getCancelado() != null && !cont.getCancelado()){
-					em.merge(cont);
+			if (aluno.getContratos() != null)
+				for (ContratoAluno cont : aluno.getContratos()) {
+					if (cont.getCancelado() != null && !cont.getCancelado()) {
+						em.merge(cont);
+					}
 				}
-			}
 			salvarIrmaos(user, aluno);
 		}
-		
 
 		return user;
 	}
 
-	
-	
 	private Aluno saveAluno(Aluno aluno, boolean saveBrother, ContratoAluno contrato) {
 		Aluno user = null;
 		ContratoAluno contratoPersistence = null;
@@ -670,26 +693,23 @@ public class AlunoService extends Service {
 				user = new Aluno();
 				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			}
-			
+
 			if (contrato.getId() != null && contrato.getId() != 0L) {
 				contratoPersistence = findContratoById(contrato.getId());
 			} else {
 				contratoPersistence = new ContratoAluno();
 			}
-			
-			
+
 			user.setIdaVolta(aluno.getIdaVolta());
 			// user.setAdministrarParacetamol(aluno.isAdministrarParacetamol());
 			user.setNomeAluno(aluno.getNomeAluno().toUpperCase());
 			user.setPeriodo(aluno.getPeriodo());
 			user.setSerie(aluno.getSerie());
-			
+
 			if (aluno.getEnderecoAluno() != null) {
 				user.setEnderecoAluno(removeCaracteresEspeciais(aluno.getEnderecoAluno()));
 			}
-			
-			
-			
+
 			// user.setNacionalidade(aluno.getNacionalidade());
 			user.setDataNascimento(aluno.getDataNascimento());
 			user.setDataMatricula(aluno.getDataMatricula());
@@ -729,7 +749,7 @@ public class AlunoService extends Service {
 			user.setSenha(aluno.getSenha());
 			user.setTelefone(aluno.getTelefone());
 			user.setEscola(aluno.getEscola());
-		
+
 			user.setBairroAluno(aluno.getBairroAluno());
 			user.setContatoEmail1(aluno.getContatoEmail1());
 			user.setContatoEmail2(aluno.getContatoEmail2());
@@ -745,7 +765,6 @@ public class AlunoService extends Service {
 			user.setContatoTelefone4(aluno.getContatoTelefone4());
 			user.setContatoTelefone5(aluno.getContatoTelefone5());
 
-			
 			if (aluno.getRemovido() == null) {
 				user.setRemovido(false);
 			} else {
@@ -758,14 +777,13 @@ public class AlunoService extends Service {
 			user.setCarroLevaParaEscolaTroca(aluno.getCarroLevaParaEscolaTroca());
 			user.setCarroPegaEscola(aluno.getCarroPegaEscola());
 			user.setCarroPegaEscolaTroca(aluno.getCarroPegaEscolaTroca());
-			
-			
-			popularContrato(contrato,contratoPersistence);
 
-			if(user.getAnoLetivo() == 0){
+			popularContrato(contrato, contratoPersistence);
+
+			if (user.getAnoLetivo() == 0) {
 				user.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 			}
-			
+
 			em.persist(user);
 
 			if (user.getDataNascimento() != null) {
@@ -775,9 +793,10 @@ public class AlunoService extends Service {
 					aniversario = new Evento();
 				}
 
-				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
-				aniversario
-						.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(), configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario.setDataFim(finalizarAnoLetivo.mudarAno(user.getDataNascimento(),
+						configuracaoService.getConfiguracao().getAnoLetivo()));
+				aniversario.setDataInicio(finalizarAnoLetivo.mudarAno(user.getDataNascimento(),
+						configuracaoService.getConfiguracao().getAnoLetivo()));
 				aniversario.setCodigo(user.getCodigo());
 				aniversario.setDescricao(" Aniversário do(a) aluno(a) " + user.getNomeAluno());
 				aniversario.setNome(
@@ -806,7 +825,7 @@ public class AlunoService extends Service {
 		if (saveBrother) {
 			salvarIrmaos(user, aluno, contratoPersistence);
 			if (aluno.getId() == null || aluno.getId() == 0L) {
-				boletos = gerarBoletos(user,contrato);
+				boletos = gerarBoletos(user, contrato);
 			}
 		}
 		if (aluno.getId() == null || aluno.getId() == 0L) {
@@ -829,7 +848,7 @@ public class AlunoService extends Service {
 		contratoPersistence.setBairro(contrato.getBairro());
 		contratoPersistence.setCep(contrato.getCep());
 		contratoPersistence.setCidade(contrato.getCidade());
-		if(contrato.getCpfResponsavel() != null){
+		if (contrato.getCpfResponsavel() != null) {
 			contratoPersistence.setCpfResponsavel(contrato.getCpfResponsavel().replace(".", "").replace("-", ""));
 		}
 		contratoPersistence.setNumeroParcelas(contrato.getNumeroParcelas());
@@ -846,19 +865,18 @@ public class AlunoService extends Service {
 		}
 		contratoPersistence.setDataCancelamento(contrato.getDataCancelamento());
 		contratoPersistence.setCnabEnviado(contrato.getCnabEnviado());
-		
-		
+
 	}
 
 	public List<Boleto> gerarBoletos(Aluno user, ContratoAluno contrato) {
-		return gerarBoletos(user,configuracaoService.getConfiguracao().getAnoLetivo(), contrato);
+		return gerarBoletos(user, configuracaoService.getConfiguracao().getAnoLetivo(), contrato);
 	}
 
 	public List<Boleto> gerarBoletos(Aluno user, int ano, ContratoAluno contrato) {
 		int quantidadeParcelas = 12 - contrato.getNumeroParcelas();
-		return gerarBoletos(user,ano,quantidadeParcelas,contrato);
+		return gerarBoletos(user, ano, quantidadeParcelas, contrato);
 	}
-	
+
 	public List<Boleto> gerarBoletos(Aluno user, int ano, int quantidadeParcelas, ContratoAluno contrato) {
 		List<Boleto> boletos = new ArrayList<>();
 		long nossoNumero = getProximoNossoNumero();
@@ -885,68 +903,56 @@ public class AlunoService extends Service {
 		return boletos;
 	}
 
-	
 	public void gerarBoletos() {
 		List<Aluno> alunos = findAll();
 		for (Aluno al : alunos) {
-			correcaoModelagemAlunoContrato(al);	
-/*			for(ContratoAluno contrato :al.getContratosVigentes()){
-				if (al.getRemovido() != null && !al.getRemovido()) {
-					if (contrato.getBoletos() == null || contrato.getBoletos().size() == 0) {
-						if (contrato.getNumeroParcelas() != null && contrato.getNumeroParcelas() > 0) {
-							if((al.getAnoLetivo() == configuracaoService.getConfiguracao().getAnoLetivo()) || (al.getRematricular() != null && al.getRematricular()) ){
-								if (!irmaoJaTemBoleto(al)) {
-									List<Boleto> boletos = gerarBoletos(al,contrato);
-									contrato.setBoletos(boletos);
-									em.persist(contrato);
-								}	
-							}
-						}
-					} else if (contrato.getBoletos() != null && contrato.getBoletos().size() > 0) {
-						List<Boleto> boletos = contrato.getBoletos();
-						if(todosBoletosBaixados(boletos) && al.getRestaurada() != null && al.getRestaurada()){
-							List<Boleto> boletosGErados = gerarBoletos(al,contrato);
-							boletosGErados.addAll(contrato.getBoletos());
-							contrato.setBoletos(boletosGErados);
-							em.persist(contrato);
-						}else{
-							for (Boleto b : boletos) {
-								if(b.getAlteracaoBoletoManual() == null || !b.getAlteracaoBoletoManual()){
-									b.setValorNominal(contrato.getValorMensal());
-									Calendar c = Calendar.getInstance();
-									c.setTime(b.getVencimento());
-									if (contrato.getVencimentoUltimoDia() == null || !contrato.getVencimentoUltimoDia()) {
-										c.set(Calendar.DAY_OF_MONTH, contrato.getDiaVencimento());
-									} else {
-										int dia = c.getActualMaximum(Calendar.DAY_OF_MONTH);
-										c.set(Calendar.DAY_OF_MONTH, dia);
-									}
-									b.setVencimento(c.getTime());
-									em.merge(b);
-								}
-							}
-						}
-					}
-				}
-				//gerarBoletosRematricula(al,anoREmatricula,contratoAluno);
-			}*/
-			
+			correcaoModelagemAlunoContrato(al);
+			/*
+			 * for(ContratoAluno contrato :al.getContratosVigentes()){ if
+			 * (al.getRemovido() != null && !al.getRemovido()) { if
+			 * (contrato.getBoletos() == null || contrato.getBoletos().size() ==
+			 * 0) { if (contrato.getNumeroParcelas() != null &&
+			 * contrato.getNumeroParcelas() > 0) { if((al.getAnoLetivo() ==
+			 * configuracaoService.getConfiguracao().getAnoLetivo()) ||
+			 * (al.getRematricular() != null && al.getRematricular()) ){ if
+			 * (!irmaoJaTemBoleto(al)) { List<Boleto> boletos =
+			 * gerarBoletos(al,contrato); contrato.setBoletos(boletos);
+			 * em.persist(contrato); } } } } else if (contrato.getBoletos() !=
+			 * null && contrato.getBoletos().size() > 0) { List<Boleto> boletos
+			 * = contrato.getBoletos(); if(todosBoletosBaixados(boletos) &&
+			 * al.getRestaurada() != null && al.getRestaurada()){ List<Boleto>
+			 * boletosGErados = gerarBoletos(al,contrato);
+			 * boletosGErados.addAll(contrato.getBoletos());
+			 * contrato.setBoletos(boletosGErados); em.persist(contrato); }else{
+			 * for (Boleto b : boletos) { if(b.getAlteracaoBoletoManual() ==
+			 * null || !b.getAlteracaoBoletoManual()){
+			 * b.setValorNominal(contrato.getValorMensal()); Calendar c =
+			 * Calendar.getInstance(); c.setTime(b.getVencimento()); if
+			 * (contrato.getVencimentoUltimoDia() == null ||
+			 * !contrato.getVencimentoUltimoDia()) {
+			 * c.set(Calendar.DAY_OF_MONTH, contrato.getDiaVencimento()); } else
+			 * { int dia = c.getActualMaximum(Calendar.DAY_OF_MONTH);
+			 * c.set(Calendar.DAY_OF_MONTH, dia); }
+			 * b.setVencimento(c.getTime()); em.merge(b); } } } } }
+			 * //gerarBoletosRematricula(al,anoREmatricula,contratoAluno); }
+			 */
+
 		}
 	}
-	
-	private List<Boleto> gerarBoletosRematricula(Aluno al, int anoRematricula,ContratoAluno contrato){
+
+	private List<Boleto> gerarBoletosRematricula(Aluno al, int anoRematricula, ContratoAluno contrato) {
 		if (al.getRemovido() != null && !al.getRemovido()) {
-			if(al.getRematricular() != null && al.getRematricular()){
-				if(!possuiBoletoNoAno(al,anoRematricula)){
-					gerarBoletos(al, anoRematricula,0,contrato);
+			if (al.getRematricular() != null && al.getRematricular()) {
+				if (!possuiBoletoNoAno(al, anoRematricula)) {
+					gerarBoletos(al, anoRematricula, 0, contrato);
 				}
 			}
 		}
 		return null;
 	}
-	
+
 	private void correcaoModelagemAlunoContrato(Aluno al) {
-		if(al.getContratos() == null || al.getContratos().isEmpty()){
+		if (al.getContratos() == null || al.getContratos().isEmpty()) {
 			ContratoAluno contrato = new ContratoAluno();
 			contrato.setAluno(al);
 			contrato.setAno((short) 2018);
@@ -967,21 +973,21 @@ public class AlunoService extends Service {
 			contrato.setNomeMaeResponsavel(al.getNomeMaeResponsavel());
 			contrato.setNomePaiResponsavel(al.getNomePaiResponsavel());
 			contrato.setNomeResponsavel(al.getNomeResponsavel());
-			
+
 			String ano = String.valueOf(contrato.getAno());
-			String finalANo = ano.substring(ano.length()-2 , ano.length());
+			String finalANo = ano.substring(ano.length() - 2, ano.length());
 			String numeroUltimoContrato = "01";
-			
-			String numero = finalANo + contrato.getAluno().getCodigo()+numeroUltimoContrato;
+
+			String numero = finalANo + contrato.getAluno().getCodigo() + numeroUltimoContrato;
 			contrato.setNumero(numero);
-			
+
 			contrato.setNumeroParcelas(al.getNumeroParcelas());
 			contrato.setRgResponsavel(al.getRgResponsavel());
 			contrato.setValorMensal(al.getValorMensal());
 			contrato.setVencimentoUltimoDia(al.isVencimentoUltimoDia());
 			contrato.setBoletos(findBoletoBy(al));
 			em.persist(contrato);
-			
+
 			List<ContratoAluno> contratos = new ArrayList<>();
 			contratos.add(contrato);
 			al.setContratos(contratos);
@@ -989,9 +995,9 @@ public class AlunoService extends Service {
 			em.persist(al);
 		}
 	}
-	
+
 	private List<Boleto> findBoletoBy(Aluno al) {
-		
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT distinct(bol) from Boleto bol ");
 		sql.append(" where 1 = 1");
@@ -1007,15 +1013,15 @@ public class AlunoService extends Service {
 		boolean retorno = false;
 		List<Boleto> boletos = al.getBoletos();
 		Calendar calendar = new GregorianCalendar();
-		if(boletos != null && !boletos.isEmpty()){
-			for(Boleto boleto:boletos){
+		if (boletos != null && !boletos.isEmpty()) {
+			for (Boleto boleto : boletos) {
 				calendar.setTime(boleto.getVencimento());
 				int anoBoleto = calendar.get(Calendar.YEAR);
-				if(anoBoleto == anoRematricula){
+				if (anoBoleto == anoRematricula) {
 					retorno = true;
 				}
 			}
-		}else{
+		} else {
 			retorno = false;
 		}
 		return retorno;
@@ -1024,9 +1030,9 @@ public class AlunoService extends Service {
 	private boolean todosBoletosBaixados(List<Boleto> boletos) {
 		boolean todosBaixados = true;
 		for (Boleto bol : boletos) {
-			if( !(bol.getBaixaGerada() != null && bol.getBaixaGerada())){
-				if(!(bol.getBaixaManual() != null && bol.getBaixaManual())){
-					if(!(bol.getConciliacaoPorExtrato() != null && bol.getConciliacaoPorExtrato())){
+			if (!(bol.getBaixaGerada() != null && bol.getBaixaGerada())) {
+				if (!(bol.getBaixaManual() != null && bol.getBaixaManual())) {
+					if (!(bol.getConciliacaoPorExtrato() != null && bol.getConciliacaoPorExtrato())) {
 						if (!(bol.getValorPago() != null && bol.getValorPago() > 0)) {
 							todosBaixados = false;
 						}
@@ -1036,7 +1042,6 @@ public class AlunoService extends Service {
 		}
 		return todosBaixados;
 	}
-
 
 	private boolean irmaoJaTemBoleto(Aluno aluno) {
 		Aluno irmao1 = aluno.getIrmao1();
@@ -1073,12 +1078,12 @@ public class AlunoService extends Service {
 
 	public List<Boleto> gerarBoletos(Aluno user, ContratoAluno contrato, boolean setUser) {
 		contrato = findContratoById(contrato.getId());
-		List<Boleto> boletos = gerarBoletos(user,contrato);
+		List<Boleto> boletos = gerarBoletos(user, contrato);
 		contrato.setBoletos(boletos);
 		em.persist(contrato);
 		return boletos;
 	}
-	
+
 	private void salvarIrmaos(Aluno aluno, Aluno unMerge) {
 		Aluno irmao1 = unMerge.getIrmao1();
 		boolean tem1Irmao = irmao1 != null ? true : false;
@@ -1203,7 +1208,6 @@ public class AlunoService extends Service {
 			irmao4.setIrmao1(aluno);
 		}
 	}
-
 
 	private void salvarIrmaos(Aluno aluno, Aluno unMerge, ContratoAluno contrato) {
 		Aluno irmao1 = unMerge.getIrmao1();
@@ -1544,11 +1548,11 @@ public class AlunoService extends Service {
 			Query q = em.createQuery(criteria);
 			q.setFirstResult(first);
 			q.setMaxResults(size);
-			List<Aluno> alunos =  (List<Aluno>)q.getResultList();
-			for(Aluno al : alunos){
+			List<Aluno> alunos = (List<Aluno>) q.getResultList();
+			for (Aluno al : alunos) {
 				carregarLazyCarro(al);
 				carregarLazyContrato(al);
-				
+
 			}
 			return alunos;
 
@@ -1561,9 +1565,9 @@ public class AlunoService extends Service {
 	}
 
 	private void carregarLazyContrato(Aluno al) {
-		if(al.getContratosSux() != null){
+		if (al.getContratosSux() != null) {
 			al.getContratosSux().size();
-			for(ContratoAluno c: al.getContratosSux()){
+			for (ContratoAluno c : al.getContratosSux()) {
 				c.getBoletos().size();
 			}
 		}
@@ -2141,9 +2145,9 @@ public class AlunoService extends Service {
 		rematriculado.setRemovido(false);
 		rematriculado.getContratoVigente().setCnabEnviado(false);
 		em.merge(rematriculado);
-		
+
 	}
-	
+
 	public List<Aluno> findAlunoTrocaNoite(Long idCarro, Long idCarroTroca) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT distinct(al)  from Aluno al ");
@@ -2193,28 +2197,29 @@ public class AlunoService extends Service {
 
 	public List<Aluno> findAluno(String nome, String nomeResponsavel, String cpf, String numeroDocumento) {
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT distinct(al) from  Boleto bol ");
-		sql.append("left join bol.pagador al ");
+		sql.append("SELECT distinct(cont) from  Boleto bol ");
+		sql.append("left join bol.contrato cont ");
+		
 		sql.append("where 1=2 ");
 		if (nome != null && !nome.equalsIgnoreCase("")) {
-			sql.append(" or al.nomeAluno like '%");
+			sql.append(" or cont.aluno.nomeAluno like '%");
 			sql.append(nome);
 			sql.append("%' ");
 		} else {
 
 		}
 		if (nomeResponsavel != null && !nomeResponsavel.equalsIgnoreCase("")) {
-			sql.append(" or al.nomeResponsavel like '%");
+			sql.append(" or cont.nomeResponsavel like '%");
 			sql.append(nomeResponsavel);
 			sql.append("%' ");
 		}
 
 		if (cpf != null && !cpf.equalsIgnoreCase("")) {
-			sql.append(" or al.cpfResponsavel like '%");
+			sql.append(" or cont.cpfResponsavel like '%");
 			sql.append(cpf);
 			sql.append("%' ");
 		}
-		
+
 		if (numeroDocumento != null && !numeroDocumento.equalsIgnoreCase("")) {
 			sql.append(" or bol.nossoNumero = ");
 			sql.append(numeroDocumento);
@@ -2223,14 +2228,28 @@ public class AlunoService extends Service {
 		Query query = em.createQuery(sql.toString());
 
 		@SuppressWarnings("unchecked")
-		List<Aluno> alunos = query.getResultList();
-		for (Aluno al : alunos) {
-			carregarLazyContrato(al);
+		List<ContratoAluno> cas = query.getResultList();
+		List<Aluno> alunos = new ArrayList<>();
+		for (ContratoAluno ca : cas) {
+			ca.getId();
+			ca.getBoletos().size();	
+			for(Boleto b : ca.getBoletos()){
+				b.getId();
+			}
+			for(ContratoAluno casac : ca.getAluno().getContratos()){
+				casac.getId();
+				casac.getBoletos().size();
+			}
+			ca.getAluno();
+			ca.getAluno().setNomeResponsavel(ca.getNomeResponsavel());
+			ca.getAluno().setCpfResponsavel(ca.getCpfResponsavel());
+			alunos.add(ca.getAluno());
+			
 		}
 
 		return alunos;
 	}
-	
+
 	public void removerCnabEnviado(Long id) {
 		Aluno aluno = findById(id);
 		aluno.getContratoVigente().setCnabEnviado(false);
@@ -2258,14 +2277,15 @@ public class AlunoService extends Service {
 	public void removerBoleto(Long idBoleto) {
 		Boleto b = findBoletoById(idBoleto);
 		b.setManterAposRemovido(false);
-		b.setDataPagamento(new Date());;
+		b.setDataPagamento(new Date());
+		;
 		b.setValorPago((double) 0);
 		em.merge(b);
 	}
-	
+
 	public void manterBoleto(Long idBoleto) {
 		Boleto b = findBoletoById(idBoleto);
-		
+
 		b.setManterAposRemovido(true);
 		b.setCancelado(false);
 		em.merge(b);
@@ -2278,11 +2298,12 @@ public class AlunoService extends Service {
 			Root<Aluno> member = criteria.from(Aluno.class);
 
 			Predicate whereBairroNulo = cb.isNull(member.get("bairroAluno"));
-			Predicate whereRemovido = cb.equal(member.get("removido"), false);;
-			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"), configuracaoService.getConfiguracao().getAnoLetivo());
-			criteria.select(member).where(whereBairroNulo, whereRemovido,whereAnoLetivo);
-			
-			
+			Predicate whereRemovido = cb.equal(member.get("removido"), false);
+			;
+			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"),
+					configuracaoService.getConfiguracao().getAnoLetivo());
+			criteria.select(member).where(whereBairroNulo, whereRemovido, whereAnoLetivo);
+
 			criteria.select(member).orderBy(cb.asc(member.get("codigo")));
 			return em.createQuery(criteria).getResultList().get(0);
 
@@ -2295,39 +2316,40 @@ public class AlunoService extends Service {
 	}
 
 	public Aluno adicionarContrato(Aluno aluno, ContratoAluno novoContrato) {
-		if(aluno.getAnoLetivo() == 0){
+		if (aluno.getAnoLetivo() == 0) {
 			aluno.setAnoLetivo(configuracaoService.getConfiguracao().getAnoLetivo());
 		}
-		if(aluno.getId() != null){
+		if (aluno.getId() != null) {
 			aluno = findById(aluno.getId());
-		}else{
+		} else {
 			saveAluno(aluno, true);
 		}
 		novoContrato.setAluno(aluno);
 		em.persist(novoContrato);
-		List<ContratoAluno> contratos =aluno.getContratos();
-		if(contratos == null){
+		List<ContratoAluno> contratos = aluno.getContratos();
+		if (contratos == null) {
 			contratos = new ArrayList<>();
 		}
 		contratos.add(novoContrato);
 		aluno.setContratos(contratos);
 		em.merge(aluno);
 		return aluno;
-		
+
 	}
-	
+
 	public Aluno findAlunoBairro(int indice) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Aluno> criteria = cb.createQuery(Aluno.class);
 			Root<Aluno> member = criteria.from(Aluno.class);
 
-			Predicate whereBairro = cb.equal(member.get("bairroAluno"),BairroEnum.PACHECOS);
-			Predicate whereRemovido = cb.equal(member.get("removido"), false);;
-			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"), configuracaoService.getConfiguracao().getAnoLetivo());
-			criteria.select(member).where(whereBairro, whereRemovido,whereAnoLetivo);
-			
-			
+			Predicate whereBairro = cb.equal(member.get("bairroAluno"), BairroEnum.PACHECOS);
+			Predicate whereRemovido = cb.equal(member.get("removido"), false);
+			;
+			Predicate whereAnoLetivo = cb.equal(member.get("anoLetivo"),
+					configuracaoService.getConfiguracao().getAnoLetivo());
+			criteria.select(member).where(whereBairro, whereRemovido, whereAnoLetivo);
+
 			criteria.select(member).orderBy(cb.asc(member.get("codigo")));
 			return em.createQuery(criteria).getResultList().get(indice);
 
@@ -2338,21 +2360,21 @@ public class AlunoService extends Service {
 			return new Aluno();
 		}
 	}
-	
+
 	public ContratoAluno criarBoletos(Aluno aluno, short ano, Integer numeroParcelas, ContratoAluno contrato) {
-		int numPa = 12 -contrato.getNumeroParcelas();
+		int numPa = 12 - contrato.getNumeroParcelas();
 		contrato = findContratoById(contrato.getId());
 		em.persist(contrato);
 		List<Boleto> boletos = this.gerarBoletos(aluno, ano, numPa, contrato);
-		contrato.setBoletos(boletos);	
+		contrato.setBoletos(boletos);
 		return contrato;
 	}
-	
+
 	public void remover(Aluno aluno) {
-		for(Boleto b : aluno.getBoletos()){
-			if(b.getManterAposRemovido() != null && b.getManterAposRemovido()){
+		for (Boleto b : aluno.getBoletos()) {
+			if (b.getManterAposRemovido() != null && b.getManterAposRemovido()) {
 				manterBoleto(b.getId());
-			}else{
+			} else {
 				removerBoleto(b.getId());
 			}
 		}
@@ -2362,7 +2384,7 @@ public class AlunoService extends Service {
 
 	public ContratoAluno saveContrato(ContratoAluno contrato) {
 		ContratoAluno c = new ContratoAluno();
-		if(contrato.getId() != null){
+		if (contrato.getId() != null) {
 			c = findContratoById(contrato.getId());
 		}
 		c.setAno(contrato.getAno());
@@ -2387,43 +2409,42 @@ public class AlunoService extends Service {
 		c.setEnviadoSPC(contrato.getEnviadoSPC());
 		c.setEnviadoParaCobrancaCDL(contrato.getEnviadoSPC());
 		c.setEndereco(contrato.getEndereco());
-		
+
 		String ano = String.valueOf(contrato.getAno());
-		String finalANo = ano.substring(ano.length()-2 , ano.length());
+		String finalANo = ano.substring(ano.length() - 2, ano.length());
 		String numeroUltimoContrato = "01";
 		int numeroNovo = 1;
-		for(ContratoAluno contratt : contrato.getAluno().getContratos()){
-			if(contratt.getNumero() != null && !contratt.getNumero().equalsIgnoreCase("")){
-				if(contratt.getAno() == contrato.getAno() ){
-					if(contrato.getId() != null && contrato.getId() != contratt.getId() ){
+		for (ContratoAluno contratt : contrato.getAluno().getContratos()) {
+			if (contratt.getNumero() != null && !contratt.getNumero().equalsIgnoreCase("")) {
+				if (contratt.getAno() == contrato.getAno()) {
+					if (contrato.getId() != null && contrato.getId() != contratt.getId()) {
 						String numeroContratt = contratt.getNumero();
-						numeroContratt = numeroContratt.substring(numeroContratt.length()-2 , numeroContratt.length());
-						if(Integer.parseInt(numeroContratt) > Integer.parseInt(numeroUltimoContrato) ){
+						numeroContratt = numeroContratt.substring(numeroContratt.length() - 2, numeroContratt.length());
+						if (Integer.parseInt(numeroContratt) > Integer.parseInt(numeroUltimoContrato)) {
 							numeroUltimoContrato = numeroContratt;
-						}	
+						}
 						numeroNovo = Integer.parseInt(numeroUltimoContrato);
-						numeroNovo++; 
+						numeroNovo++;
 					}
-					
+
 				}
-				
+
 				numeroUltimoContrato = String.valueOf(numeroNovo);
-			}	
+			}
 		}
-		
-		String numero = finalANo + contrato.getAluno().getCodigo()+"0"+numeroUltimoContrato;
+
+		String numero = finalANo + contrato.getAluno().getCodigo() + "0" + numeroUltimoContrato;
 		c.setNumero(numero);
-	
 
 		em.merge(c);
 		return c;
 	}
 
 	public void removerContrato(ContratoAluno contrat) {
-		for(Boleto b : contrat.getBoletos()){
-			if(b.getManterAposRemovido() != null && b.getManterAposRemovido()){
+		for (Boleto b : contrat.getBoletos()) {
+			if (b.getManterAposRemovido() != null && b.getManterAposRemovido()) {
 				manterBoleto(b.getId());
-			}else{
+			} else {
 				removerBoleto(b.getId());
 			}
 		}
@@ -2433,13 +2454,184 @@ public class AlunoService extends Service {
 		contratoPersistence.setCancelado(true);
 		contratoPersistence.setAluno(al);
 		contratoPersistence.setBoletos(contrat.getBoletos());
-		try{
+		try {
 			em.merge(contratoPersistence);
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 			em.persist(contratoPersistence);
 		}
 	}
+
+	public void cancelarAlunosSemContratoAtivo() {
+		for (Aluno al : findAll()) {
+			if (!temContratoAtivo(al)) { 
+				if(al.getIrmao1() != null && temContratoAtivo(al.getIrmao1())){
+				}else if(al.getIrmao2() != null && temContratoAtivo(al.getIrmao2())){
+				}else{
+					cancelar(al);
+				}
+			}
+		}
+	}
 	
-		
+	public boolean temContratoAtivo(Aluno al){
+		boolean ativo = false;
+		if (al.getContratosSux() != null) {
+			for (ContratoAluno ca : al.getContratosSux()) {
+
+				if (ca.getCancelado() == null || !ca.getCancelado()) {
+					if (Verificador.possuiBoletoAberto(ca)) {
+						ativo = true;
+					}
+				}
+			}
+		}
+		return ativo;
+	}
+
+	private void cancelar(Aluno al) {
+		Aluno ap = findById(al.getId());
+		if (ap.getRemovido() == null || !ap.getRemovido()) {
+			ap.setDataCancelamento(new Date());
+			ap.setRemovido(true);
+			em.merge(ap);
+		}
+	}
+
+	public void saveContactado(Aluno al) {
+		Aluno ap = findById(al.getId());
+
+		ap.setDataContato(al.getDataContato());
+		ap.setContactado(al.getContactado());
+		ap.setQuantidadeContatos(al.getQuantidadeContatos());
+		ap.setObservacaoAtrasado(al.getObservacaoAtrasado());
+		ap.setDataPrometeuPagar(al.getDataPrometeuPagar());
+		em.merge(ap);
+	}
+
+	public void colocarAlunosNaListaDeCobranca() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 15);
+		Date diaAtualMais15 = calendar.getTime();
+
+		boolean contactado = true;
+		for (Aluno al : findAll()) {
+			contactado = true;
+
+			if ((al.getDataContato() != null && al.getDataContato().after(diaAtualMais15))
+					|| (al.getDataPrometeuPagar() != null && al.getDataPrometeuPagar().after(new Date()))) {
+				if (al.getContactado() != null && al.getContactado()) {
+					contactado = false;
+				}
+			}
+			if (!contactado) { 
+				desconectado(al);
+			}
+		}
+	}
+
+	private void desconectado(Aluno al) {
+		Aluno ap = findById(al.getId());
+		ap.setContactado(false);
+		em.merge(ap);
+	}
+	
+	public String enviarBoletoEmail(long idContrato, int mesBoletoInt,String email) {
+		mesBoletoInt+=1;
+		Boleto bol = getBoletoMe(mesBoletoInt, idContrato);
+		byte[] anexoPDF = byteArrayPDFBoleto(getBoletoFinanceiro(bol), bol.getPagador(), bol.getContrato());
+		String corpoEmail = "<!DOCTYPE html><html><body><p><h2><center>Transporte Escolar Favo de Mel.</center></h2><center>"
+				+ "<a href=\"https://ibb.co/YkYrnBd\"><img src=\"https://i.ibb.co/1qhSyGX/logo-tefamel-512-X512.png\" "
+				+ "alt=\"logo\" border=\"0\" style=\"width:192px;height:192px;border:0;\" ></a><br/><br/></center>Prezado(a) #nomeResponsavel,"
+				+ "<br/><p><br/><br/>Você esta recebendo o seu boleto do transporte escolar Favo de Mel referente ao mês de <b><font size=\"2\" color=\"blue\"> #mesBoleto</font>"
+				+ "</b> .<h3><center><font size=\"3\" color=\"blue\">Resumo da conta</font></center>"
+				+ "</h3>Vencimento  :<font size=\"3\" color=\"blue\"> #vencimentoBoleto</font>"
+				+ "<br/>Valor       :<font size=\"3\" color=\"blue\"> #valorAtualBoleto</font><br/><br/><br/><br/><center><h4>"
+				+ "<font size=\"3\" color=\"red\"> Caso já tenha efetuado o pagamento favor desconsiderar esse e-mail. </font></h4></center></p><br/>"
+				+ "<a href=\"href=https://ibb.co/BsLmfg1\"><img src=\"https://i.ibb.co/s3jhgFB/assinatura-Tefamel.png\" alt=\"assinatura_Email\" border=\"0\" "
+				+ "style=\"width:365px;height:126px;border:0;\"></a></body></html>";
+		corpoEmail = corpoEmail.replace("#vencimentoBoleto", org.escolar.util.Formatador.formataData(bol.getVencimento()));
+		corpoEmail = corpoEmail.replace("#valorAtualBoleto", org.escolar.util.Formatador.valorFormatado(Verificador.getValorFinal(bol)));
+		corpoEmail = corpoEmail.replace("#nomeResponsavel", bol.getContrato().getNomeResponsavel());
+		corpoEmail = corpoEmail.replace("#mesBoleto", org.escolar.util.Formatador.getMes(bol.getVencimento()));
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(anexoPDF);
+		org.aaf.financeiro.util.EnviadorEmail.enviarEmail("Boleto - Tefamel", corpoEmail, bais, email,
+				org.escolar.rotinasAutomaticas.CONSTANTES.emailFinanceiro, org.escolar.rotinasAutomaticas.CONSTANTES.senhaEmailFinanceiro);
+		return null;
+	}
+	
+	public byte[] byteArrayPDFBoleto(org.aaf.financeiro.model.Boleto boleto, Aluno aluno, ContratoAluno contrato) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(boleto.getVencimento());
+		CNAB240_SICOOB cnab = new CNAB240_SICOOB(2);
+
+		Pagador pagador = new Pagador();
+		pagador.setBairro(contrato.getBairro());
+		pagador.setCep(contrato.getCep());
+		pagador.setCidade(contrato.getCidade() != null ? contrato.getCidade() : "PALHOCA");
+		pagador.setCpfCNPJ(contrato.getCpfResponsavel());
+		pagador.setEndereco(contrato.getEndereco());
+		pagador.setNome(contrato.getNomeResponsavel());
+		pagador.setNossoNumero(boleto.getNossoNumero() + "");
+		pagador.setUF("SC");
+		List<org.aaf.financeiro.model.Boleto> boletos = new ArrayList<>();
+		boletos.add(boleto);
+		pagador.setBoletos(boletos);
+
+		byte[] pdf = cnab.getBoletoPDF(pagador);
+
+		return pdf;
+	}
+	
+	private org.aaf.financeiro.model.Boleto getBoletoFinanceiro(Boleto boleto) {
+		org.aaf.financeiro.model.Boleto boletoFinanceiro = new org.aaf.financeiro.model.Boleto();
+		boletoFinanceiro.setEmissao(boleto.getEmissao());
+		boletoFinanceiro.setId(boleto.getId());
+		boletoFinanceiro.setValorNominal(boleto.getValorNominal());
+		boletoFinanceiro.setVencimento(boleto.getVencimento());
+		boletoFinanceiro.setNossoNumero(String.valueOf(boleto.getNossoNumero()));
+		boletoFinanceiro.setDataPagamento(OfficeUtil.retornaDataSomenteNumeros(boleto.getDataPagamento()));
+		boletoFinanceiro.setValorPago(boleto.getValorPago());
+		return boletoFinanceiro;
+	}
+	
+	public Boleto getBoletoMe(int mes, long idContrato) {
+		if (mes >= 0) {
+			try {
+				Calendar c = Calendar.getInstance();
+				c.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, 1, 0, 0, 0);
+				Calendar c2 = Calendar.getInstance();
+				c2.set(configuracaoService.getConfiguracao().getAnoLetivo(), mes, c.getMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT bol from Boleto bol ");
+				sql.append("where 1=1 ");
+				sql.append(" and bol.vencimento >= '");
+				sql.append(c.getTime());
+				sql.append("'");
+				sql.append(" and bol.vencimento < '");
+				sql.append(c2.getTime());
+				sql.append("'");
+				sql.append(" AND bol.pagador.removido = false ");
+				sql.append(" AND (bol.cancelado = false ");
+				sql.append(" or  bol.cancelado = null ) ");
+				sql.append(" AND bol.contrato.id =  ");
+				sql.append(idContrato);
+				
+				System.out.println("QUERY:" + sql.toString());
+				Query query = em.createQuery(sql.toString());
+				Boleto boleto = (Boleto) query.getSingleResult();
+				System.out.println("Boleto:" + boleto);
+				
+				return boleto;
+
+			} catch (NoResultException nre) {
+				return null;
+			}
+		}
+		return null;
+
+	}
+
 }

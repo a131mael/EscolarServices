@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.aaf.financeiro.util.OfficeUtil;
 
+
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
@@ -42,8 +43,8 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 	private Long id;
 
 	@Column
-	private Date vencimento;
 
+	private Date vencimento;
 	@ManyToOne
 	private ContratoAluno contrato;
 
@@ -94,6 +95,9 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	@Column
 	private Boolean cnabEnviado;
+	
+	@Column
+    private Boolean protestado;
 	
 	public Long getId() {
 		return id;
@@ -268,6 +272,14 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	public void setCnabCanceladoEnviado(Boolean cnabCanceladoEnviado) {
 		this.cnabCanceladoEnviado = cnabCanceladoEnviado;
+	}
+
+	public Boolean getProtestado() {
+		return protestado;
+	}
+
+	public void setProtestado(Boolean protestado) {
+		this.protestado = protestado;
 	}
 
 }

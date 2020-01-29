@@ -102,27 +102,33 @@ public class TabelaPrecoService extends Service {
 	public double getValor(int mesMatricula, Aluno aluno){
 		TabelaPrecos tp = find(aluno.getBairroAluno(), aluno.getEscola().getBairroEnum());
 		if(tp == null){
-			tp = find(aluno.getEscola().getBairroEnum(),aluno.getBairroAluno());
+			try{
+				tp = find(aluno.getEscola().getBairroEnum(),aluno.getBairroAluno());
+			}catch(Exception e){
+				
+			}
 		}
 		double valor = 0;
 		if(aluno.getEscola().equals(EscolaEnum.ADONAI)){
-			valor -=40;
+			valor -=30;
 		}
-		
-		switch (mesMatricula) {
-		case 1:
-			valor+= tp.getValorJaneiro();
-			break;
-		case 2:
-			valor+= tp.getValorFevereiro();
-			break;
-		case 3:
-			valor+= tp.getValorMarco();
-			break;
-
-		default:
-			valor+= tp.getValorMarco();
-			break;
+		if(tp != null){
+			switch (mesMatricula) {
+			case 1:
+				valor+= tp.getValorJaneiro();
+				break;
+			case 2:
+				valor+= tp.getValorFevereiro();
+				break;
+			case 3:
+				valor+= tp.getValorMarco();
+				break;
+				
+			default:
+				valor+= tp.getValorMarco();
+				break;
+			}
+			
 		}
 		return valor;
 	}
