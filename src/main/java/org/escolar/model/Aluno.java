@@ -108,6 +108,9 @@ public class Aluno implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Aluno irmao4;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Empresa empresa;
+	
 	@Column
 	private Boolean verificadoOk;
 
@@ -1263,15 +1266,53 @@ public class Aluno implements Serializable {
 		ContratoAluno contratoAtivo = null;
 		if (contratos != null) {
 			for (ContratoAluno contrato : contratos) {
-				if (contrato.isContratoAtivo()) {
-					contratoAtivo = contrato;
+				if ((contrato.getCancelado() == null || !contrato.getCancelado() )) {
+					
+					if(contratoAtivo != null && contrato.getDataCriacaoContrato().after(contratoAtivo.getDataCriacaoContrato())){
+						contratoAtivo = contrato;
+					}else if(contratoAtivo == null){
+						contratoAtivo = contrato;
+					}
 				}
+			}
+		}
+		
+		if(contratoAtivo == null){
+			if(contratos != null){
+				return contratos.get(0);
 			}
 		}
 
 		return contratoAtivo;
 	}
 
+	public ContratoAluno getContratoVigente(int anoLetivo) {
+		ContratoAluno contratoAtivo = null;
+		if (contratos != null) {
+			for (ContratoAluno contrato : contratos) {
+				if ((contrato.getCancelado() == null || !contrato.getCancelado() )) {
+					
+					if(contratoAtivo != null 
+							&& contrato.getDataCriacaoContrato().after(contratoAtivo.getDataCriacaoContrato())
+							&& contrato.getAno() == anoLetivo){
+						contratoAtivo = contrato;
+					}else if(contratoAtivo == null && contrato.getAno() == anoLetivo ){
+						contratoAtivo = contrato;
+					}
+				}
+			}
+		}
+		
+		if(contratoAtivo == null){
+			if(contratos != null && contratos.size() > 0){
+				return contratos.get(0);
+			}
+		}
+
+		return contratoAtivo;
+	}
+
+	
 	public List<ContratoAluno> getContratosVigentes() {
 		List<ContratoAluno> contratosAtivo = new ArrayList<>();
 		for (ContratoAluno contrato : contratos) {
@@ -1281,6 +1322,8 @@ public class Aluno implements Serializable {
 		}
 		return contratosAtivo;
 	}
+	
+	
 
 	public ContratoAluno getUltimoContrato() {
 		ContratoAluno conts = null;

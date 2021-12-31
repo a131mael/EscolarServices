@@ -18,38 +18,45 @@ package org.escolar.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
-public class Configuracao implements Serializable {
+public class Filial implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column
-    private int anoLetivo;
+    @NotNull
+    @Size(min = 1, max = 250)
+    private String nome;
     
-    @Column
-    private Short anoRematricula;
+    @ManyToOne
+    private Empresa empresa; 
+   
+    private boolean matriz;
     
-    @Column
-    private long sequencialArquivoCNAB;
+    private String codigo;
     
-    @Transient
-    private double valorNotas;
-    
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -58,38 +65,49 @@ public class Configuracao implements Serializable {
 		this.id = id;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		
+		Filial other = (Filial) obj;
+		if (nome == null) {
+			if (other.nome != null)
+				return false;
+		} 
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		
+		return true;
 
-	public int getAnoLetivo() {
-		return anoLetivo;
+	}
+	
+	@Override
+	public String toString() {
+		return nome;
 	}
 
-
-	public void setAnoLetivo(int anoLetivo) {
-		this.anoLetivo = anoLetivo;
+	public boolean isMatriz() {
+		return matriz;
 	}
 
-	public long getSequencialArquivoCNAB() {
-		return sequencialArquivoCNAB;
+	public void setMatriz(boolean matriz) {
+		this.matriz = matriz;
 	}
 
-	public void setSequencialArquivoCNAB(long sequencialArquivoCNAB) {
-		this.sequencialArquivoCNAB = sequencialArquivoCNAB;
+	public String getCodigo() {
+		return codigo;
 	}
 
-	public Short getAnoRematricula() {
-		return anoRematricula;
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
 	}
-
-	public void setAnoRematricula(Short anoRematricula) {
-		this.anoRematricula = anoRematricula;
-	}
-
-	public double getValorNotas() {
-		return valorNotas;
-	}
-
-	public void setValorNotas(double valorNotas) {
-		this.valorNotas = valorNotas;
-	}
-
+		
 }

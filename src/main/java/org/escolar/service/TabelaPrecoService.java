@@ -99,11 +99,11 @@ public class TabelaPrecoService extends Service {
 		return user;
 	}
 
-	public double getValor(int mesMatricula, Aluno aluno){
-		TabelaPrecos tp = find(aluno.getBairroAluno(), aluno.getEscola().getBairroEnum());
+	public double getValor(int mesMatricula, Aluno aluno, int anoRematricula){
+		TabelaPrecos tp = find(aluno.getBairroAluno(), aluno.getEscola().getBairroEnum(),anoRematricula);
 		if(tp == null){
 			try{
-				tp = find(aluno.getEscola().getBairroEnum(),aluno.getBairroAluno());
+				tp = find(aluno.getEscola().getBairroEnum(),aluno.getBairroAluno(),anoRematricula);
 			}catch(Exception e){
 				
 			}
@@ -133,7 +133,7 @@ public class TabelaPrecoService extends Service {
 		return valor;
 	}
 	
-	public TabelaPrecos find(BairroEnum bairroCrianca, BairroEnum bairroEscola) {
+	public TabelaPrecos find(BairroEnum bairroCrianca, BairroEnum bairroEscola, int anoRematricula) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<TabelaPrecos> criteria = cb.createQuery(TabelaPrecos.class);
@@ -146,7 +146,7 @@ public class TabelaPrecoService extends Service {
 			StringBuilder sb = new StringBuilder();
 			whereSerie = cb.equal(member.get("bairroCrianca"), bairroCrianca);
 			wherePeriodo = cb.equal(member.get("bairroEscola"), bairroEscola);
-			whereAno = cb.equal(member.get("ano"), "2019");
+			whereAno = cb.equal(member.get("ano"), anoRematricula);
 
 			criteria.select(member).where(whereSerie, wherePeriodo,whereAno);
 			

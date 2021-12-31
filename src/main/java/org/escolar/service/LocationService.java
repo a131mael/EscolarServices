@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -77,6 +78,7 @@ public class LocationService extends Service {
 	}
 
 	public LocationDTO saveCar(LocationDTO loc) {
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
 		Localizacao m = null;
 		
 		if (loc != null && loc.getAndroidID() != null  ) {

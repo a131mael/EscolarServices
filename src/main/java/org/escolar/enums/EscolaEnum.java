@@ -66,7 +66,13 @@ public enum EscolaEnum {
 	
 	RAIZES("Raizes","Bela Vista",BairroEnum.BELA_VISTA),
 	
-	CIRANDA_COLORIDA("Ciranda Colorida","Pachecos",BairroEnum.PACHECOS);
+	CIRANDA_COLORIDA("Ciranda Colorida","Pachecos",BairroEnum.PACHECOS),
+	
+	COLEGIO_MILITAR("Colégio Militar","Bela Vista",BairroEnum.BELA_VISTA),
+	
+	SESC("SESC","Ponte Imaruim",BairroEnum.Ponte_IMARUIM),
+	
+	EDUCARE("Centro Educacional Educare","Centro Palhoça",BairroEnum.PALHOCA_CENTRO);
 	
 	
 	private String name;

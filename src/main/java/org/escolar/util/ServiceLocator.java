@@ -11,6 +11,7 @@ import javax.naming.NamingException;
 
 import org.escolar.service.AlunoService;
 import org.escolar.service.FinanceiroService;
+import org.escolar.service.LocationRotaService;
 import org.escolar.service.LocationService;
 import org.escolar.service.MemberRegistration;
 
@@ -72,6 +73,16 @@ public class ServiceLocator {
                             + simpleNameImpl +"!"  + nameInterface);
 
         return (LocationService) ejbHome2;
+    }
+    
+    public LocationRotaService getLocationRotaService(String simpleNameImpl, String nameInterface) throws NamingException {
+		Constant c = new Constant();
+	
+		Object ejbHome2 = (Object) jndiContext.lookup(c.getContextoGlobalEJB() + c.getBarra() 
+                            + c.getProjeto() + c.getBarra() 
+                            + simpleNameImpl +"!"  + nameInterface);
+
+        return (LocationRotaService) ejbHome2;
     }
     
     public AlunoService getAlunoService(String simpleNameImpl, String nameInterface) throws NamingException {

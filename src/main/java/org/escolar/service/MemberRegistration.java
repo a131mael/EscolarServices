@@ -95,6 +95,39 @@ public class MemberRegistration {
 		}
 	}
     
+    public MemberDTO findMemberDTO(String login, String senha){
+    	Member member = null;
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT m from Member m ");
+		sql.append("where (m.login = '");
+		sql.append(login);
+		sql.append("' or m.email = '");
+		sql.append(login);
+		sql.append("' ) and m.senha = '");
+		sql.append(senha);
+		sql.append("'");
+		
+		Query query = em.createQuery(sql.toString());
+		 
+		System.out.println("--------------" + query);
+		try{
+			member = (Member) query.getSingleResult();
+		}catch (NoResultException ne) {
+			System.out.println(ne);
+		}catch (NonUniqueResultException nure) {
+			System.out.println(nure);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("--------------" + member);
+		if(member == null){
+			return null;
+		}
+		System.out.println("--------------" + member.getDTO());
+    	return member.getDTO();
+    }
+    
     public Member findById(EntityManager em, Long id) {
 		return em.find(Member.class, id);
 	}

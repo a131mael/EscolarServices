@@ -10,9 +10,11 @@ C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\esc
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\RelatorioService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSServiceProxy.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Boleto.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\LocationRotaService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\util\ServiceLocator.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\MemberRegistration.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\BimestreEnum.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\LocalizacaoRota.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\RecadoService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConsumidorEndereco.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\TipoEventoEnum.java

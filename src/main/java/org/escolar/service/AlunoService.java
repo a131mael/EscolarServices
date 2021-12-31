@@ -85,6 +85,32 @@ public class AlunoService extends Service {
 
 		return alunos;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunoDoAnoLetivoComLzyContrato() {
+		List<Aluno> alunos = new ArrayList<>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT al from  Aluno al ");
+		sql.append("where 1=1 ");
+		sql.append(" and al.removido = false ");
+		sql.append(" and al.anoLetivo = ");
+		sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
+		Query query = em.createQuery(sql.toString());
+
+		alunos = query.getResultList();
+		List<Aluno> alunos2 = new ArrayList<>();
+		for(Aluno al :alunos){
+			if(al.getContratos() != null){
+				for(ContratoAluno c : al.getContratos()){
+					c.getId();
+					c.getBoletos().size();
+				}
+			}
+			alunos2.add(al);
+		}
+		return alunos2;
+	}
 
 	public ContratoAluno findContratoById(Long id) {
 		ContratoAluno contrato = em.find(ContratoAluno.class, id);
@@ -1341,6 +1367,12 @@ public class AlunoService extends Service {
 		em.persist(al);
 		return "ok";
 	}
+	
+	public void setNfsEnviada(Long idBoleto) {
+		Boleto bol = findBoletoById(idBoleto);
+		bol.setNfsEnviada(true);
+		em.persist(bol);
+	}
 
 	public String restaurar(Long idAluno) {
 		Aluno al = findById(idAluno);
@@ -2564,7 +2596,7 @@ public class AlunoService extends Service {
 	public byte[] byteArrayPDFBoleto(org.aaf.financeiro.model.Boleto boleto, Aluno aluno, ContratoAluno contrato) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(boleto.getVencimento());
-		CNAB240_SICOOB cnab = new CNAB240_SICOOB(2);
+		CNAB240_SICOOB cnab = new CNAB240_SICOOB(1);
 
 		Pagador pagador = new Pagador();
 		pagador.setBairro(contrato.getBairro());
@@ -2627,6 +2659,10 @@ public class AlunoService extends Service {
 				return boleto;
 
 			} catch (NoResultException nre) {
+				System.out.println(nre);
+				return null;
+			}catch (Exception e) {
+				System.out.println(e);
 				return null;
 			}
 		}

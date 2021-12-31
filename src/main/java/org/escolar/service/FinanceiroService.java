@@ -1,7 +1,11 @@
 package org.escolar.service;
 
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +31,8 @@ public class FinanceiroService extends Service {
 	@PersistenceContext(unitName = "EscolarDS")
 	private EntityManager em;
 
+	@Inject
+	private AlunoService alunoService;
 	
 	@Inject
 	private ConfiguracaoService configuracaoService;
@@ -146,11 +152,11 @@ public class FinanceiroService extends Service {
 	}
 
 	public double getPrevisto(int mes) {
-		if (mes >= 0) {
+		if (mes > 0) {
 			try {
-				Calendar c = Calendar.getInstance();
-				c.set(Calendar.MONTH, mes-1);
-				c.getActualMaximum(Calendar.DAY_OF_MONTH);
+				Calendar c2 = Calendar.getInstance();
+				c2.set(Calendar.MONTH, 1);
+				c2.getActualMaximum(Calendar.DAY_OF_MONTH);
 				
 				StringBuilder sb = new StringBuilder();
 				sb.append(configuracaoService.getConfiguracao().getAnoLetivo());
@@ -163,7 +169,7 @@ public class FinanceiroService extends Service {
 				sb2.append("-");
 				sb2.append(mes);
 				sb2.append("-");
-				sb2.append(c.getActualMaximum(Calendar.DAY_OF_MONTH));
+				sb2.append(getUltimoDiaMes(mes));
 
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT sum(bol.valorNominal) from Boleto bol ");
@@ -179,6 +185,9 @@ public class FinanceiroService extends Service {
 
 				Query query = em.createQuery(sql.toString());
 				Double boleto = (Double) query.getSingleResult();
+				if(boleto == null){
+					return 0;
+				}
 				return boleto;
 			} catch (NoResultException nre) {
 				return 0D;
@@ -187,7 +196,38 @@ public class FinanceiroService extends Service {
 		return 0D;
 
 	}
+	
+	private int getUltimoDiaMes(int mes){
+		switch ( mes) {
+		case 1:
+			return 31;
+		case 2:
+			return 28;
+		case 3:
+			return 31;
+		case 4:
+			return 30;
+		case 5:
+			return 31;
+		case 6:
+			return 30;
+		case 7:
+			return 31;
+		case 8:
+			return 31;
+		case 9:
+			return 30;
+		case 10:
+			return 31;
+		case 11:
+			return 30;
+		case 12:
+			return 31;
 
+		default:
+			return 0;
+		}
+	}
 	
 	public int countContratos(int mes) {
 		if (mes >= 0) {
@@ -286,7 +326,7 @@ public class FinanceiroService extends Service {
 		}
 
 	}
-
+	
 	public long count(Map<String, Object> filtros) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -506,10 +546,220 @@ public class FinanceiroService extends Service {
 			
 			em.merge(bol);
 		}
-		
 	}
 
+	public int getQuantidadeBoletosAtrasadosPorMes(int mes){
+		StringBuilder sql = new StringBuilder();
+		sql.append("select count(*) from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id where ");
+		if(mes > 0){
+			sql.append(getIntervaloMes(mes));
+			sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		}else{
+			sql.append("  (bol.cancelado is null or bol.cancelado = false)");
+		}
+		sql.append(" and bol.datapagamento is null and (contrato.protestado is  null or contrato.protestado = false )");
+		Query query = em.createNativeQuery(sql.toString());
+		BigInteger codigo = (BigInteger) query.getSingleResult();
+		if(codigo == null){
+			return 0;
+		}
+		return codigo.intValue();
+	}
 	
+	public Double getValorBoletosAtrasadosPorMes(int mes){
+		StringBuilder sql = new StringBuilder();
+		sql.append("select sum(valornominal) from boleto bol  left join contratoaluno contrato on bol.contrato_id = contrato.id where ");
+		sql.append(getIntervaloMes(mes));
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		sql.append(" and bol.datapagamento is null and (contrato.protestado is  null or contrato.protestado = false ) ");
+		Query query = em.createNativeQuery(sql.toString());
+		Double codigo = (Double) query.getSingleResult();
+		if(codigo == null){
+			return 0d;
+		}
+		return codigo;
+	}
+	
+	public int getQuantidadeBoletosAtrasadosPorQuantidade(int quantidade){
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		final String hoje = df.format(new Date());
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("select sum(1) from ( ");
+		sql.append(" select sum(1) as quantidadeAtrasadas,pagador_id from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id ");
+		sql.append(" where ");
+		sql.append(" bol.vencimento >  '2021-01-01' and bol.vencimento < '");
+		sql.append(hoje);
+		sql.append("'");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		sql.append(" and bol.datapagamento is null and (contrato.protestado is  null or contrato.protestado = false ) group by pagador_id");
+		sql.append(" order by quantidadeAtrasadas) as buscaAtrasadas");
+		if(quantidade != 0){
+			sql.append(" where quantidadeAtrasadas  ");
+			if(quantidade > 6){
+				sql.append(" > ");
+				sql.append(quantidade-1);
+			}else{
+				sql.append(" = ");
+				sql.append(quantidade);	
+			}
+		}
+		
+		Query query = em.createNativeQuery(sql.toString());
+		BigInteger codigo = (BigInteger) query.getSingleResult();
+		if(codigo == null){
+			return 0;
+		}
+		return codigo.intValue();
+	}
+	
+	public int getQuantidadeBoletosAtrasados(){
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		final String hoje = df.format(new Date());
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("select sum(1) as quantidadeAtrasadas from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id  where	 bol.vencimento >  '2021-01-01'  ");
+		sql.append(" and bol.vencimento < '");
+		sql.append(hoje);
+		sql.append("'");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)	 and bol.datapagamento is null and (contrato.protestado is  null or contrato.protestado = false )");
+		
+		Query query = em.createNativeQuery(sql.toString());
+		BigInteger codigo = (BigInteger) query.getSingleResult();
+		if(codigo == null){
+			return 0;
+		}
+		return codigo.intValue();
+	}
+	
+	public Double getValorTotalAtrasado(){
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		final String hoje = df.format(new Date());
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("select sum(valornominal) as quantidadeAtrasadas from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id where	 bol.vencimento >  '2021-01-01'  ");
+		sql.append(" and bol.vencimento < '");
+		sql.append(hoje);
+		sql.append("'");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)	 and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false )");
+		
+		Query query = em.createNativeQuery(sql.toString());
+		Double codigo = (Double) query.getSingleResult();
+		if(codigo == null){
+			return 0d;
+		}
+		return codigo;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunoMes(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("select pagador_id from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id  where  ");
+			sql.append(getIntervaloMes((Integer)filtros.get("mesAtrasado")));
+			sql.append(" and (bol.cancelado is null or bol.cancelado = false)	 and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false )");
+			
+			Query query = em.createNativeQuery(sql.toString());
+			List<BigInteger> codigo = (List<BigInteger>) query.getResultList();
+			if(codigo == null){
+				return new ArrayList<>();
+			}
+			List<Aluno> alunos = new ArrayList<>();
+			for(BigInteger id : codigo){
+				alunos.add(alunoService.findById(id.longValue()));
+			}
+			
+			return alunos;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunoQuantidade(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
+		int quantidade = (Integer)filtros.get("quantidadeAtrasados");	
+		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		final String hoje = df.format(new Date());
+		
+		StringBuilder sql = new StringBuilder();
+		
+		sql.append("select pagador_id from (");
+		sql.append(" select sum(1) as quantidadeAtrasadas,pagador_id from boleto  bol left join contratoaluno contrato on bol.contrato_id = contrato.id ");
+		sql.append(" where ");
+		sql.append(" bol.vencimento >  '2021-01-01' and bol.vencimento < '");
+		sql.append(hoje);
+		sql.append("'");
+		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		sql.append(" and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false ) ");
+		sql.append(" group by pagador_id");
+		sql.append("  order by quantidadeAtrasadas) as buscaAtrasadas");
+		if(quantidade != 0){
+			sql.append(" where quantidadeAtrasadas  ");
+			if(quantidade > 6){
+				sql.append(" > ");
+				sql.append(quantidade-1);
+			}else{
+				sql.append(" = ");
+				sql.append(quantidade);	
+			}
+		}
+		
+		Query query = em.createNativeQuery(sql.toString());
+		List<BigInteger> codigo = (List<BigInteger>) query.getResultList();
+		if(codigo == null){
+			return new ArrayList<>();
+		}
+		List<Aluno> alunos = new ArrayList<>();
+		for(BigInteger id : codigo){
+			alunos.add(alunoService.findById(id.longValue()));
+		}
+		return alunos;
+	}
+	
+	private String getIntervaloMes(int mes){
+		
+		String retorno = "";
+		switch (mes) {
+		case 1:
+			retorno = " vencimento >  '2021-01-01' and vencimento < '2021-01-30' " ;
+			break;
+		case 2:
+			retorno = " vencimento >  '2021-02-01' and vencimento < '2021-02-28' " ;
+			break;
+		case 3:
+			retorno = " vencimento >  '2021-03-01' and vencimento < '2021-03-30' " ;
+			break;
+		case 4:
+			retorno = " vencimento >  '2021-04-01' and vencimento < '2021-04-30' " ;
+			break;
+		case 5:
+			retorno = " vencimento >  '2021-05-01' and vencimento < '2021-05-30' " ;
+			break;
+		case 6:
+			retorno = " vencimento >  '2021-06-01' and vencimento < '2021-06-30' " ;
+			break;
+		case 7:
+			retorno = " vencimento >  '2021-07-01' and vencimento < '2021-07-30' " ;
+			break;
+		case 8:
+			retorno = " vencimento >  '2021-08-01' and vencimento < '2021-08-30' " ;
+			break;
+		case 9:
+			retorno = " vencimento >  '2021-09-01' and vencimento < '2021-09-30' " ;
+			break;
+		case 10:
+			retorno = " vencimento >  '2021-10-01' and vencimento < '2021-10-30' " ;
+			break;
+		case 11:
+			retorno = " vencimento >  '2021-11-01' and vencimento < '2021-11-30' " ;
+			break;
+		case 12:
+			retorno = " vencimento >  '2021-12-01' and vencimento < '2021-12-30' " ;
+			break;
+		default:
+			break;
+		}
+		return retorno;
+		
+	}
 	
 	
 }

@@ -17,39 +17,46 @@
 package org.escolar.model;
 
 import java.io.Serializable;
+import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
-public class Configuracao implements Serializable {
+public class Empresa implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column
-    private int anoLetivo;
+    @NotNull
+    @Size(min = 1, max = 250)
+    private String nome;
+   
+    @NotNull
+    private String codigo;
     
-    @Column
-    private Short anoRematricula;
+    @OneToMany
+    private List<Filial> filiais;
     
-    @Column
-    private long sequencialArquivoCNAB;
-    
-    @Transient
-    private double valorNotas;
-    
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -59,37 +66,41 @@ public class Configuracao implements Serializable {
 	}
 
 
-	public int getAnoLetivo() {
-		return anoLetivo;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		
+		Empresa other = (Empresa) obj;
+		if (nome == null) {
+			if (other.nome != null)
+				return false;
+		} 
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		
+		return true;
+
+	}
+	
+	@Override
+	public String toString() {
+		return nome;
 	}
 
-
-	public void setAnoLetivo(int anoLetivo) {
-		this.anoLetivo = anoLetivo;
+	public List<Filial> getFiliais() {
+		return filiais;
 	}
 
-	public long getSequencialArquivoCNAB() {
-		return sequencialArquivoCNAB;
+	public void setFiliais(List<Filial> filiais) {
+		this.filiais = filiais;
 	}
-
-	public void setSequencialArquivoCNAB(long sequencialArquivoCNAB) {
-		this.sequencialArquivoCNAB = sequencialArquivoCNAB;
-	}
-
-	public Short getAnoRematricula() {
-		return anoRematricula;
-	}
-
-	public void setAnoRematricula(Short anoRematricula) {
-		this.anoRematricula = anoRematricula;
-	}
-
-	public double getValorNotas() {
-		return valorNotas;
-	}
-
-	public void setValorNotas(double valorNotas) {
-		this.valorNotas = valorNotas;
-	}
-
+		
 }

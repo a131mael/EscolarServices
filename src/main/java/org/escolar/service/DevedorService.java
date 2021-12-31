@@ -210,6 +210,7 @@ public class DevedorService extends Service {
 		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
 		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
 		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+		sql.append(" and (bol.dividaPerdoada is null or bol.dividaPerdoada = false)");
 		
 		
 		Query query = em.createNativeQuery(sql.toString(),Aluno.class);
@@ -275,7 +276,7 @@ public class DevedorService extends Service {
 		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
 		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
 		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
-		
+		sql.append(" and (bol.dividaPerdoada is null or bol.dividaPerdoada = false)");
 		sql.append(" and (al.contactado is null or al.contactado = false) ");
 		
 		
@@ -361,7 +362,7 @@ public class DevedorService extends Service {
 		sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
 		sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
 		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
-		
+		sql.append(" and (bol.dividaPerdoada is null or bol.dividaPerdoada = false)");
 		sql.append(" and (al.contactado = true) ");
 		
 		
@@ -534,7 +535,7 @@ public class DevedorService extends Service {
 		if(al.getIrmao2() != null){
 			al.getIrmao2().getId();
 		}
-		if(al.getIrmao3() != null){
+		if(al.getIrmao4() != null){
 			al.getIrmao4().getId();
 		}
 		if(al.getIrmao4() != null){
@@ -869,10 +870,19 @@ public class DevedorService extends Service {
 				sql.append(dataFim);
 				sql.append("'");
 			}
+			if(filtros != null){
+				if(filtros.get("nomeResponsavel") != null){
+					sql.append(" and ca.nomeResponsavel like '%");
+					sql.append(filtros.get("nomeResponsavel"));
+					sql.append("%'");
+				}
+			}
+			
 			sql.append(" and (bol.valorpago<bol.valornominal -20 or bol.valorpago is null)");
 			sql.append(" and (bol.baixagerada is null or bol.baixagerada = false)");
 			sql.append(" and (bol.baixamanual is null or bol.baixamanual = false)");
 			sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
+			sql.append(" and (bol.dividaPerdoada is null or bol.dividaPerdoada = false)");
 			sql.append(" and ca.protestado = true");
 			sql.append(" and (ca.enviadoProtestoDefinitivo is null or ca.enviadoProtestoDefinitivo = false)");
 			

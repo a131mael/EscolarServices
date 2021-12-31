@@ -74,9 +74,15 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	@Column
 	private Boolean baixaManual;
+	
+	@Column
+	private Boolean dividaPerdoada;
 
 	@Column
 	private Boolean manterAposRemovido;
+	
+	@Column
+	private Boolean nfsEnviada;
 
 	@Column
 	private Boolean conciliacaoPorExtrato;
@@ -280,6 +286,22 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	public void setProtestado(Boolean protestado) {
 		this.protestado = protestado;
+	}
+
+	public Boolean getNfsEnviada() {
+		return nfsEnviada;
+	}
+
+	public void setNfsEnviada(Boolean nfsEnviada) {
+		this.nfsEnviada = nfsEnviada;
+	}
+
+	public Boolean getDividaPerdoada() {
+		return dividaPerdoada;
+	}
+
+	public void setDividaPerdoada(Boolean dividaPerdoada) {
+		this.dividaPerdoada = dividaPerdoada;
 	}
 
 }

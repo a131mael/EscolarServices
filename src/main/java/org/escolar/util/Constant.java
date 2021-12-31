@@ -5,6 +5,8 @@
  */
 package org.escolar.util;
 
+import java.util.TimeZone;
+
 import org.escolar.enums.TipoMembro;
 
 /**
@@ -42,6 +44,7 @@ public class Constant {
     	 PROFESSOR = TipoMembro.MONITOR;
     	 ALUNO = TipoMembro.ALUNO;
     	 ADMINISTRADOR = TipoMembro.ADMIM;
+    	 TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
     }
     
     public String getContextoGlobalEJB() {

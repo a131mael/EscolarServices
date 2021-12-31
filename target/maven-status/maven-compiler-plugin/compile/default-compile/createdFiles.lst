@@ -18,6 +18,7 @@ org\escolar\enums\EspecialidadeEnum.class
 org\escolar\enums\TipoEventoEnum.class
 org\escolar\model\Funcionario.class
 org\escolar\model\RecadoDestinatario_.class
+org\escolar\model\LocalizacaoRota.class
 org\escolar\rest\JaxRsActivator.class
 org\escolar\util\ServiceLocator.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSPCWS.class
@@ -67,6 +68,7 @@ org\escolar\model\RecadoDestinatario.class
 org\escolar\model\ContratoAdonai.class
 org\escolar\util\EndPoints.class
 org\escolar\util\Formatador.class
+org\escolar\model\LocalizacaoRota_.class
 org\escolar\model\ObjetoRota_.class
 org\escolar\model\Recado.class
 org\escolar\util\FileUtils.class
@@ -80,6 +82,7 @@ br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSFaul
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConsumidorEndereco.class
 org\escolar\model\Localizacao_.class
 org\escolar\model\Lote.class
+org\escolar\service\LocationRotaService.class
 org\escolar\enums\PegarEntregarEnun.class
 org\escolar\model\AlunoAvaliacao_.class
 org\escolar\service\TabelaPrecoService.class

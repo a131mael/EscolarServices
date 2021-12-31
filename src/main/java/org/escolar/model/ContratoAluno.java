@@ -476,6 +476,13 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	public void setProtestado(Boolean protestado) {
 		this.protestado = protestado;
 	}
+	
+	public boolean isProtestado(){
+		if(protestado != null && protestado){
+			return true;
+		}
+		return false;
+	}
 
 	public Boolean getPodeProtestarFinal() {
 		return podeProtestarFinal;

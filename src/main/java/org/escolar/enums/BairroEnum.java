@@ -24,7 +24,12 @@ public enum BairroEnum {
 	
 	TERRA_NOVA("Terra Nova, Bela Vista"),
 	
-	VILA_NOVA("Vila Nova, Pachecos");
+	VILA_NOVA("Vila Nova, Pachecos"),
+	
+	Ponte_IMARUIM("Ponte Imaruim, Ponte Imaruim"),
+	
+	VALE_VERDE("Vale Verde, Bela Vista");
+	
 	
 	
 	private String name;

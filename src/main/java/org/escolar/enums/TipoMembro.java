@@ -14,7 +14,14 @@ public enum TipoMembro {
 	
 	MESTRE("Mestre"),
 	
-	FINANCEIRO("Financeiro");
+	FINANCEIRO("Financeiro"),
+	
+	USUARIO("Usuario"),
+	
+	FILIAL("Filial"),
+	
+	DONO("Dono");
+	
 	
 	private String tipo;
 	
