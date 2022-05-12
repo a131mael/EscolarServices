@@ -14,6 +14,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -42,6 +43,9 @@ public class ProfessorService extends Service {
 	
 	@Inject
 	private UtilFinalizarAnoLetivo finalizarAnoLetivo;
+	
+	@Inject
+	private ProfessorService funcionarioCarroService;
 
 	public Funcionario findById(EntityManager em, Long id) {
 		return em.find(Funcionario.class, id);
@@ -51,8 +55,18 @@ public class ProfessorService extends Service {
 		return em.find(Funcionario.class, id);
 	}
 	
+	public void removerFuncionarioDoCarro(Long id) {
+		List<FuncionarioCarro> carros = funcionarioCarroService.findFuncionarioCarro(id);
+		for(FuncionarioCarro c : carros){
+			em.remove(c);
+		}
+	}
+	
 	public String remover(Long idTurma){
-		em.remove(findById(idTurma));
+		removerFuncionarioDoCarro(idTurma);
+		Funcionario f = findById(idTurma);
+		f.setAtivo(false);
+		
 		return "index";
 	}
 
@@ -65,7 +79,8 @@ public class ProfessorService extends Service {
 			// criteria queries, a new
 			// feature in JPA 2.0
 			// criteria.select(member).orderBy(cb.asc(member.get(Member_.name)));
-			criteria.select(member).orderBy(cb.asc(member.get("id")));
+			Predicate whereativo =  cb.equal(member.get("ativo"), true);
+			criteria.select(member).where(whereativo).orderBy(cb.asc(member.get("id")));
 			return em.createQuery(criteria).getResultList();
 	
 		}catch(NoResultException nre){
@@ -103,6 +118,7 @@ public class ProfessorService extends Service {
 			user.setEspecialidade(professor.getEspecialidade());
 			user.setLogin(professor.getLogin());
 			user.setSenha(professor.getSenha());
+			user.setAtivo(professor.isAtivo());
 			
 			em.persist(user);
 			Member m = null;
@@ -209,6 +225,29 @@ public class ProfessorService extends Service {
 		
 		
 		return turmas;
+
+	}
+	@SuppressWarnings("unchecked")
+	public List<FuncionarioCarro> findFuncionarioCarro(long ifFuncionario) {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT pt from  FuncionarioCarro pt ");
+		sql.append("where pt.professor.id =   ");
+		sql.append(ifFuncionario);
+
+		Query query = em.createQuery(sql.toString());
+		
+		 
+		try{
+			List<FuncionarioCarro> professorTurmas = query.getResultList();
+			return professorTurmas;
+			
+		}catch(NoResultException noResultException){
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 
 	}
 

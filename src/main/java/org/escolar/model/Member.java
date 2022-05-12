@@ -97,16 +97,16 @@ public class Member implements Serializable {
 	private String phoneNumber;
 	
 	@Column
-	private boolean alertaProximidade;
+	private Boolean alertaProximidade;
 	
 	@Column
-	private boolean enviarBoletosEmail;
+	private Boolean enviarBoletosEmail;
 	
 	@Column
-	private int distanciaAlerta;
+	private Integer distanciaAlerta;
 	
 	@Column
-	private int quantidadeAcessos;
+	private Integer quantidadeAcessos;
 
 	
 	public org.aaf.escolar.MemberDTO getDTO(){
@@ -248,42 +248,54 @@ public class Member implements Serializable {
 	}
 
 
-	public boolean isAlertaProximidade() {
+	public Boolean isAlertaProximidade() {
+		if(alertaProximidade == null){
+			return false;
+		}
 		return alertaProximidade;
 	}
 
 
-	public void setAlertaProximidade(boolean alertaProximidade) {
+	public void setAlertaProximidade(Boolean alertaProximidade) {
 		this.alertaProximidade = alertaProximidade;
 	}
 
 
-	public int getDistanciaAlerta() {
+	public Integer getDistanciaAlerta() {
+		if(distanciaAlerta == null){
+			return 0;
+		}
 		return distanciaAlerta;
 	}
 
 
-	public void setDistanciaAlerta(int distanciaAlerta) {
+	public void setDistanciaAlerta(Integer distanciaAlerta) {
 		this.distanciaAlerta = distanciaAlerta;
 	}
 
 
-	public int getQuantidadeAcessos() {
+	public Integer getQuantidadeAcessos() {
+		if(quantidadeAcessos == null){
+			return 0;
+		}
 		return quantidadeAcessos;
 	}
 
 
-	public void setQuantidadeAcessos(int quantidadeAcessos) {
+	public void setQuantidadeAcessos(Integer quantidadeAcessos) {
 		this.quantidadeAcessos = quantidadeAcessos;
 	}
 
 
-	public boolean isEnviarBoletosEmail() {
+	public Boolean isEnviarBoletosEmail() {
+		if(enviarBoletosEmail == null){
+			return false;
+		}
 		return enviarBoletosEmail;
 	}
 
 
-	public void setEnviarBoletosEmail(boolean enviarBoletosEmail) {
+	public void setEnviarBoletosEmail(Boolean enviarBoletosEmail) {
 		this.enviarBoletosEmail = enviarBoletosEmail;
 	}
 }

@@ -72,7 +72,9 @@ public enum EscolaEnum {
 	
 	SESC("SESC","Ponte Imaruim",BairroEnum.Ponte_IMARUIM),
 	
-	EDUCARE("Centro Educacional Educare","Centro Palhoça",BairroEnum.PALHOCA_CENTRO);
+	EDUCARE("Centro Educacional Educare","Centro Palhoça",BairroEnum.PALHOCA_CENTRO),
+	
+	IVO_SILVEIRA("Ivo Silveira","Centro Palhoça",BairroEnum.PALHOCA_CENTRO);
 	
 	
 	private String name;

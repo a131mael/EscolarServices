@@ -28,6 +28,10 @@ import org.escolar.model.Funcionario;
 import org.escolar.service.ProfessorService;
 import org.escolar.service.TurmaService;
 
+import br.com.aaf.base.importacao.extrato.ExtratoGruposPagamentoRecebimentoEnum;
+import br.com.aaf.base.importacao.extrato.ExtratoTiposEntradaEnum;
+import br.com.aaf.base.importacao.extrato.ExtratoTiposEntradaSaidaEnum;
+
 /**
  *
  * @author abimael Fidencio Combos na aplicação.
@@ -101,8 +105,6 @@ public class CombosEspeciaisMB implements Serializable {
 
 		return items;
 	}
-
-
 	
 	public ArrayList<SelectItem> getSimNao() {
 		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
@@ -115,6 +117,52 @@ public class CombosEspeciaisMB implements Serializable {
 			e.printStackTrace();
 		}
 
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getMeses() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(-1, "Selecione"));
+			 items.add(new SelectItem(0, "Janeiro"));
+			 items.add(new SelectItem(1, "Fevereiro"));
+			 items.add(new SelectItem(2, "Março"));
+			 items.add(new SelectItem(3, "Abril"));
+			 items.add(new SelectItem(4, "Maio"));
+			 items.add(new SelectItem(5, "junho"));
+			 items.add(new SelectItem(6, "Julho"));
+			 items.add(new SelectItem(7, "Agosto"));
+			 items.add(new SelectItem(8, "Setembro"));
+			 items.add(new SelectItem(9, "Outubro"));
+			 items.add(new SelectItem(10, "Novembro"));
+			 items.add(new SelectItem(11, "Dezembro"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getMesesValorInteiroCorreto() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(-1, "Selecione"));
+			 items.add(new SelectItem(1, "Janeiro"));
+			 items.add(new SelectItem(2, "Fevereiro"));
+			 items.add(new SelectItem(3, "Março"));
+			 items.add(new SelectItem(4, "Abril"));
+			 items.add(new SelectItem(5, "Maio"));
+			 items.add(new SelectItem(6, "junho"));
+			 items.add(new SelectItem(7, "Julho"));
+			 items.add(new SelectItem(8, "Agosto"));
+			 items.add(new SelectItem(9, "Setembro"));
+			 items.add(new SelectItem(10, "Outubro"));
+			 items.add(new SelectItem(11, "Novembro"));
+			 items.add(new SelectItem(12, "Dezembro"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return items;
 	}
 
@@ -226,6 +274,51 @@ public class CombosEspeciaisMB implements Serializable {
 		return EscolaEnum.values();
 	}
 	
+	public static Integer[] getAnos() {
+		Integer[] anos = {2020,2021,2022,2023,2024,2025};
+		return anos;
+	}
+	
+	public static int getUltimaDiaMes(int mes) {
+		if(mes ==0){
+			return 31;
+		}
+		if(mes ==1){
+			return 28;
+		}
+		if(mes ==2){
+			return 31;
+		}
+		if(mes ==3){
+			return 30;
+		}
+		if(mes ==4){
+			return 31;
+		}
+		if(mes ==5){
+			return 30;
+		}
+		if(mes ==6){
+			return 31;
+		}
+		if(mes ==7){
+			return 31;
+		}
+		if(mes ==8){
+			return 30;
+		}
+		if(mes ==9){
+			return 31;
+		}
+		if(mes ==10){
+			return 30;
+		}
+		if(mes ==11){
+			return 31;
+		}
+		return 28;
+	}
+	
 	public static BairroEnum[] getBairros() {
 
 		return BairroEnum.values();
@@ -250,10 +343,72 @@ public class CombosEspeciaisMB implements Serializable {
 
 		return TipoMembro.values();
 	}
+	
+	public static ExtratoTiposEntradaSaidaEnum[] getExtratoTiposEntradaSaidaEnum() {
+		ExtratoTiposEntradaSaidaEnum[] extratos = ExtratoTiposEntradaSaidaEnum.values();
+		
+		return extratos;
+	}
+	
+	public static ExtratoTiposEntradaEnum[] getExtratoTiposEntradaEnum() {
+
+		return ExtratoTiposEntradaEnum.values();
+	}
+	
+	public static ExtratoGruposPagamentoRecebimentoEnum[] getExtratoGruposPagamentoRecebimentoEnum() {
+		ExtratoGruposPagamentoRecebimentoEnum[] grupos =  ExtratoGruposPagamentoRecebimentoEnum.values();
+		
+		return grupos;
+	}
 
 	public static CustoEnum[] getTipoCusto() {
 
 		return CustoEnum.values();
+	}
+	
+	public ArrayList<SelectItem> getExtratoGruposPagamentoRecebimentoEnumSelectItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (ExtratoGruposPagamentoRecebimentoEnum m : ExtratoGruposPagamentoRecebimentoEnum.values()) {
+				items.add(new SelectItem(m, m.getNome()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getExtratoTiposEntradaSelectItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (ExtratoTiposEntradaEnum m : ExtratoTiposEntradaEnum.values()) {
+				items.add(new SelectItem(m, m.getNameReal()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getExtratoTiposEntradaSaidaSelectItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (ExtratoTiposEntradaSaidaEnum m : ExtratoTiposEntradaSaidaEnum.values()) {
+				items.add(new SelectItem(m, m.getNome()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
 	}
 
 	

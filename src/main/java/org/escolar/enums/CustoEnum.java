@@ -6,8 +6,11 @@ public enum CustoEnum {
 	SALARIO_MONITOR("Salário monitor"),
 	COMBUSTIVEL("Combustivel"),
 	MECANICA("Mecânica"),
-	ELETRICA("Elétrica"),
+	LIMPEZA("Limpeza"),
 	PRESTACAO_CARRO("Prestação Carro"),
+	SEGURO("Seguro"),
+	DOCUMENTACAO("DOCUMENTOS E IMPOSTOS"),
+	INTERNET("Internet"),
 	OUTROS("Outros");
 	
 	

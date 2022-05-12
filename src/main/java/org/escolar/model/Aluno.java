@@ -43,6 +43,8 @@ import org.escolar.enums.BairroEnum;
 import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
+import org.escolar.enums.StatusBoletoEnum;
+import org.escolar.util.Verificador;
 
 @SuppressWarnings("serial")
 @Entity
@@ -94,6 +96,24 @@ public class Aluno implements Serializable {
 	private String contatoNome5;
 
 	@Column
+	private Boolean contato1WhatsValido;
+	
+	@Column
+	private Boolean contato2WhatsValido;
+	
+	@Column
+	private Boolean contato3WhatsValido;
+	
+	@Column
+	private Boolean contato4WhatsValido;
+	
+	@Column
+	private Boolean contato5WhatsValido;
+
+	@Column
+	private Boolean jaTestousContatosWhats;
+	
+	@Column
 	private int anoLetivo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -119,6 +139,9 @@ public class Aluno implements Serializable {
 
 	@Column
 	private Boolean restaurada;
+	
+	@Column
+	private Boolean gerarNFSe;
 
 	@Column
 	private Boolean rematricular;
@@ -1278,7 +1301,7 @@ public class Aluno implements Serializable {
 		}
 		
 		if(contratoAtivo == null){
-			if(contratos != null){
+			if(contratos != null && contratos.size() > 0){
 				return contratos.get(0);
 			}
 		}
@@ -1421,5 +1444,105 @@ public class Aluno implements Serializable {
 
 	public void setObservacaoAtrasado(String observacaoAtrasado) {
 		this.observacaoAtrasado = observacaoAtrasado;
+	}
+
+	public Boolean getGerarNFSe() {
+		return gerarNFSe;
+	}
+
+	public void setGerarNFSe(Boolean gerarNFSe) {
+		this.gerarNFSe = gerarNFSe;
+	}
+	
+	public double getTotalABerto(){
+		Double total = 0D;
+		List<Boleto> boletos = getBoletos2();
+		for(Boleto b : boletos){
+			StatusBoletoEnum status = Verificador.getStatusEnum(b); 
+			if(status.equals(StatusBoletoEnum.ATRASADO)){
+				total += Verificador.getValorFinal(b);
+			}
+		}
+		
+		return total;
+	}
+
+	public Boolean isJaTestousContatosWhats() {
+		return jaTestousContatosWhats;
+	}
+
+	public void setJaTestousContatosWhats(Boolean jaTestousContatosWhats) {
+		this.jaTestousContatosWhats = jaTestousContatosWhats;
+	}
+
+	public Boolean isContato5WhatsValido() {
+		return contato5WhatsValido;
+	}
+
+	public void setContato5WhatsValido(Boolean contato5WhatsValido) {
+		this.contato5WhatsValido = contato5WhatsValido;
+	}
+
+	public Boolean isContato4WhatsValido() {
+		return contato4WhatsValido;
+	}
+
+	public void setContato4WhatsValido(Boolean contato4WhatsValido) {
+		this.contato4WhatsValido = contato4WhatsValido;
+	}
+
+	public Boolean isContato3WhatsValido() {
+		return contato3WhatsValido;
+	}
+
+	public void setContato3WhatsValido(Boolean contato3WhatsValido) {
+		this.contato3WhatsValido = contato3WhatsValido;
+	}
+
+	public Boolean isContato2WhatsValido() {
+		return contato2WhatsValido;
+	}
+
+	public void setContato2WhatsValido(Boolean contato2WhatsValido) {
+		this.contato2WhatsValido = contato2WhatsValido;
+	}
+
+	public Boolean isContato1WhatsValido() {
+		return contato1WhatsValido;
+	}
+
+	public void setContato1WhatsValido(Boolean contato1WhatsValido) {
+		this.contato1WhatsValido = contato1WhatsValido;
+	}
+	
+	public List<String> contatosWhatsValido(){
+		List<String> contatos = new ArrayList<>();
+		if(jaTestousContatosWhats!= null && jaTestousContatosWhats){
+			if(contato1WhatsValido != null && contato1WhatsValido){
+				contatos.add(contatoTelefone1);
+			}
+			if(contato2WhatsValido!= null &&contato2WhatsValido ){
+				contatos.add(contatoTelefone2);
+			}
+			
+			if(contato3WhatsValido!= null &&contato3WhatsValido ){
+				contatos.add(contatoTelefone3);
+			}
+			
+			if(contato4WhatsValido!= null && contato4WhatsValido ){
+				contatos.add(contatoTelefone4);
+			}
+			
+			if(contato5WhatsValido!= null && contato5WhatsValido ){
+				contatos.add(contatoTelefone5);
+			}
+		}else{
+			contatos.add(contatoTelefone1);
+			contatos.add(contatoTelefone2);
+			contatos.add(contatoTelefone3);
+			contatos.add(contatoTelefone4);
+			contatos.add(contatoTelefone5);
+		}
+		return contatos;
 	}
 }

@@ -28,9 +28,15 @@ public enum BairroEnum {
 	
 	Ponte_IMARUIM("Ponte Imaruim, Ponte Imaruim"),
 	
-	VALE_VERDE("Vale Verde, Bela Vista");
+	VALE_VERDE("Vale Verde, Bela Vista"),
 	
+	AZALEIA("Azaleia, Bela Vista"),
 	
+	BROMELIAS("Bromelias, Bela Vista"),
+	
+	PARQUE_DAS_ROSAS("Parque das rosas, Bela Vista"),
+	
+	Tabuleiro("Tabuleiro, Bela Vista");
 	
 	private String name;
 	

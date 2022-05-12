@@ -18,6 +18,7 @@ package org.escolar.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,8 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.aaf.financeiro.util.OfficeUtil;
+import org.escolar.enums.StatusBoletoEnum;
+import org.escolar.util.Verificador;
 
 @SuppressWarnings("serial")
 @Entity
@@ -524,4 +527,66 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 		this.usuarioAppCriado = usuarioAppCriado;
 	}
 	
+	private String getMes(int mes) {
+		switch (mes) {
+
+		case 1:
+			return "Janeiro";
+
+		case 2:
+			return "Fevereiro";
+
+		case 3:
+			return "Março";
+
+		case 4:
+			return "Abril";
+
+		case 5:
+			return "Maio";
+
+		case 6:
+			return "Junho";
+
+		case 7:
+			return "Julho";
+
+		case 8:
+			return "Agosto";
+
+		case 9:
+			return "Setembro";
+
+		case 10:
+			return "Outubro";
+
+		case 11:
+			return "Novembro";
+
+		case 12:
+			return "Dezembro";
+
+		default:
+			return "erro";
+		}
+	}
+	
+	public String getMesesAberto() {
+		String mes = "";
+		if(boletos!= null){
+			for(Boleto boleto : boletos){
+				if(StatusBoletoEnum.ATRASADO.equals(Verificador.getStatusEnum(boleto)) ){
+					Calendar c = Calendar.getInstance();
+					c.setTime(boleto.getVencimento());
+					int mesInt = c.get(Calendar.MONTH) + 1;
+					if(mes.equalsIgnoreCase("")){
+						mes = getMes(mesInt);
+					}else{
+						mes += " e " + getMes(mesInt);
+					}
+				}
+			}
+		}
+		return mes;
+	}
 }

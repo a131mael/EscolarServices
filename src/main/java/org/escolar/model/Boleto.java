@@ -105,6 +105,12 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 	@Column
     private Boolean protestado;
 	
+	@Column
+	private Boolean emailBoletoMesEnviado;
+	
+	@Column
+	private Boolean emailAvisoBoletoAtrasadoEnviado;
+	
 	public Long getId() {
 		return id;
 	}
@@ -302,6 +308,22 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	public void setDividaPerdoada(Boolean dividaPerdoada) {
 		this.dividaPerdoada = dividaPerdoada;
+	}
+
+	public Boolean getEmailBoletoMesEnviado() {
+		return emailBoletoMesEnviado;
+	}
+
+	public void setEmailBoletoMesEnviado(Boolean emailBoletoMesEnviado) {
+		this.emailBoletoMesEnviado = emailBoletoMesEnviado;
+	}
+
+	public Boolean getEmailAvisoBoletoAtrasadoEnviado() {
+		return emailAvisoBoletoAtrasadoEnviado;
+	}
+
+	public void setEmailAvisoBoletoAtrasadoEnviado(Boolean emailAvisoBoletoAtrasadoEnviado) {
+		this.emailAvisoBoletoAtrasadoEnviado = emailAvisoBoletoAtrasadoEnviado;
 	}
 
 }

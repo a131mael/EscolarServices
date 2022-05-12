@@ -44,7 +44,11 @@ public class EnviadorEmail {
 		Calendar c = Calendar.getInstance();
 		List<Boleto> boletos = financeiroService.getBoletoMes(c.get(Calendar.MONTH));
 		for (Boleto bol : boletos) {
-			enviarEmailBoletosMesAtual(bol);
+			if(bol.getEmailBoletoMesEnviado() == null || !bol.getEmailBoletoMesEnviado()){
+				enviarEmailBoletosMesAtual(bol);
+				bol.setEmailBoletoMesEnviado(true);
+				financeiroService.save(bol);
+			}
 		}
 	}
 
@@ -64,18 +68,18 @@ public class EnviadorEmail {
 		if (bol.getPagador().getEmailPai() != null) {
 			destinatario += bol.getPagador().getEmailPai() + ",";
 		}
-
+		
 		byte[] anexoPDF = byteArrayPDFBoleto(getBoletoFinanceiro(bol), bol.getContrato());
 
 		String corpoEmail = "<!DOCTYPE html><html><body><p><h2><center>Transporte Escolar Favo de Mel.</center></h2></p><br/>"
-				+ "<p>Bom dia #nomeResponsavel,<br/><br/><br/><br/>Você esta recebendo em anexo o seu boleto do Transporte Escolar Favo de Mel referente ao mês de <b>"
+				+ "<p>Bom dia #nomeResponsavel,<br/><br/>Você esta recebendo em anexo o seu boleto do Transporte Escolar Favo de Mel referente ao mês de <b>"
 				+ "<font size=\"2\" color=\"blue\"> #mesBoleto</font></b> .<h3><br/>"
-				+ "<center><font size=\"3\" color=\"blue\">Resumo da conta</font></center>"
+				+ "<br/><br/><center><font size=\"3\" color=\"blue\">Resumo da conta</font></center><br/><br/>"
 				+ "</h3>Vencimento  :<font size=\"2\" color=\"blue\"> #vencimentoBoleto</font>"
 				+ "<br/>Valor       :<font size=\"2\" color=\"blue\"> #valorAtualBoleto</font><br/>"
 				+ "<br/><center><h4><font size=\"3\" color=\"red\"> Caso já tenha efetuado o pagamento favor desconsiderar esse e-mail. </font></h4>"
 				+ "</center></p>" + "<br/>"
-				+ "<a href=\"https://ibb.co/i3s83m\"><img src=\"https://preview.ibb.co/hX0Hw6/assinatura_Tefamel.png\" "
+				+ "<a href=\"https://www.tefamel.com\"><img src=\"https://i.ibb.co/pvtxPyH/assinatura.jpg\" "
 				+ "alt=\"assinatura_Tefamel\" style=\"width:365px;height:146px;border:0;\" border=\"0\"></a>"
 				+ "</body></html>";
 

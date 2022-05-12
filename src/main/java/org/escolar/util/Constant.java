@@ -21,7 +21,7 @@ public class Constant {
     public static String ProjetoEJB = "";
     public static String barra = "/";
     
-    public static int anoLetivoAtual = 2018;
+    public static int anoLetivoAtual = 2022;
     
     private static TipoMembro SECRETARIA = TipoMembro.SECRETARIA; 
     

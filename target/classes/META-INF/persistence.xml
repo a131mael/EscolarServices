@@ -20,8 +20,8 @@
 		<class>org.escolar.model.ObjetoRota</class>
 		<class>org.escolar.model.LocalizacaoRota</class>
 		<properties>
-			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->
-			<property name="hibernate.hbm2ddl.auto" value="update" />
+<!-- 			<property name="hibernate.hbm2ddl.auto" value="create-drop"/> -->
+			 <property name="hibernate.hbm2ddl.auto" value="update" /> 
 			<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.transaction.flush_before_completion"

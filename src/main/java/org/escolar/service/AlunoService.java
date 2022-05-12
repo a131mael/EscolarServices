@@ -639,12 +639,41 @@ public class AlunoService extends Service {
 			user.setContatoNome4(aluno.getContatoNome4());
 			user.setContatoNome5(aluno.getContatoNome5());
 
+			boolean telefoneAlterado = false;
+			if(aluno.getContatoTelefone1() != null 
+					&& aluno.getContatoTelefone1().equalsIgnoreCase(user.getContatoTelefone1())){
+				telefoneAlterado = true;
+			}
 			user.setContatoTelefone1(aluno.getContatoTelefone1());
+			
+			if(aluno.getContatoTelefone2() != null 
+					&& aluno.getContatoTelefone2().equalsIgnoreCase(user.getContatoTelefone2())){
+				telefoneAlterado = true;
+			}
 			user.setContatoTelefone2(aluno.getContatoTelefone2());
+			if(aluno.getContatoTelefone3() != null 
+					&& aluno.getContatoTelefone3().equalsIgnoreCase(user.getContatoTelefone3())){
+				telefoneAlterado = true;
+			}
 			user.setContatoTelefone3(aluno.getContatoTelefone3());
+			
+			if(aluno.getContatoTelefone4() != null 
+					&& aluno.getContatoTelefone4().equalsIgnoreCase(user.getContatoTelefone4())){
+				telefoneAlterado = true;
+			}
 			user.setContatoTelefone4(aluno.getContatoTelefone4());
+			if(aluno.getContatoTelefone5() != null 
+					&& aluno.getContatoTelefone5().equalsIgnoreCase(user.getContatoTelefone5())){
+				telefoneAlterado = true;
+			}
 			user.setContatoTelefone5(aluno.getContatoTelefone5());
-
+			
+			if(aluno.getId() != null && aluno.getId() != 0L  ){
+				user.setJaTestousContatosWhats(false );
+			}else{
+				user.setJaTestousContatosWhats(!telefoneAlterado);
+			}
+			
 			user.setTrocaIDA(aluno.isTrocaIDA());
 			user.setTrocaVolta(aluno.isTrocaVolta());
 			user.setCarroLevaParaEscola(aluno.getCarroLevaParaEscola());
@@ -796,6 +825,8 @@ public class AlunoService extends Service {
 			} else {
 				user.setRemovido(aluno.getRemovido());
 			}
+			
+			user.setGerarNFSe(aluno.getGerarNFSe());
 
 			user.setTrocaIDA(aluno.isTrocaIDA());
 			user.setTrocaVolta(aluno.isTrocaVolta());
@@ -2202,6 +2233,9 @@ public class AlunoService extends Service {
 
 		Query query = em.createQuery(sql.toString());
 		String codigo = (String) query.getSingleResult();
+		if(codigo == null){
+			return 1l;
+		}
 		return Long.parseLong(codigo) + 1;
 	}
 
@@ -2538,6 +2572,18 @@ public class AlunoService extends Service {
 		ap.setQuantidadeContatos(al.getQuantidadeContatos());
 		ap.setObservacaoAtrasado(al.getObservacaoAtrasado());
 		ap.setDataPrometeuPagar(al.getDataPrometeuPagar());
+		em.merge(ap);
+	}
+	
+	public void saveContado(Aluno al) {
+		Aluno ap = findById(al.getId());
+		ap.setJaTestousContatosWhats(al.isJaTestousContatosWhats());
+		ap.setContato1WhatsValido(al.isContato1WhatsValido());
+		ap.setContato2WhatsValido(al.isContato2WhatsValido());
+		ap.setContato3WhatsValido(al.isContato3WhatsValido());
+		ap.setContato4WhatsValido(al.isContato4WhatsValido());
+		ap.setContato5WhatsValido(al.isContato5WhatsValido());
+		
 		em.merge(ap);
 	}
 
