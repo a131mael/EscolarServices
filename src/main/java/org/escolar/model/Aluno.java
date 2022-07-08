@@ -145,6 +145,8 @@ public class Aluno implements Serializable {
 
 	@Column
 	private Boolean rematricular;
+	
+	private Boolean cadastroTemporario;
 
 	/** DADOS DO ALUNO */
 	@NotNull
@@ -1544,5 +1546,13 @@ public class Aluno implements Serializable {
 			contatos.add(contatoTelefone5);
 		}
 		return contatos;
+	}
+
+	public Boolean getCadastroTemporario() {
+		return cadastroTemporario;
+	}
+
+	public void setCadastroTemporario(Boolean cadastroTemporario) {
+		this.cadastroTemporario = cadastroTemporario;
 	}
 }

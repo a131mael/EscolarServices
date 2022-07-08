@@ -86,6 +86,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 
 	@Column
 	private String numero;
+	
+	@Column
+	private String complemento;
 
 	@Column
 	private String bairro;
@@ -588,5 +591,13 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 			}
 		}
 		return mes;
+	}
+
+	public String getComplemento() {
+		return complemento;
+	}
+
+	public void setComplemento(String complemento) {
+		this.complemento = complemento;
 	}
 }

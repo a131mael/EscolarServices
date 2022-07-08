@@ -12,8 +12,7 @@ public class ImpressoesUtils {
 
 	private static OfficeDOCUtil officeDOCUtil = new OfficeDOCUtil();
 
-	public static void imprimirInformacoesAluno(Aluno aluno, String modelo, HashMap<String, String> trocas,
-			String nomeArquivoSaida) throws IOException {
+	public static void imprimirInformacoesAluno(Aluno aluno, String modelo, HashMap<String, String> trocas,	String nomeArquivoSaida) throws IOException {
 
 		try {
 			officeDOCUtil.editDoc2(modelo, trocas, nomeArquivoSaida);

@@ -638,6 +638,8 @@ public class AlunoService extends Service {
 			user.setContatoNome3(aluno.getContatoNome3());
 			user.setContatoNome4(aluno.getContatoNome4());
 			user.setContatoNome5(aluno.getContatoNome5());
+			
+			user.setCadastroTemporario(aluno.getCadastroTemporario());
 
 			boolean telefoneAlterado = false;
 			if(aluno.getContatoTelefone1() != null 
@@ -2480,22 +2482,25 @@ public class AlunoService extends Service {
 		String finalANo = ano.substring(ano.length() - 2, ano.length());
 		String numeroUltimoContrato = "01";
 		int numeroNovo = 1;
-		for (ContratoAluno contratt : contrato.getAluno().getContratos()) {
-			if (contratt.getNumero() != null && !contratt.getNumero().equalsIgnoreCase("")) {
-				if (contratt.getAno() == contrato.getAno()) {
-					if (contrato.getId() != null && contrato.getId() != contratt.getId()) {
-						String numeroContratt = contratt.getNumero();
-						numeroContratt = numeroContratt.substring(numeroContratt.length() - 2, numeroContratt.length());
-						if (Integer.parseInt(numeroContratt) > Integer.parseInt(numeroUltimoContrato)) {
-							numeroUltimoContrato = numeroContratt;
+		
+		if(contrato.getAluno().getContratos() != null){
+			for (ContratoAluno contratt : contrato.getAluno().getContratos()) {
+				if (contratt.getNumero() != null && !contratt.getNumero().equalsIgnoreCase("")) {
+					if (contratt.getAno() == contrato.getAno()) {
+						if (contrato.getId() != null && contrato.getId() != contratt.getId()) {
+							String numeroContratt = contratt.getNumero();
+							numeroContratt = numeroContratt.substring(numeroContratt.length() - 2, numeroContratt.length());
+							if (Integer.parseInt(numeroContratt) > Integer.parseInt(numeroUltimoContrato)) {
+								numeroUltimoContrato = numeroContratt;
+							}
+							numeroNovo = Integer.parseInt(numeroUltimoContrato);
+							numeroNovo++;
 						}
-						numeroNovo = Integer.parseInt(numeroUltimoContrato);
-						numeroNovo++;
+
 					}
 
+					numeroUltimoContrato = String.valueOf(numeroNovo);
 				}
-
-				numeroUltimoContrato = String.valueOf(numeroNovo);
 			}
 		}
 
