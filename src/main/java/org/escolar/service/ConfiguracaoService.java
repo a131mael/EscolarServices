@@ -45,6 +45,7 @@ public class ConfiguracaoService extends Service {
 
 	public String remover(Long idEvento) {
 		em.remove(findById(idEvento));
+		em.flush();
 		return "index";
 	}
 
@@ -95,6 +96,8 @@ public class ConfiguracaoService extends Service {
 			}
 
 			user.setAnoLetivo(configuracao.getAnoLetivo());
+			user.setValordinheiroEmcaixa(configuracao.getValordinheiroEmcaixa());
+			
 			user.setSequencialArquivoCNAB(configuracao.getSequencialArquivoCNAB());
 			user.setAnoRematricula(configuracao.getAnoRematricula());
 
@@ -114,7 +117,7 @@ public class ConfiguracaoService extends Service {
 
 			e.printStackTrace();
 		}
-
+		em.flush();
 		return user;
 	}
 
@@ -178,13 +181,14 @@ public class ConfiguracaoService extends Service {
 		b = em.find(Boleto.class, b.getId());
 		b.setCnabEnviado(true);
 		em.merge(b);
-		
+		em.flush();
 	}
 
 	public void mudarStatusParaProtestoEnviadoPorEmail(ContratoAluno ca) {
 		ca = em.find(ContratoAluno.class, ca.getId());
 		ca.setEnviadoPorEmailProtesto(true);
 		em.merge(ca);
+		em.flush();
 	}
 
 	public List<ContratoAluno> findContratosProtestados(boolean jaEnviadoPorEmail) {

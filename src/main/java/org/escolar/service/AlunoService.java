@@ -32,6 +32,7 @@ import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PegarEntregarEnun;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
+import org.escolar.enums.StatusContratoEnum;
 import org.escolar.model.Aluno;
 import org.escolar.model.AlunoCarro;
 import org.escolar.model.Boleto;
@@ -736,6 +737,7 @@ public class AlunoService extends Service {
 			salvarIrmaos(user, aluno);
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -891,6 +893,7 @@ public class AlunoService extends Service {
 			contratoPersistence.setBoletos(boletos);
 		}
 
+		em.flush();
 		return user;
 
 	}
@@ -959,6 +962,7 @@ public class AlunoService extends Service {
 
 			quantidadeParcelas++;
 		}
+		em.flush();
 		return boletos;
 	}
 
@@ -1052,6 +1056,7 @@ public class AlunoService extends Service {
 			al.setContratos(contratos);
 			al.setBoletos(null);
 			em.persist(al);
+			em.flush();
 		}
 	}
 
@@ -1140,6 +1145,7 @@ public class AlunoService extends Service {
 		List<Boleto> boletos = gerarBoletos(user, contrato);
 		contrato.setBoletos(boletos);
 		em.persist(contrato);
+		em.flush();
 		return boletos;
 	}
 
@@ -1398,12 +1404,14 @@ public class AlunoService extends Service {
 		al.setRemovido(true);
 		al.getContratoVigente().setDataCancelamento(new Date());
 		em.persist(al);
+		em.flush();
 		return "ok";
 	}
 	
 	public void setNfsEnviada(Long idBoleto) {
 		Boleto bol = findBoletoById(idBoleto);
 		bol.setNfsEnviada(true);
+		em.flush();
 		em.persist(bol);
 	}
 
@@ -1413,6 +1421,7 @@ public class AlunoService extends Service {
 		al.setRestaurada(true);
 		al.getContratoVigente().setCnabEnviado(false);
 		em.persist(al);
+		em.flush();
 		return "ok";
 	}
 
@@ -1437,6 +1446,7 @@ public class AlunoService extends Service {
 				pt.setAluno(prof);
 				pt.setCarro(em.find(Carro.class, turma.getId()));
 				em.persist(pt);
+				em.flush();
 			}
 
 		} catch (NoResultException noResultException) {
@@ -1545,7 +1555,7 @@ public class AlunoService extends Service {
 		} else {
 			em.merge(obj);
 		}
-
+		em.flush();
 	}
 
 	private void atualizarIndices(ObjetoRota obj) {
@@ -1558,6 +1568,7 @@ public class AlunoService extends Service {
 				em.merge(ob);
 			}
 		}
+		em.flush();
 	}
 
 	private List<ObjetoRota> getObjetosRotasSeguintes(ObjetoRota obj) {
@@ -1948,6 +1959,7 @@ public class AlunoService extends Service {
 			for (ObjetoRota obj : objRotas) {
 				em.remove(obj);
 			}
+			em.flush();
 
 		} catch (NoResultException nre) {
 			nre.printStackTrace();
@@ -1975,6 +1987,7 @@ public class AlunoService extends Service {
 				em.remove(obj);
 			}
 
+			em.flush();
 		} catch (NoResultException nre) {
 			nre.printStackTrace();
 		} catch (Exception e) {
@@ -2210,7 +2223,7 @@ public class AlunoService extends Service {
 		rematriculado.setRemovido(false);
 		rematriculado.getContratoVigente().setCnabEnviado(false);
 		em.merge(rematriculado);
-
+		em.flush();
 	}
 
 	public List<Aluno> findAlunoTrocaNoite(Long idCarro, Long idCarroTroca) {
@@ -2322,24 +2335,58 @@ public class AlunoService extends Service {
 		Aluno aluno = findById(id);
 		aluno.getContratoVigente().setCnabEnviado(false);
 		em.merge(aluno);
+		em.flush();
 	}
-
+	
+	public void enviarCDL(ContratoAluno contrato) {
+		ContratoAluno contratoa = findContratoById(contrato.getId());
+		contratoa.setEnviadoSPC(true);
+		contratoa.setComentario(contrato.getComentario());
+		em.merge(contratoa);
+		em.flush();
+	}
+	
+	public void enviarConfirmadoWebService(ContratoAluno contrato) {
+		ContratoAluno contratoa = findContratoById(contrato.getId());
+		contratoa.setConfirmadoEnvioPorWebService(true);
+		em.merge(contratoa);
+		em.flush();
+	}
+	
+	public void saveComentarioContrato(ContratoAluno contrato) {
+		ContratoAluno contratoa = findContratoById(contrato.getId());
+		contratoa.setComentarioWebService(contrato.getComentarioWebService());
+		em.merge(contratoa);
+		em.flush();
+	}
+	
+	public void saveArquivoContrato(ContratoAluno contrato) {
+		ContratoAluno contratoa = findContratoById(contrato.getId());
+		contratoa.setContratoScaneado(contrato.getContratoScaneado());
+		em.merge(contratoa);
+		em.flush();
+	}
+	
+	
 	public void enviarCnab(Long id) {
 		Aluno aluno = findById(id);
 		aluno.getContratoVigente().setCnabEnviado(true);
 		em.merge(aluno);
+		em.flush();
 	}
 
 	public void removerVerificadoOk(Long id) {
 		Aluno aluno = findById(id);
 		aluno.setVerificadoOk(false);
 		em.merge(aluno);
+		em.flush();
 	}
 
 	public void verificadoOk(Long id) {
 		Aluno aluno = findById(id);
 		aluno.setVerificadoOk(true);
 		em.merge(aluno);
+		em.flush();
 	}
 
 	public void removerBoleto(Long idBoleto) {
@@ -2349,6 +2396,7 @@ public class AlunoService extends Service {
 		;
 		b.setValorPago((double) 0);
 		em.merge(b);
+		em.flush();
 	}
 
 	public void manterBoleto(Long idBoleto) {
@@ -2357,6 +2405,7 @@ public class AlunoService extends Service {
 		b.setManterAposRemovido(true);
 		b.setCancelado(false);
 		em.merge(b);
+		em.flush();
 	}
 
 	public Aluno findAlunoSemEndereco() {
@@ -2400,7 +2449,9 @@ public class AlunoService extends Service {
 		}
 		contratos.add(novoContrato);
 		aluno.setContratos(contratos);
+		aluno.setStatusContrato(StatusContratoEnum.ACEITO_CONTRATO_ENVIADO);
 		em.merge(aluno);
+		em.flush();
 		return aluno;
 
 	}
@@ -2435,6 +2486,7 @@ public class AlunoService extends Service {
 		em.persist(contrato);
 		List<Boleto> boletos = this.gerarBoletos(aluno, ano, numPa, contrato);
 		contrato.setBoletos(boletos);
+		em.flush();
 		return contrato;
 	}
 
@@ -2508,6 +2560,7 @@ public class AlunoService extends Service {
 		c.setNumero(numero);
 
 		em.merge(c);
+		em.flush();
 		return c;
 	}
 
@@ -2531,6 +2584,7 @@ public class AlunoService extends Service {
 			e.printStackTrace();
 			em.persist(contratoPersistence);
 		}
+		em.flush();
 	}
 
 	public void cancelarAlunosSemContratoAtivo() {
@@ -2566,6 +2620,7 @@ public class AlunoService extends Service {
 			ap.setDataCancelamento(new Date());
 			ap.setRemovido(true);
 			em.merge(ap);
+			em.flush();
 		}
 	}
 
@@ -2578,6 +2633,7 @@ public class AlunoService extends Service {
 		ap.setObservacaoAtrasado(al.getObservacaoAtrasado());
 		ap.setDataPrometeuPagar(al.getDataPrometeuPagar());
 		em.merge(ap);
+		em.flush();
 	}
 	
 	public void saveContado(Aluno al) {
@@ -2590,8 +2646,37 @@ public class AlunoService extends Service {
 		ap.setContato5WhatsValido(al.isContato5WhatsValido());
 		
 		em.merge(ap);
+		em.flush();
 	}
 
+	public void saveStatusCntrato(Aluno al) {
+		Aluno ap = findById(al.getId());
+		ap.setStatusContrato(al.getStatusContrato());
+				
+		em.merge(ap);
+		em.flush();
+	}
+	
+	public void saveNumeroCasa(ContratoAluno contrato) {
+		ContratoAluno ap = findContratoById(contrato.getId());
+		ap.setEnderecoNumero(contrato.getEnderecoNumero());
+		ap.setEndereco(contrato.getEndereco());
+		
+		ap.setBairro(contrato.getBairro());
+		ap.setCidade(contrato.getCidade());
+		
+		em.merge(ap);
+		em.flush();
+	}
+	
+	public void saveCPF(ContratoAluno contrato) {
+		ContratoAluno ap = findContratoById(contrato.getId());
+		ap.setCpfResponsavel(contrato.getCpfResponsavel());
+		em.merge(ap);
+		em.flush();
+	}
+
+	
 	public void colocarAlunosNaListaDeCobranca() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 15);
@@ -2612,11 +2697,14 @@ public class AlunoService extends Service {
 			}
 		}
 	}
+	
+	
 
 	private void desconectado(Aluno al) {
 		Aluno ap = findById(al.getId());
 		ap.setContactado(false);
 		em.merge(ap);
+		em.flush();
 	}
 	
 	public String enviarBoletoEmail(long idContrato, int mesBoletoInt,String email) {
@@ -2720,5 +2808,14 @@ public class AlunoService extends Service {
 		return null;
 
 	}
+	
+	public void setStatusCONVITE_ENVIADO(Aluno al) {
+		Aluno ap = findById(al.getId());
+		ap.setStatusContrato(StatusContratoEnum.CONVITE_ENVIADO);
+				
+		em.merge(ap);
+		em.flush();
+	}
+
 
 }

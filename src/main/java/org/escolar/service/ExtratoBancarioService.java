@@ -52,6 +52,7 @@ public class ExtratoBancarioService extends Service {
 		em.merge(findById(ie.getId()));
 		removeVinculoPai(ie.getId());
 		em.remove(findById(ie.getId()));
+		em.flush();
 	}
 	
 	
@@ -108,6 +109,7 @@ public class ExtratoBancarioService extends Service {
 			
 			em.persist(id);
 		}
+		em.flush();
 	}
 	
 	public Double count(Map<String, Object> filtros) {
@@ -137,6 +139,14 @@ public class ExtratoBancarioService extends Service {
 				sql.append(" and item.grupoRecebimento = ");
 				ExtratoGruposPagamentoRecebimentoEnum tipo =  (ExtratoGruposPagamentoRecebimentoEnum) filtros.get("grupoRecebimento");
 				sql.append(tipo.ordinal());
+			}
+			
+			if(filtros.get("dataEvento")!= null){
+				sql.append(" and item.dataEvento < ");
+				String dataFormata = OfficeUtil.dataFormatadaBanco((int)filtros.get("dia"),((int)filtros.get("mes")),(int)filtros.get("ano"));				
+				sql.append("'");
+				sql.append(dataFormata);
+				sql.append("'");
 			}
 			
 			Query query = em.createQuery(sql.toString());
@@ -286,7 +296,7 @@ public class ExtratoBancarioService extends Service {
 		
 		
 		em.merge(persistido);
-		
+		em.flush();
 	}
 	
 	private boolean isItemCriadorDeCusto(ItemExtrato id){
@@ -462,46 +472,49 @@ public class ExtratoBancarioService extends Service {
 									item.setTipoEntrada(ExtratoTiposEntradaEnum.NAO_IDENTIFICADO);
 								}
 								//Grupos automaticos
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.DEBITO_TELECOMUNICACAO)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.DEBITO_TELECOMUNICACAO)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.INTERNET);
 								}
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.TARIFA_REN)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.TARIFA_REN)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_BANCO);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.DEBITO_SEGURO)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.DEBITO_SEGURO)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.SEGURO);
 								}
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.CREDITO_LIQUIDACAO_COBRANCA)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.CREDITO_LIQUIDACAO_COBRANCA)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.ENTRADA_BOLETO);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.PACOTE_SERVICOS)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.PACOTE_SERVICOS)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_BANCO);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.DEBITO_ORGAO_FEDERAL)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.DEBITO_ORGAO_FEDERAL)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_GERAL);
 								}
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.TARIFA)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.TARIFA)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_GERAL);
 								}
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.SAQUE)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.SAQUE)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.SALARIO);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.TED)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.TED)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_BANCO);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.DEBITO_CASAM)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.DEBITO_CASAM)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.OUTROS);
 								}
 								
-								if(item.getTipoEntradaSaida().equals(ExtratoTiposEntradaEnum.DEBITO_FGTS)){
+								if(item.getTipoEntrada().equals(ExtratoTiposEntradaEnum.DEBITO_FGTS)){
 									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.TARIFA_GERAL);
 								}
 								
+								if(item.getGrupoRecebimento() == null) {
+									item.setGrupoRecebimento(ExtratoGruposPagamentoRecebimentoEnum.NAO_SELECIONADO);
+								}
 								
 								
 								if (!itensExtratoCadastrados.contains(item)) {

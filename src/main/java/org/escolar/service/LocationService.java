@@ -115,6 +115,7 @@ public class LocationService extends Service {
 		}else{
 			em.persist(m);
 		}
+		em.flush();
 		return m.getDTO();
 		
 	}

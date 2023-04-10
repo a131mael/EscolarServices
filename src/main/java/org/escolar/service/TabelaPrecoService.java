@@ -41,6 +41,7 @@ public class TabelaPrecoService extends Service {
 
 	public String remover(Long idRecado){
 		em.remove(findById(idRecado));
+		em.flush();
 		return "index";
 	}
 	
@@ -96,6 +97,7 @@ public class TabelaPrecoService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -130,6 +132,17 @@ public class TabelaPrecoService extends Service {
 			}
 			
 		}
+		
+		
+		if(aluno.getIrmao1() != null) {
+			valor = valor*2;
+			valor = valor - 100;
+		}
+		
+		if(aluno.getIrmao2() != null) {
+			valor = valor + 150;
+		}
+		
 		return valor;
 	}
 	

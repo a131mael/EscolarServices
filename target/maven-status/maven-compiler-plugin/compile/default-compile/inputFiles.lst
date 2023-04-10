@@ -4,6 +4,8 @@ C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Filial.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\rotinasAutomaticas\CONSTANTES.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\CustoService.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\FormaPagamentoEnum.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\StatusContratoEnum.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Custo.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSFault.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\StatusBoletoEnum.java
@@ -25,6 +27,7 @@ C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\esc
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\PerioddoEnum.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\ClienteWebServiceSPC.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\controller\OfficeDOCUtil.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Contratante.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroGeralWS.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\util\JsonReader.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Empresa.java
@@ -69,6 +72,7 @@ C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\esc
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\SuspensaoContratoService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Member.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\rotinasAutomaticas\RotinaAutomatica.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\FreteService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\TabelaPrecoService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSService_PortType.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Configuracao.java
@@ -88,11 +92,13 @@ C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\esc
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\rest\JaxRsActivator.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ProtestoWS.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSPCWS.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\Frete.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\TurmaService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConfirmacaoCancelamentoRegistroWS.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\Sexo.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\PromessaPagamentoBoleto.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\ConfiguracaoService.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\model\CarroFrete.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\enums\Serie.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\util\UtilFinalizarAnoLetivo.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarServices\src\main\java\org\escolar\service\SQLs.java

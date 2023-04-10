@@ -1,4 +1,5 @@
 /*
+
 ] * JBoss, Home of Professional Open Source
  * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
@@ -42,6 +43,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.aaf.financeiro.util.OfficeUtil;
 import org.escolar.enums.StatusBoletoEnum;
 import org.escolar.util.Verificador;
+import org.hibernate.annotations.Type;
 
 @SuppressWarnings("serial")
 @Entity
@@ -72,8 +74,11 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	@Column
 	private String nomePaiResponsavel;
 	
-	 @Column 
+	@Column 
 	private String endereco;
+	
+	@Column 
+	private String enderecoNumero;
 
 	@Column
 	private Boolean cnabEnviado;
@@ -139,6 +144,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
     private Boolean protestado;
 	
 	@Column
+    private Boolean confirmadoEnvioPorWebService;
+	
+	@Column
     private Boolean podeProtestarFinal;
 	
 	@Column
@@ -149,6 +157,12 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	
 	@Lob
 	private String comentario;
+	
+	@Lob
+	@Type(type = "org.hibernate.type.TextType")  
+	private String contratoScaneado;
+	
+	private byte[] comentarioWebService;
 	
 	@Transient
 	private Boolean atrasado;
@@ -599,5 +613,37 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 
 	public void setComplemento(String complemento) {
 		this.complemento = complemento;
+	}
+
+	public String getContratoScaneado() {
+		return contratoScaneado;
+	}
+
+	public void setContratoScaneado(String contratoScaneado) {
+		this.contratoScaneado = contratoScaneado;
+	}
+
+	public byte[] getComentarioWebService() {
+		return comentarioWebService;
+	}
+
+	public void setComentarioWebService(byte[] comentarioWebService) {
+		this.comentarioWebService = comentarioWebService;
+	}
+
+	public String getEnderecoNumero() {
+		return enderecoNumero;
+	}
+
+	public void setEnderecoNumero(String enderecoNumero) {
+		this.enderecoNumero = enderecoNumero;
+	}
+
+	public Boolean getConfirmadoEnvioPorWebService() {
+		return confirmadoEnvioPorWebService;
+	}
+
+	public void setConfirmadoEnvioPorWebService(Boolean confirmadoEnvioPorWebService) {
+		this.confirmadoEnvioPorWebService = confirmadoEnvioPorWebService;
 	}
 }

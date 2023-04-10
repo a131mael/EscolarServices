@@ -100,6 +100,7 @@ public class TurmaService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -128,7 +129,7 @@ public class TurmaService extends Service {
 		}
 		
 		
-		
+		em.flush();
 		return "ok";
 	}
 

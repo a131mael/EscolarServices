@@ -18,41 +18,32 @@ package org.escolar.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
-public class Configuracao implements Serializable {
+public class CarroFrete implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column
-    private int anoLetivo;
+    @ManyToOne
+    private Carro carro;
     
-    @Column
-    private Double valordinheiroEmcaixa;
     
-    @Column
-    private Short anoRematricula;
-    
-    @Column
-    private long sequencialArquivoCNAB;
-    
-    @Transient
-    private double valorNotas;
-    
+    @ManyToOne
+    private Frete frete;
+
+
 	public Long getId() {
 		return id;
 	}
@@ -62,45 +53,23 @@ public class Configuracao implements Serializable {
 	}
 
 
-	public int getAnoLetivo() {
-		return anoLetivo;
+	public Carro getCarro() {
+		return carro;
 	}
 
 
-	public void setAnoLetivo(int anoLetivo) {
-		this.anoLetivo = anoLetivo;
+	public void setCarro(Carro carro) {
+		this.carro = carro;
 	}
 
-	public long getSequencialArquivoCNAB() {
-		return sequencialArquivoCNAB;
+
+	public Frete getFrete() {
+		return frete;
 	}
 
-	public void setSequencialArquivoCNAB(long sequencialArquivoCNAB) {
-		this.sequencialArquivoCNAB = sequencialArquivoCNAB;
-	}
 
-	public Short getAnoRematricula() {
-		return anoRematricula;
-	}
-
-	public void setAnoRematricula(Short anoRematricula) {
-		this.anoRematricula = anoRematricula;
-	}
-
-	public double getValorNotas() {
-		return valorNotas;
-	}
-
-	public void setValorNotas(double valorNotas) {
-		this.valorNotas = valorNotas;
-	}
-
-	public Double getValordinheiroEmcaixa() {
-		return valordinheiroEmcaixa;
-	}
-
-	public void setValordinheiroEmcaixa(Double valordinheiroEmcaixa) {
-		this.valordinheiroEmcaixa = valordinheiroEmcaixa;
+	public void setFrete(Frete frete) {
+		this.frete = frete;
 	}
 
 }

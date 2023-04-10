@@ -30,6 +30,7 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.escolar.enums.CustoEnum;
+import org.escolar.enums.FormaPagamentoEnum;
 
 @Entity
 @XmlRootElement
@@ -62,6 +63,9 @@ public class Custo implements Serializable {
 
     @Column
     private CustoEnum tipoCusto;
+    
+    @Column
+    private FormaPagamentoEnum formaPagamento;
     
 	public Long getId() {
 		return id;
@@ -145,6 +149,14 @@ public class Custo implements Serializable {
 		
 		return true;
 
+	}
+
+	public FormaPagamentoEnum getFormaPagamento() {
+		return formaPagamento;
+	}
+
+	public void setFormaPagamento(FormaPagamentoEnum formaPagamento) {
+		this.formaPagamento = formaPagamento;
 	}
 
     

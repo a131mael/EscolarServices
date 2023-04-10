@@ -42,6 +42,7 @@ public class EventoService extends Service {
 	
 	public String remover(Long idEvento){
 		em.remove(findById(idEvento));
+		em.flush();
 		return "index";
 	}
 
@@ -99,6 +100,7 @@ public class EventoService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 

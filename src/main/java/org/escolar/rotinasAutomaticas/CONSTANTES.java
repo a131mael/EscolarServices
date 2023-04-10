@@ -15,6 +15,11 @@ public class CONSTANTES {
 	public static String PATH_EXTRATO_BANCARIO_ENVIADO = File.separator+"home"+File.separator+"servidor" + File.separator+"extrato" + File.separator +nomeProjeto + File.separator + "enviado" + File.separator;
 	
 	
+	//public static String PATH_EXTRATO_BANCARIO_ENVIAR = "C:\\Sicoobnet\\extrato"+ File.separator;
+	//public static String PATH_EXTRATO_BANCARIO_ENVIADO = "C:\\Sicoobnet\\extrato"+ File.separator;
+		
+		
+	
 	public static String PATH_ENVIAR_CNAB = File.separator+"home"+File.separator+"ubuntu" + File.separator+"cnab" + File.separator +nomeProjeto + File.separator + "enviar" + File.separator;
 	
 	

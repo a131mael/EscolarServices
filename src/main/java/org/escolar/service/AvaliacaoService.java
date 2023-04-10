@@ -182,6 +182,7 @@ public class AvaliacaoService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -220,6 +221,7 @@ public class AvaliacaoService extends Service {
 		aa.setAvaliacao(avaliacao);
 		aa.setAnoLetivo(al.getAnoLetivo());
 		em.persist(aa);
+		em.flush();
 	}
 	
 	public String remover(Long idAvaliacao) {
@@ -230,6 +232,7 @@ public class AvaliacaoService extends Service {
 		}
 		
 		em.remove(av);
+		em.flush();
 		return "ok";
 	}
 
@@ -316,12 +319,14 @@ public class AvaliacaoService extends Service {
 		AlunoAvaliacao al = em.find(AlunoAvaliacao.class, alunoAvaliacao.getId()); 
 		al.setNota(n);
 		em.persist(al);
+		em.flush();
 	}
 
 	public void saveAlunoAvaliacao(Long  idAluAv, Float nota) {
 		AlunoAvaliacao al = em.find(AlunoAvaliacao.class, idAluAv); 
 		al.setNota(nota);
 		em.persist(al);
+		em.flush();
 	}
 
 	public void save(AlunoAvaliacao alunoAvaliacao) {
@@ -329,6 +334,7 @@ public class AvaliacaoService extends Service {
 		AlunoAvaliacao al = em.find(AlunoAvaliacao.class, alunoAvaliacao.getId()); 
 		al.setNota(nota);
 		em.persist(al);
+		em.flush();
 	}
 
 	public Map<Aluno, List<AlunoAvaliacao>> findAlunoAvaliacaoMap(Long idAluno, Long idAvaliavao, DisciplinaEnum disciplina, BimestreEnum bimestre, Serie serie) {

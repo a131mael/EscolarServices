@@ -39,6 +39,7 @@ public class UsuarioService extends Service {
 	
 	public String remover(Long idTurma){
 		em.remove(findById(idTurma));
+		em.flush();
 		return "index";
 	}
 
@@ -91,6 +92,7 @@ public class UsuarioService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 

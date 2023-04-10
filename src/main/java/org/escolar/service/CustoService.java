@@ -86,6 +86,9 @@ public class CustoService extends Service {
 			user.setDescricao(evento.getDescricao());
 			user.setNome(evento.getNome());
 			user.setTipoCusto(evento.getTipoCusto());
+			
+			user.setFormaPagamento(evento.getFormaPagamento());
+			
 			user.setValor(evento.getValor());
 			user.setId(evento.getId());
 			if(evento.getCarro() != null){
@@ -109,7 +112,7 @@ public class CustoService extends Service {
 
 			e.printStackTrace();
 		}
-
+		em.flush();
 		return user;
 	}
 

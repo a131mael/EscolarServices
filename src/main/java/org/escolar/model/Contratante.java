@@ -17,90 +17,120 @@
 package org.escolar.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 @SuppressWarnings("serial")
 @Entity
 @XmlRootElement
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "id"))
-public class Configuracao implements Serializable {
+public class Contratante implements Serializable {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column
-    private int anoLetivo;
+    @NotNull
+    @Size(min = 1, max = 250)
+    private String nome;
     
     @Column
-    private Double valordinheiroEmcaixa;
+    private Date dataCadastro;
     
     @Column
-    private Short anoRematricula;
+    private String CPF_CNPJ;
     
     @Column
-    private long sequencialArquivoCNAB;
+    private String telefone1;
     
-    @Transient
-    private double valorNotas;
+    @Column
+    private String telefone2;
     
+    @Column
+    private String email;
+    
+    @Column
+    private String descricao;
+    
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
+	}
+
+
 	public Long getId() {
 		return id;
 	}
+
 
 	public void setId(Long id) {
 		this.id = id;
 	}
 
 
-	public int getAnoLetivo() {
-		return anoLetivo;
+	public Date getDataCadastro() {
+		return dataCadastro;
 	}
 
 
-	public void setAnoLetivo(int anoLetivo) {
-		this.anoLetivo = anoLetivo;
+	public void setDataCadastro(Date dataCadastro) {
+		this.dataCadastro = dataCadastro;
 	}
 
-	public long getSequencialArquivoCNAB() {
-		return sequencialArquivoCNAB;
+
+	public String getCPF_CNPJ() {
+		return CPF_CNPJ;
 	}
 
-	public void setSequencialArquivoCNAB(long sequencialArquivoCNAB) {
-		this.sequencialArquivoCNAB = sequencialArquivoCNAB;
+
+	public void setCPF_CNPJ(String cPF_CNPJ) {
+		CPF_CNPJ = cPF_CNPJ;
 	}
 
-	public Short getAnoRematricula() {
-		return anoRematricula;
+	public String getTelefone1() {
+		return telefone1;
 	}
 
-	public void setAnoRematricula(Short anoRematricula) {
-		this.anoRematricula = anoRematricula;
+	public void setTelefone1(String telefone1) {
+		this.telefone1 = telefone1;
 	}
 
-	public double getValorNotas() {
-		return valorNotas;
+	public String getTelefone2() {
+		return telefone2;
 	}
 
-	public void setValorNotas(double valorNotas) {
-		this.valorNotas = valorNotas;
+	public void setTelefone2(String telefone2) {
+		this.telefone2 = telefone2;
 	}
 
-	public Double getValordinheiroEmcaixa() {
-		return valordinheiroEmcaixa;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setValordinheiroEmcaixa(Double valordinheiroEmcaixa) {
-		this.valordinheiroEmcaixa = valordinheiroEmcaixa;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

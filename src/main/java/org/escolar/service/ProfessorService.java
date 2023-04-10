@@ -59,7 +59,7 @@ public class ProfessorService extends Service {
 		List<FuncionarioCarro> carros = funcionarioCarroService.findFuncionarioCarro(id);
 		for(FuncionarioCarro c : carros){
 			em.remove(c);
-		}
+			em.flush();}
 	}
 	
 	public String remover(Long idTurma){
@@ -168,6 +168,7 @@ public class ProfessorService extends Service {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -279,7 +280,7 @@ public class ProfessorService extends Service {
 			
 		}catch (Exception e){
 			e.printStackTrace();
-		}
+		}em.flush();
 		
 	}
 

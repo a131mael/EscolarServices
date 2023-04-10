@@ -21,6 +21,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.aaf.financeiro.model.Boleto;
+import org.escolar.enums.EscolaEnum;
+import org.escolar.enums.PerioddoEnum;
+import org.escolar.enums.StatusContratoEnum;
 import org.escolar.model.Aluno;
 import org.escolar.model.ContratoAluno;
 import org.escolar.model.extrato.ItemExtrato;
@@ -119,6 +122,7 @@ public class FinanceiroService extends Service {
 			bol.setEmailAvisoBoletoAtrasadoEnviado(boleto.getEmailAvisoBoletoAtrasadoEnviado());
 			bol.setEmailBoletoMesEnviado(boleto.getEmailBoletoMesEnviado());
 			em.merge(bol);
+			em.flush();
 		}
 	}
 
@@ -502,6 +506,7 @@ public class FinanceiroService extends Service {
 		boletoMerged.setVencimento(boleto.getVencimento());
 		boletoMerged.setValorNominal(boleto.getValorNominal());
 		em.merge(boletoMerged);
+		em.flush();
 	}
 
 	public List<Aluno> getAlunosCNABNaoEnviado() {
@@ -527,6 +532,7 @@ public class FinanceiroService extends Service {
 		Aluno al = em.find(Aluno.class, aluno.getId());
 		al.getContratoVigente().setCnabEnviado(true);
 		em.merge(al);
+		em.flush();
 	}
 
 	public List<ContratoAluno> getAlunosRemovidos() {
@@ -669,6 +675,7 @@ public class FinanceiroService extends Service {
 		if (boleto.getId() != null) {
 			ContratoAluno ca = findContratoALunoByID(boleto.getContrato().getId());
 			ca.setProtestado(true);
+			ca.setEnviadoParaCobrancaCDL(true);
 			em.merge(ca);
 			
 			org.escolar.model.Boleto bol = findBoletoByID(boleto.getId());
@@ -680,6 +687,7 @@ public class FinanceiroService extends Service {
 			bol.setCnabCanceladoEnviado(boleto.getCnabCanceladoEnviado());
 			
 			em.merge(bol);
+			em.flush();
 		}
 	}
 
@@ -750,6 +758,7 @@ public class FinanceiroService extends Service {
 				sql.append(quantidade);	
 			}
 		}
+		
 		
 		Query query = em.createNativeQuery(sql.toString());
 		BigInteger codigo = (BigInteger) query.getSingleResult();
@@ -823,9 +832,76 @@ public class FinanceiroService extends Service {
 	public List<Aluno> findAlunoMes(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
 			
 			StringBuilder sql = new StringBuilder();
-			sql.append("select pagador_id from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id  where  ");
+			sql.append("select pagador_id from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id left join Aluno aluno on aluno.id = contrato.aluno_id where  ");
 			sql.append(getIntervaloMes((Integer)filtros.get("mesAtrasado"),(Integer)filtros.get("anoSelecionado")));
 			sql.append(" and (bol.cancelado is null or bol.cancelado = false)	 and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false )");
+			
+			if (filtros.containsKey("escola")) {
+				String escolaSelecionada = filtros.get("escola").toString();
+				
+				for(EscolaEnum escola :EscolaEnum.values()) {
+					if (escolaSelecionada.equals(escola.name())) {
+						sql.append(" and aluno.escola = ");
+						sql.append(escola.ordinal());
+						
+					}
+				}
+			}
+			
+			Query query = em.createNativeQuery(sql.toString());
+			query.setFirstResult(first);
+			List<BigInteger> codigo = (List<BigInteger>) query.getResultList();
+			if(codigo == null){
+				return new ArrayList<>();
+			}
+			List<Aluno> alunos = new ArrayList<>();
+			for(BigInteger id : codigo){
+				alunos.add(alunoService.findById(id.longValue()));
+			}
+			
+			return alunos;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunosStatusContrato(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
+			
+			StringBuilder sql = new StringBuilder();
+			
+			
+			sql.append("select distinct(aluno.id) from aluno aluno left join contratoaluno contrato on aluno.id = contrato.aluno_id where 1 = 1 and anoletivo = ");
+			sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
+
+			sql.append(" and (contrato.cancelado is null or contrato.cancelado  = false)");
+			sql.append(" and (aluno.removido is null or aluno.removido  = false)");
+			
+			if(filtros.get("escola") != null) {
+				sql.append("and aluno.escola = ");
+				sql.append( ((EscolaEnum)filtros.get("escola")).ordinal());
+			}
+			
+			if(filtros.get("periodo") != null) {
+				sql.append(" and aluno.periodo = ");
+				sql.append( ((PerioddoEnum) filtros.get("periodo")).ordinal());
+			}
+			
+			if(filtros.get("nomeAluno") != null) {
+				sql.append(" and UPPER(aluno.nomealuno) like UPPER('%");
+				sql.append(filtros.get("nomeAluno"));
+				sql.append("%')");
+			}
+			
+			if(filtros.get("nomeResponsavel") != null) {
+				sql.append(" and UPPER(contrato.nomeresponsavel) like UPPER('%");
+				sql.append(filtros.get("nomeResponsavel"));
+				sql.append("%')");
+			}
+			
+			if(filtros.get("statusContrato") != null) {
+				sql.append(" and aluno.statusContrato = ");
+				sql.append(((StatusContratoEnum)filtros.get("statusContrato")).ordinal());
+			}
+			
+			sql.append(" order by aluno.id desc ");
 			
 			Query query = em.createNativeQuery(sql.toString());
 			query.setFirstResult(first);
@@ -857,7 +933,7 @@ public class FinanceiroService extends Service {
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("select pagador_id from (");
-		sql.append(" select sum(1) as quantidadeAtrasadas,pagador_id from boleto  bol left join contratoaluno contrato on bol.contrato_id = contrato.id ");
+		sql.append(" select sum(1) as quantidadeAtrasadas,pagador_id from boleto  bol left join contratoaluno contrato on bol.contrato_id = contrato.id left join Aluno al on al.id= pagador_id  ");
 		sql.append(" where ");
 		sql.append(" bol.vencimento >  '");
 		sql.append((Integer)filtros.get("anoSelecionado"));
@@ -866,6 +942,21 @@ public class FinanceiroService extends Service {
 		sql.append("'");
 		sql.append(" and (bol.cancelado is null or bol.cancelado = false)");
 		sql.append(" and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false ) ");
+	
+		
+		if (filtros.containsKey("escola")) {
+			String escolaSelecionada = filtros.get("escola").toString();
+			
+			for(EscolaEnum escola :EscolaEnum.values()) {
+				if (escolaSelecionada.equals(escola.name())) {
+					sql.append(" and escola = ");
+					sql.append(escola.ordinal());
+					
+				}
+			}
+		}
+		
+		
 		sql.append(" group by pagador_id");
 		sql.append("  order by quantidadeAtrasadas) as buscaAtrasadas");
 		if(quantidade != 0){
@@ -880,6 +971,9 @@ public class FinanceiroService extends Service {
 		}
 		
 		Query query = em.createNativeQuery(sql.toString());
+		query.setFirstResult(first);
+		
+		
 		List<BigInteger> codigo = (List<BigInteger>) query.getResultList();
 		if(codigo == null){
 			return new ArrayList<>();

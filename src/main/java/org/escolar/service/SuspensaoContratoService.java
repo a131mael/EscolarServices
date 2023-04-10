@@ -41,6 +41,7 @@ public class SuspensaoContratoService extends Service implements Serializable {
 		suspensao.setAtivo(true);
 		suspensao.setDataSuspensao(new Date());
 		em.persist(suspensao);
+		em.flush();
 	}
 	
 	public void remove(SuspensaoContrato suspensao) {
@@ -50,6 +51,7 @@ public class SuspensaoContratoService extends Service implements Serializable {
 		suspensao.setAtivo(false);
 		suspensao.setDataContratoRetornado(new Date());
 		em.persist(suspensao);
+		em.flush();
 	}
 
 	public List<SuspensaoContrato> findByParam(Long idcontratoAluno) {

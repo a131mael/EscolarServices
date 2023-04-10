@@ -53,6 +53,7 @@ public class PromessaPagamentoService extends Service implements Serializable {
 		promessa.setBoleto(bol);
 		promessa.setAtivo(true);
 		em.persist(promessa);
+		em.flush();
 	}
 
 	public void remove(PromessaPagamentoBoleto promessa) {
@@ -76,6 +77,7 @@ public class PromessaPagamentoService extends Service implements Serializable {
 		promessa.setBoleto(bol);
 		promessa.setAtivo(false);
 		em.merge(promessa);
+		em.flush();
 	}
 
 	

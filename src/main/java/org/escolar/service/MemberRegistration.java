@@ -54,10 +54,12 @@ public class MemberRegistration {
 	        
 	        em.persist(m);
 	        /*memberEventSrc.fire(member);*/
+	        em.flush();
 	    }
 
     public void register(Member member) throws Exception {
         em.persist(member);
+        em.flush();
     }
     
     public Member login(Member member) throws Exception {

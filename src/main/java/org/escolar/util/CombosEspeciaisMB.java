@@ -20,8 +20,10 @@ import org.escolar.enums.CustoEnum;
 import org.escolar.enums.DisciplinaEnum;
 import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.EspecialidadeEnum;
+import org.escolar.enums.FormaPagamentoEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
+import org.escolar.enums.StatusContratoEnum;
 import org.escolar.enums.TipoMembro;
 import org.escolar.model.Carro;
 import org.escolar.model.Funcionario;
@@ -196,6 +198,21 @@ public class CombosEspeciaisMB implements Serializable {
 
 		return items;
 	}
+	
+	public ArrayList<SelectItem> getStatusContratoSelectIItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (StatusContratoEnum m : StatusContratoEnum.values()) {
+				items.add(new SelectItem(m, m.getName()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
 
 	public ArrayList<SelectItem> getEsolasSelectIItem() {
 		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
@@ -218,6 +235,21 @@ public class CombosEspeciaisMB implements Serializable {
 		try {
 			 items.add(new SelectItem(null, " "));
 			for (Serie m : Serie.values()) {
+				items.add(new SelectItem(m, m.getName()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+	
+	public ArrayList<SelectItem> getFormaPagamentoSelectIItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			 items.add(new SelectItem(null, " "));
+			for (FormaPagamentoEnum m : FormaPagamentoEnum.values()) {
 				items.add(new SelectItem(m, m.getName()));
 			}
 

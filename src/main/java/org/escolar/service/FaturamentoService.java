@@ -77,6 +77,7 @@ public class FaturamentoService extends Service {
 			faturamento.setQuantidadeCriancas(relatorioService.countCriancasCarro(filtros));
 			faturamento.setValor(relatorioService.getValorTotal(filtros));
 			em.persist(faturamento);
+			em.flush();
 		}
 		
 	}

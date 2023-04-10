@@ -36,6 +36,7 @@ public class MensagemAlunoService extends Service implements Serializable {
 		mensagem.setAluno(al);
 		mensagem.setDataEnvio(new Date());
 		em.persist(mensagem);
+		em.flush();
 	}
 
 	public List<MensagemAluno> findByParam(Long idALuno, String mes, String ano, CanalMensagem canal) {

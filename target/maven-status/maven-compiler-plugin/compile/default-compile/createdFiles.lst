@@ -1,6 +1,7 @@
 org\escolar\model\Boleto_.class
 org\escolar\util\Constant.class
 org\escolar\model\extrato\ItemExtrato_.class
+org\escolar\enums\FormaPagamentoEnum.class
 org\escolar\model\AlunoAvaliacao.class
 org\escolar\util\JsonReader.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\CancelamentoSPCWS.class
@@ -9,7 +10,9 @@ org\escolar\rotinasAutomaticas\RotinaAutomatica.class
 org\escolar\service\PromessaPagamentoService.class
 org\escolar\util\Verificador.class
 org\escolar\service\TurmaService.class
+org\escolar\model\Contratante_.class
 org\escolar\service\FaturamentoService.class
+org\escolar\model\Frete.class
 org\escolar\model\MensagemAluno.class
 org\escolar\service\ConfiguracaoService.class
 org\escolar\service\EventoService.class
@@ -63,6 +66,7 @@ org\escolar\enums\TipoDestinatario.class
 org\escolar\enums\TipoMensagem.class
 org\escolar\model\TabelaPrecos.class
 org\escolar\rotinasAutomaticas\CNAB240.class
+org\escolar\model\Contratante.class
 org\escolar\rotinasAutomaticas\EnviadorEmail.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConsumidorContato.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ProtestoWS.class
@@ -77,6 +81,7 @@ org\escolar\model\ContratoAdonai.class
 org\escolar\model\MensagemAluno_.class
 org\escolar\util\EndPoints.class
 org\escolar\util\Formatador.class
+org\escolar\model\CarroFrete_.class
 org\escolar\model\LocalizacaoRota_.class
 org\escolar\model\ObjetoRota_.class
 org\escolar\enums\CanalMensagem.class
@@ -107,6 +112,7 @@ org\escolar\util\JSONPRequestFilter.class
 br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\RegistroSpcScWSServiceProxy.class
 org\escolar\model\Boleto.class
 org\escolar\enums\EscolaEnum.class
+org\escolar\model\CarroFrete.class
 org\escolar\model\SuspensaoContrato.class
 org\escolar\enums\StatusBoletoEnum.class
 org\escolar\enums\BimestreEnum.class
@@ -120,6 +126,7 @@ br\org\cdl_sc\spcsc_ws_registro\spc_web\RegistroSpcscService\ConfirmacaoRegistro
 org\escolar\model\Faturamento.class
 org\escolar\service\MemberRegistration.class
 org\escolar\model\PromessaPagamentoBoleto.class
+org\escolar\service\FreteService.class
 org\escolar\model\Configuracao.class
 org\escolar\model\extrato\ItemExtrato.class
 org\escolar\util\CurrencyWriter.class
@@ -138,6 +145,7 @@ org\escolar\service\AlunoService.class
 org\escolar\service\LocationService.class
 org\escolar\enums\BairroEnum.class
 org\escolar\model\SuspensaoContrato_.class
+org\escolar\model\Frete_.class
 org\escolar\model\Carro_.class
 br\org\cdl_sc\ClienteWebServiceSPC.class
 org\escolar\controller\OfficeDOCUtil.class
@@ -146,4 +154,5 @@ org\escolar\model\Contrato.class
 org\escolar\service\DevedorService$2.class
 org\escolar\model\Filial.class
 org\escolar\controller\WriteDocx.class
+org\escolar\enums\StatusContratoEnum.class
 org\escolar\model\Avaliacao.class

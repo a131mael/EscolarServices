@@ -44,6 +44,7 @@ import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
 import org.escolar.enums.StatusBoletoEnum;
+import org.escolar.enums.StatusContratoEnum;
 import org.escolar.util.Verificador;
 
 @SuppressWarnings("serial")
@@ -180,6 +181,9 @@ public class Aluno implements Serializable {
 
 	@NotNull
 	private PerioddoEnum periodo;
+	
+	@Column(columnDefinition = "int default 0") 
+	private StatusContratoEnum statusContrato;
 
 	@Column
 	private String telefone;
@@ -1554,5 +1558,13 @@ public class Aluno implements Serializable {
 
 	public void setCadastroTemporario(Boolean cadastroTemporario) {
 		this.cadastroTemporario = cadastroTemporario;
+	}
+
+	public StatusContratoEnum getStatusContrato() {
+		return statusContrato;
+	}
+
+	public void setStatusContrato(StatusContratoEnum statusContrato) {
+		this.statusContrato = statusContrato;
 	}
 }

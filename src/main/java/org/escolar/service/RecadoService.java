@@ -154,6 +154,7 @@ public class RecadoService extends Service implements Serializable {
 			e.printStackTrace();
 		}
 
+		em.flush();
 		return user;
 	}
 
@@ -285,6 +286,7 @@ public class RecadoService extends Service implements Serializable {
 			e.printStackTrace();
 		}
 
+		em.flush();
 //		return user;
 		
 		

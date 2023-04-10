@@ -101,6 +101,7 @@ public class LocationRotaService extends Service {
 		}else{
 			em.persist(m);
 		}
+		em.flush();
 		return m.getDTO();
 		
 	}
