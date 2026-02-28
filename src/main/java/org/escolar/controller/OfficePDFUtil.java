@@ -16,13 +16,11 @@ import javax.naming.NamingException;
 import org.escolar.enums.PegarEntregarEnun;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.model.Aluno;
-import org.escolar.model.Boleto;
 import org.escolar.model.Carro;
 import org.escolar.model.ObjetoRota;
 import org.escolar.service.AlunoService;
 import org.escolar.util.Formatador;
 import org.escolar.util.ServiceLocator;
-import org.escolar.util.Verificador;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;

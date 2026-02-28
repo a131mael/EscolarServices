@@ -107,6 +107,14 @@ public class Member implements Serializable {
 	
 	@Column
 	private Integer quantidadeAcessos;
+	
+	@Column(nullable = false, columnDefinition = "float8 default 0")
+	private double latitude =0;
+
+	@Column(nullable = false, columnDefinition = "float8 default 0")
+	private double longitude =0;
+	
+	private String tokenFCM;
 
 	
 	public org.aaf.escolar.MemberDTO getDTO(){
@@ -117,7 +125,7 @@ public class Member implements Serializable {
 		dto.setLogin(login);
 		dto.setName(name);
 		dto.setSenha(senha);
-		//dto.setTokenFCM(tokenFCM);
+		dto.setTokenFCM(tokenFCM);
 		dto.setTelefone(phoneNumber);
 		dto.setIdCrianca1(idCrianca1);
 		dto.setIdCrianca2(idCrianca2);
@@ -125,10 +133,13 @@ public class Member implements Serializable {
 		dto.setIdCrianca4(idCrianca4);
 		dto.setIdCrianca5(idCrianca5);
 		dto.setIdContratoAtivo(idContratoAtivo);
-		dto.setAlertaProximidade(alertaProximidade);
-		dto.setDistanciaAlerta(distanciaAlerta);
-		dto.setQuantidadeAcessos(quantidadeAcessos);
-		dto.setEnviarBoletosEmail(enviarBoletosEmail);
+		dto.setAlertaProximidade(alertaProximidade==null?true:alertaProximidade);
+		dto.setDistanciaAlerta(distanciaAlerta==null?0:distanciaAlerta);
+		dto.setQuantidadeAcessos(quantidadeAcessos==null?0:quantidadeAcessos);
+		dto.setEnviarBoletosEmail(enviarBoletosEmail==null?true:enviarBoletosEmail);
+		dto.setLatitude(latitude);
+		dto.setLongitude(longitude);
+		dto.setPhoneNumber(phoneNumber);
 		return dto;
 	}
 
@@ -297,5 +308,35 @@ public class Member implements Serializable {
 
 	public void setEnviarBoletosEmail(Boolean enviarBoletosEmail) {
 		this.enviarBoletosEmail = enviarBoletosEmail;
+	}
+
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+
+	public String getTokenFCM() {
+		return tokenFCM;
+	}
+
+
+	public void setTokenFCM(String tokenFCM) {
+		this.tokenFCM = tokenFCM;
 	}
 }

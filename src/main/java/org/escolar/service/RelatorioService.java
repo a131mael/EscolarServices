@@ -28,16 +28,16 @@ public class RelatorioService extends Service {
 	@PersistenceContext(unitName = "EscolarDS")
 	private EntityManager em;
 
-	public double getTotalNotasEmitidas(int mes){
+	public double getTotalNotasEmitidas(int mes, int ano){
 		try{
 			StringBuilder sql = new StringBuilder();
 			sql.append(" select sum(valorPago) from boleto ");
 			sql.append("where ");
 			sql.append("nfsEnviada = true ");
 			sql.append("and vencimento >  ");
-			sql.append(getInicioMes(mes));
+			sql.append(getInicioMes(mes,ano));
 			sql.append(" and vencimento < ");
-			sql.append(getFimMes(mes));
+			sql.append(getFimMes(mes,ano));
 			
 			Query query = em.createNativeQuery(sql.toString());
 			Double t = (Double) query.getSingleResult();
@@ -52,7 +52,7 @@ public class RelatorioService extends Service {
 		}
 	}
 	
-	public List<String> getResponsaveisNotasEnviadas(int mes){
+	public List<String> getResponsaveisNotasEnviadas(int mes, int ano){
 		try{
 			StringBuilder sql = new StringBuilder();
 			sql.append(" select contrato.nomeresponsavel || ' (' || aluno.nomealuno  || ' )'  ");
@@ -65,9 +65,9 @@ public class RelatorioService extends Service {
 			sql.append("where ");
 			sql.append("nfsEnviada = true ");
 			sql.append("and vencimento >  ");
-			sql.append(getInicioMes(mes));
+			sql.append(getInicioMes(mes,ano));
 			sql.append(" and vencimento < ");
-			sql.append(getFimMes(mes));
+			sql.append(getFimMes(mes,ano));
 			
 			Query query = em.createNativeQuery(sql.toString());
 			List<String> t = (List<String>) query.getResultList();
@@ -79,124 +79,157 @@ public class RelatorioService extends Service {
 		}
 	}
 	
-	private String getInicioMes(int mesDoAno) {
+	private String getInicioMes(int mesDoAno, int ano) {
 		String mes = "2022-01-01";
+		StringBuilder sb = new StringBuilder();
+		sb.append("'");
+		sb.append(ano);
+		
 		switch (mesDoAno) {
 
 		case 12:
+			sb.append("-12-01'");
 			mes = "'2022-12-01'";
 			break;
 
 		case 11:
+			sb.append("-11-01'");
 			mes = "'2022-11-01'";
 			break;
 
 		case 10:
+			sb.append("-10-01'");
 			mes = "'2022-10-01'";
 			break;
 
 		case 9:
+			sb.append("-09-01'");
 			mes = "'2022-09-01'";
 			break;
 
 		case 8:
+			sb.append("-08-01'");
 			mes = "'2022-08-01'";
 			break;
 
 		case 7:
+			sb.append("-07-01'");
 			mes = "'2022-07-01'";
 			break;
 
 		case 6:
+			sb.append("-06-01'");
 			mes = "'2022-06-01'";
 			break;
 
 		case 5:
+			sb.append("-05-01'");
 			mes = "'2022-05-01'";
 			break;
 
 		case 4:
+			sb.append("-04-01'");
 			mes = "'2022-04-01'";
 			break;
 
 		case 3:
+			sb.append("-03-01'");
 			mes = "'2022-03-01'";
 			break;
 
 		case 2:
+			sb.append("-02-01'");
 			mes = "'2022-02-01'";
 			break;
 
 		case 1:
+			sb.append("-01-01'");
 			mes = "'2022-01-01'";
 			break;
 
 		default:
+			sb.append("-12-01'");
 			mes = "'2022-12-01'";
 			break;
 		}
 
-		return mes;
+		return sb.toString();
 	}
 	
-	private String getFimMes(int mesDoAno) {
+	private String getFimMes(int mesDoAno, int ano) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("'");
+		sb.append(ano);
 		String mes = "2022-01-31";
 		switch (mesDoAno) {
 
 		case 12:
+			sb.append("-12-31'");
 			mes = "'2022-12-31'";
 			break;
 
 		case 11:
+			sb.append("-11-30'");
 			mes = "'2022-11-30'";
 			break;
 
 		case 10:
+			sb.append("-10-31'");
 			mes = "'2022-10-31'";
 			break;
 
 		case 9:
+			sb.append("-09-30'");
 			mes = "'2022-09-30'";
 			break;
 
 		case 8:
+			sb.append("-08-31'");
 			mes = "'2022-08-31'";
 			break;
 
 		case 7:
+			sb.append("-07-31'");
 			mes = "'2022-07-31'";
 			break;
 
 		case 6:
+			sb.append("-06-30'");
 			mes = "'2022-06-30'";
 			break;
 
 		case 5:
+			sb.append("-05-31'");
 			mes = "'2022-05-31'";
 			break;
 
 		case 4:
+			sb.append("-04-30'");
 			mes = "'2022-04-30'";
 			break;
 
 		case 3:
+			sb.append("-03-31'");
 			mes = "'2022-03-31'";
 			break;
 
 		case 2:
+			sb.append("-02-28'");
 			mes = "'2022-02-28'";
 			break;
 
 		case 1:
+			sb.append("-01-31'");
 			mes = "'2022-01-31'";
 			break;
 
 		default:
+			sb.append("-12-31'");
 			mes = "'2022-12-31'";
 			break;
 		}
 
-		return mes;
+		return sb.toString();
 	}
 
 	public long count(Map<String, Object> filtros) {

@@ -45,6 +45,7 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 	@Column
 
 	private Date vencimento;
+	
 	@ManyToOne
 	private ContratoAluno contrato;
 

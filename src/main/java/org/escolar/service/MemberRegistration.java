@@ -16,6 +16,10 @@
  */
 package org.escolar.service;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -28,34 +32,63 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.aaf.escolar.MemberDTO;
+import org.escolar.enums.StatusBoletoEnum;
 import org.escolar.enums.TipoMembro;
+import org.escolar.model.Aluno;
+import org.escolar.model.ContratoAluno;
 import org.escolar.model.Member;
+import org.escolar.util.Verificador;
 
-// The @Stateless annotation eliminates the need for manual transaction demarcation
 @Stateless
 public class MemberRegistration {
 
 	@PersistenceContext(unitName = "EscolarDS")
     private EntityManager em;
 
-	 public void register(MemberDTO member) throws Exception {
-	        Member m = new Member();
-	        if(member.getId() != null){
-	        	m = findById(member.getId());
-	        }
-	        m.setEmail(member.getEmail());
-	        m.setLogin(member.getLogin());
-	        m.setName(member.getName());
-	        m.setSenha(member.getSenha());
-	        m.setAlertaProximidade(member.isAlertaProximidade());
-	        m.setDistanciaAlerta(member.getDistanciaAlerta());
-	        m.setEnviarBoletosEmail(member.isEnviarBoletosEmail());
-	        m.setQuantidadeAcessos(member.getQuantidadeAcessos());
-	        
-	        em.persist(m);
-	        /*memberEventSrc.fire(member);*/
-	        em.flush();
+	public void register(MemberDTO member) throws Exception {
+	    Member m = new Member();
+	    if (member.getId() != null) {
+	        m = findById(member.getId());
 	    }
+	    
+	    if (member.getEmail() != null) {
+	        m.setEmail(member.getEmail());
+	    }
+	    if (member.getLogin() != null) {
+	        m.setLogin(member.getLogin());
+	    }
+	    if (member.getName() != null) {
+	        m.setName(member.getName());
+	    }
+	    if (member.getSenha() != null) {
+	        m.setSenha(member.getSenha());
+	    }
+	        m.setAlertaProximidade(member.isAlertaProximidade());
+	    if (member.getDistanciaAlerta() != 0) {
+	        m.setDistanciaAlerta(member.getDistanciaAlerta());
+	    }
+	      m.setEnviarBoletosEmail(member.isEnviarBoletosEmail());
+	    if (member.getQuantidadeAcessos() != 0) {
+	        m.setQuantidadeAcessos(member.getQuantidadeAcessos());
+	    }
+	    if (member.getTokenFCM() != null) {
+	        m.setTokenFCM(member.getTokenFCM());
+	    }
+	    if (member.getPhoneNumber() != null) {
+	        m.setPhoneNumber(member.getPhoneNumber());
+	    }
+	    if (member.getLatitude() != 0) {
+	        m.setLatitude(member.getLatitude());
+	    }
+	    if (member.getLongitude() != 0) {
+	        m.setLongitude(member.getLongitude());
+	    }
+	    
+	    em.persist(m);
+	    /* memberEventSrc.fire(member); */
+	    em.flush();
+	}
+
 
     public void register(Member member) throws Exception {
         em.persist(member);
@@ -70,8 +103,17 @@ public class MemberRegistration {
     
     public org.aaf.escolar.MemberDTO findByIdDTO(Long id) {
 		Member m = em.find(Member.class, id); 
- 		return m.getDTO();
+		if(m!= null) {
+			return m.getDTO();
+		}else {
+			return null;
+		}
 	}
+    
+    public ContratoAluno findContratoById(Long id) {
+  		ContratoAluno m = em.find(ContratoAluno.class, id); 
+  		return m;
+  	}
     
     public MemberDTO findByLoginSenha(String login, String senha) {
 		try {
@@ -96,6 +138,7 @@ public class MemberRegistration {
 			return null;
 		}
 	}
+    
     
     public MemberDTO findMemberDTO(String login, String senha){
     	Member member = null;
@@ -129,6 +172,71 @@ public class MemberRegistration {
 		System.out.println("--------------" + member.getDTO());
     	return member.getDTO();
     }
+    
+    public List<MemberDTO> findMemberValidoAPPDTO(String periodo){
+    	
+    	String usuariosValidosPeriodoSQL = construirSQLUsuariosValidos(periodo);
+    	
+    	Query query = em.createQuery(usuariosValidosPeriodoSQL.toString());
+		 
+    	List<Member> membros = query.getResultList();
+		System.out.println("--------------" + query);
+		List<MemberDTO> membrosDTO = new ArrayList<>();
+		try{
+			
+			
+			for (Member member : membros) {
+				  MemberDTO memberDTO = member.getDTO();
+				  membrosDTO.add(memberDTO);
+			}
+    	
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return membrosDTO; 
+    }
+    
+    private String construirSQLUsuariosValidos(String periodo) {
+        // Obter o ano atual dinamicamente
+        int anoAtual = Calendar.getInstance().get(Calendar.YEAR);
+
+        // Construir a query
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT m FROM Member m ");
+        sql.append("LEFT JOIN m.aluno a "); // Alterado para LEFT JOIN para permitir alunos nulos
+        sql.append("LEFT JOIN a.contratos c "); // Mantém o LEFT JOIN para lidar com alunos nulos
+        sql.append("WHERE (");
+        sql.append("  (a IS NOT NULL AND "); // Condição para membros com aluno
+        sql.append("   c.ano = ").append(anoAtual).append(" "); // Ano atual
+        sql.append("   AND tokenFCM IS NOT NULL ");
+        sql.append("   AND latitude IS NOT NULL ");
+        sql.append("   AND (c.cancelado IS NULL OR c.cancelado = false) "); // Contrato não cancelado ou nulo
+        sql.append("   AND (");
+
+        // Condição para o período
+        if ("manha".equalsIgnoreCase(periodo)) {
+            sql.append("a.periodo = 1 OR a.periodo = 0"); // 1 = MANHA, 0 = INTEGRAL
+        } else if ("meio_dia".equalsIgnoreCase(periodo)) {
+            sql.append("a.periodo = 1 OR a.periodo = 2"); // 1 = MANHA, 2 = TARDE
+        } else if ("tarde".equalsIgnoreCase(periodo)) {
+            sql.append("a.periodo = 0 OR a.periodo = 2"); // 0 = INTEGRAL, 2 = TARDE
+        } else {
+            throw new IllegalArgumentException("Período inválido: " + periodo);
+        }
+
+        sql.append(")) "); // Fechando condição para membros com aluno
+
+        // Condição para membros sem aluno e tipoMembro diferente de 3
+        sql.append("OR (a IS NULL AND m.tipoMembro <> 3) ");
+
+        // Condições globais
+        sql.append("AND tokenFCM IS NOT NULL "); // Token deve ser preenchido
+        sql.append("AND latitude IS NOT NULL "); // Localização deve ser preenchida
+
+        sql.append(")"); // Fechando a condição principal
+        return sql.toString();
+    }
+
     
     public Member findById(EntityManager em, Long id) {
 		return em.find(Member.class, id);

@@ -39,8 +39,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.escolar.enums.BairroEnum;
-import org.escolar.enums.EscolaEnum;
+import org.aaf.escolar.enums.BairroEnum;
+import org.aaf.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
 import org.escolar.enums.StatusBoletoEnum;
@@ -436,6 +436,9 @@ public class Aluno implements Serializable {
 
 	@Transient
 	private String contatos;
+	
+	@Transient
+	private boolean remocaoIrmao;
 	
 	public Long getId() {
 		return id;
@@ -1359,7 +1362,7 @@ public class Aluno implements Serializable {
 		if (contratos != null) {
 			for (ContratoAluno contrato : contratos) {
 				if (contrato.getNumero() != null && !contrato.getNumero().equalsIgnoreCase("")) {
-					if (conts == null || Integer.parseInt(contrato.getNumero()) > Integer.parseInt(conts.getNumero())) {
+					if (conts == null || Long.parseLong(contrato.getNumero()) > Long.parseLong(conts.getNumero())) {
 						conts = contrato;
 					}
 				}
@@ -1368,6 +1371,31 @@ public class Aluno implements Serializable {
 
 		return conts;
 	}
+
+	public ContratoAluno getUltimoContratoComBoletoEMaiorValor() {
+		ContratoAluno conts = null;
+		if (contratos != null) {
+			for (ContratoAluno contrato : contratos) {
+				if (contrato.getNumero() != null && !contrato.getNumero().equalsIgnoreCase("")) {
+					if(conts == null) {
+						conts = contrato;
+					}else 
+						if (Long.parseLong(contrato.getNumero()) > Long.parseLong(conts.getNumero())) {
+						if(contrato.getBoletos().size() >0) {
+							if ((contrato.getCancelado() == null || !contrato.getCancelado() )) {
+								if ((contrato.getValorMensal() >= conts.getValorMensal())) {
+									conts = contrato;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return conts;
+	}
+	
 
 	public int getDiaVencimento() {
 		return diaVencimento;
@@ -1566,5 +1594,13 @@ public class Aluno implements Serializable {
 
 	public void setStatusContrato(StatusContratoEnum statusContrato) {
 		this.statusContrato = statusContrato;
+	}
+
+	public boolean isRemocaoIrmao() {
+		return remocaoIrmao;
+	}
+
+	public void setRemocaoIrmao(boolean remocaoIrmao) {
+		this.remocaoIrmao = remocaoIrmao;
 	}
 }

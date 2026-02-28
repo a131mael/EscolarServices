@@ -40,8 +40,12 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.aaf.escolar.AlunoDTO;
+import org.aaf.escolar.BoletoDTO;
+import org.aaf.escolar.ContratoAlunoDTO;
 import org.aaf.financeiro.util.OfficeUtil;
 import org.escolar.enums.StatusBoletoEnum;
+import org.escolar.enums.TipoBoleto;
 import org.escolar.util.Verificador;
 import org.hibernate.annotations.Type;
 
@@ -59,7 +63,7 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	@ManyToOne
 	private Aluno aluno;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade= CascadeType.ALL)
+	@OneToMany(mappedBy = "contrato", fetch = FetchType.LAZY, cascade= CascadeType.ALL)
 	private List<Boleto> boletos;
 
 	@Column
@@ -85,6 +89,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	
 	@Column
 	private Boolean cancelado;
+	
+	@Column
+	private Boolean acordo;
 	
 	@Column
 	private Boolean usuarioAppCriado;
@@ -166,6 +173,9 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	
 	@Transient
 	private Boolean atrasado;
+	
+	@Column
+	private TipoBoleto tipoBoleto;
 
 	public Boolean getContratoTerminado() {
 		return contratoTerminado;
@@ -646,4 +656,64 @@ public class ContratoAluno implements Serializable,Comparable<ContratoAluno> {
 	public void setConfirmadoEnvioPorWebService(Boolean confirmadoEnvioPorWebService) {
 		this.confirmadoEnvioPorWebService = confirmadoEnvioPorWebService;
 	}
+
+	public Boolean getAcordo() {
+		return acordo;
+	}
+
+	public void setAcordo(Boolean acordo) {
+		this.acordo = acordo;
+	}
+
+	public TipoBoleto getTipoBoleto() {
+		return tipoBoleto;
+	}
+
+	public void setTipoBoleto(TipoBoleto tipoBoleto) {
+		this.tipoBoleto = tipoBoleto;
+	}
+	
+	public ContratoAlunoDTO getDTO() {
+	    ContratoAlunoDTO contratoAlunoDTO = new ContratoAlunoDTO();
+
+	    // Populando o DTO com os dados de ContratoAluno
+	    contratoAlunoDTO.setIdContrato(this.getId());
+	    contratoAlunoDTO.setValorContrato(this.getAnuidade()); // ou o campo que represente o valor total do contrato
+	    contratoAlunoDTO.setDataCriacao(this.getDataCriacaoContrato());
+	    contratoAlunoDTO.setAno(this.getAno());
+	    contratoAlunoDTO.setNomeResponsavel(this.getNomeResponsavel());
+	    contratoAlunoDTO.setAcordo(this.getAcordo());
+	    contratoAlunoDTO.setNumeroParcelas(this.getNumeroParcelas());
+	    contratoAlunoDTO.setCpfResponsavel(this.getCpfResponsavel());
+	    contratoAlunoDTO.setValorMensal(this.getValorMensal());
+
+	    // Populando o aluno DTO
+	    AlunoDTO alunoDTO = new AlunoDTO();
+	    alunoDTO.setId(this.getAluno().getId());
+	    alunoDTO.setNomeAluno(this.getAluno().getNomeAluno());
+	    alunoDTO.setCodigo(this.getAluno().getCodigo());  // Certifique-se de que esses campos estão disponíveis em Aluno
+	    alunoDTO.setSerie(this.getAluno().getSerie().ordinal()+"");  // Assim como esse
+	    alunoDTO.setPeriodo(this.getAluno().getPeriodo().ordinal()+"");  // E este
+
+	    contratoAlunoDTO.setAluno(alunoDTO);
+
+	    // Populando boletos DTO
+	    List<BoletoDTO> boletosDTO = new ArrayList<>();
+	    for (Boleto boleto : this.getBoletos()) {
+	        BoletoDTO boletoDTO = new BoletoDTO();
+	        boletoDTO.setId(boleto.getId());
+	        boletoDTO.setVencimento(boleto.getVencimento());
+	        boletoDTO.setDataPagamento(boleto.getDataPagamento());
+	        boletoDTO.setValorNominal(boleto.getValorNominal());
+	        boletoDTO.setValorPago(boleto.getValorPago());
+	        boletoDTO.setCancelado(boleto.getCancelado());
+	        boletoDTO.setProtestado(boleto.getProtestado());
+	        boletoDTO.setStatusBoleto(Verificador.getStatus(boleto));
+	        boletosDTO.add(boletoDTO);
+	    }
+	    contratoAlunoDTO.setBoletos(boletosDTO);
+
+	    return contratoAlunoDTO;
+	}
+
 }

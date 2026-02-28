@@ -410,15 +410,16 @@ public class ExtratoBancarioService extends Service {
 	public void lerExtrato(String localArquivo) {
 		try {
 			List<ItemExtrato> itensExtratoCadastrados = new ArrayList<>();
-
 			File arquivos[];
 			File diretorio = new File(localArquivo);
 			arquivos = diretorio.listFiles();
+			
 			if (arquivos != null) {
 				for (int i = 0; i < arquivos.length; i++) {
 					if(!arquivos[i].isDirectory()){
 						List<String> arquivo = OfficeUtil.lerArquivo(localArquivo  + arquivos[i].getName());
 
+						
 						if(arquivo != null && arquivo.size() > 3){
 							String linha2 = OfficeUtil.getLinha(arquivo, 3);
 							String data2 = OfficeUtil.getValor(linha2, ConstantesEXTRATO.INICIO_DATA, ConstantesEXTRATO.FIM_DATA);
@@ -521,6 +522,7 @@ public class ExtratoBancarioService extends Service {
 									save(item);
 								}
 							}
+							
 
 							Date hj = new Date();
 
@@ -529,7 +531,6 @@ public class ExtratoBancarioService extends Service {
 											+ arquivos[i].getName() + hj.getTime());
 							
 						}
-					
 						
 					}
 					

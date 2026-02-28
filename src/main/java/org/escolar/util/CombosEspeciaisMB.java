@@ -14,16 +14,17 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 
-import org.escolar.enums.BairroEnum;
+import org.aaf.escolar.enums.BairroEnum;
+import org.aaf.escolar.enums.EscolaEnum;
 import org.escolar.enums.BimestreEnum;
 import org.escolar.enums.CustoEnum;
 import org.escolar.enums.DisciplinaEnum;
-import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.EspecialidadeEnum;
 import org.escolar.enums.FormaPagamentoEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.Serie;
 import org.escolar.enums.StatusContratoEnum;
+import org.escolar.enums.TipoBoleto;
 import org.escolar.enums.TipoMembro;
 import org.escolar.model.Carro;
 import org.escolar.model.Funcionario;
@@ -90,6 +91,11 @@ public class CombosEspeciaisMB implements Serializable {
 		return items;
 	}
 
+	public static TipoBoleto[] getTipoBoleto() {
+
+		return TipoBoleto.values();
+	}
+	
 	public ArrayList<SelectItem> getCarrosSelectItem() {
 		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
 		try {
@@ -307,7 +313,7 @@ public class CombosEspeciaisMB implements Serializable {
 	}
 	
 	public static Integer[] getAnos() {
-		Integer[] anos = {2020,2021,2022,2023,2024,2025};
+		Integer[] anos = {2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2036};
 		return anos;
 	}
 	

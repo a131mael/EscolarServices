@@ -1,7 +1,6 @@
 package org.escolar.service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,9 @@ import javax.persistence.criteria.Root;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
-import org.escolar.enums.BairroEnum;
-import org.escolar.enums.EscolaEnum;
-import org.escolar.enums.PerioddoEnum;
-import org.escolar.enums.Serie;
+import org.aaf.escolar.enums.BairroEnum;
+import org.aaf.escolar.enums.EscolaEnum;
 import org.escolar.model.Aluno;
-import org.escolar.model.Avaliacao;
-import org.escolar.model.Recado;
 import org.escolar.model.TabelaPrecos;
 import org.escolar.util.Service;
 
@@ -132,15 +127,34 @@ public class TabelaPrecoService extends Service {
 			}
 			
 		}
+		int irmaos = 0;
 		
 		
 		if(aluno.getIrmao1() != null) {
-			valor = valor*2;
-			valor = valor - 100;
+			/*
+			 * valor = valor*2; valor = valor - 100;
+			 */
+			irmaos++;
 		}
 		
 		if(aluno.getIrmao2() != null) {
-			valor = valor + 150;
+			//valor = valor + 150;
+			irmaos++;
+		}
+		
+		if(irmaos == 1) {
+			if(mesMatricula == 1) {
+				valor = 700;
+			}else {
+				valor = 760;
+			}
+		}
+		if(irmaos == 2) {
+			if(mesMatricula == 1) {
+				valor = 950;
+			}else {
+				valor = 1100;
+			}
 		}
 		
 		return valor;

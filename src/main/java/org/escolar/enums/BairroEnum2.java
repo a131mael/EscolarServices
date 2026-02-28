@@ -1,6 +1,6 @@
  package org.escolar.enums;
 
-public enum BairroEnum {
+public enum BairroEnum2 {
 
 	ARIRIU("Aririu"),
 	
@@ -40,7 +40,7 @@ public enum BairroEnum {
 	
 	private String name;
 	
-	BairroEnum(String name){
+	BairroEnum2(String name){
 		this.name = name;
 		
 	}

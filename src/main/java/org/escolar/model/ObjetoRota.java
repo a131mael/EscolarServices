@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.escolar.enums.EscolaEnum;
+import org.aaf.escolar.enums.EscolaEnum;
 import org.escolar.enums.PegarEntregarEnun;
 import org.escolar.enums.PerioddoEnum;
 

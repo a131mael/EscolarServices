@@ -2,6 +2,7 @@
 package org.escolar.service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -189,6 +190,8 @@ public class DevedorService extends Service {
 	}
 	
 	public List<Aluno> findDevedor(Date dataInicio,Date dataFim){
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.YEAR, -1);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select al.* from aluno al ");   
 		sql.append("left join boleto bol ");
@@ -197,6 +200,12 @@ public class DevedorService extends Service {
 		sql.append("bol.vencimento < '");
 		sql.append(new Date());
 		sql.append("'");
+		
+		sql.append(" and bol.vencimento > '");
+		sql.append(c.getTime());
+		sql.append("'");
+		
+		
 		if(dataInicio != null){
 			sql.append(" and bol.vencimento > '");
 			sql.append(dataInicio);
@@ -853,6 +862,9 @@ public class DevedorService extends Service {
 	@SuppressWarnings("unchecked")
 	public List<ContratoAluno> findProtesto(int first, int size, String orderBy, String order, Map<String, Object> filtros) {
 		try {
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.YEAR, -1);
+			
 			StringBuilder sql = new StringBuilder();
 			sql.append("select bol.* from boleto bol ");   
 			sql.append("left join contratoaluno ca ");
@@ -861,6 +873,12 @@ public class DevedorService extends Service {
 			sql.append("bol.vencimento < '");
 			sql.append(new Date());
 			sql.append("'");
+			
+			sql.append(" and bol.vencimento > '");
+			sql.append(c.getTime());
+			sql.append("'");
+			
+			
 			if(dataInicio != null){
 				sql.append(" and bol.vencimento > '");
 				sql.append(dataInicio);
@@ -962,6 +980,8 @@ public class DevedorService extends Service {
 			sql.append(" and (bol.dividaPerdoada is null or bol.dividaPerdoada = false)");
 			sql.append(" and ca.protestado = true");
 			sql.append(" and (ca.enviadoProtestoDefinitivo is null or ca.enviadoProtestoDefinitivo = false)");
+			sql.append(" limit ");
+			sql.append((size*2.5));
 			
 			Query query = em.createNativeQuery(sql.toString(),Boleto.class);
 			query.setFirstResult(first);
@@ -984,6 +1004,7 @@ public class DevedorService extends Service {
 			}
 			return aux;
 		}catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 	}

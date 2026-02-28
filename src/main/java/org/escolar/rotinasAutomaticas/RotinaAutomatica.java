@@ -116,10 +116,10 @@ public class RotinaAutomatica {
 	}
 
 	
-	@Schedule(hour="*",minute="*/23",  persistent = false)
+	@Schedule(hour="*",minute="*/4",  persistent = false)
 	public synchronized void ImportarExtratoBancario() {
 		try {
-			System.out.println("Importando Extrato ");
+			System.out.println("Importando Extrato 2");
 			extratoBancarioService.lerExtrato(CONSTANTES.PATH_EXTRATO_BANCARIO_ENVIAR);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -16,7 +16,6 @@ import org.apache.poi.hwpf.usermodel.Paragraph;
 import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.hwpf.usermodel.Section;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
-import org.apache.poi.poifs.filesystem.OPOIFSFileSystem;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -124,17 +123,23 @@ public class OfficeDOCUtil {
 
 		OutputStream writer = null;
 		
-		try {
-			XWPFDocument docx = new XWPFDocument(
+		XWPFDocument docx;
+		if(FacesContext.getCurrentInstance() == null) {
+			
+			docx = new XWPFDocument(new FileInputStream(endereco));
+			
+			writer = new FileOutputStream(nomeArquivoSaida + ".docx");
+			
+		}else {
+			docx = new XWPFDocument(
 					new FileInputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath(endereco)));
-			
-			//System.out.println("OUTPUT:  " +FacesContext.getCurrentInstance().getExternalContext().getRealPath(endereco));
-			
+
 			writer = new FileOutputStream(FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + File.separator
 					+ nomeArquivoSaida + ".doc");
-			
-			//System.out.println("OUTPUT:  " + FacesContext.getCurrentInstance().getExternalContext().getRealPath("/") + File.separator	+ nomeArquivoSaida + ".doc");
-			// faz o replace do que esta no map
+		}
+		
+		try {
+		
 			for (Map.Entry<String, String> entry : trocas.entrySet()) {
 				for(XWPFTable table :docx.getTables()){
 					for(XWPFTableRow linha :table.getRows()){

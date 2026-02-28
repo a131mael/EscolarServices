@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +22,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.aaf.escolar.enums.EscolaEnum;
 import org.aaf.financeiro.model.Boleto;
-import org.escolar.enums.EscolaEnum;
 import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.StatusContratoEnum;
 import org.escolar.model.Aluno;
@@ -859,6 +861,56 @@ public class FinanceiroService extends Service {
 				alunos.add(alunoService.findById(id.longValue()));
 			}
 			
+			return alunos;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<org.escolar.model.Boleto> findAlunoMes2(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("select * from boleto bol left join contratoaluno contrato on bol.contrato_id = contrato.id left join Aluno aluno on aluno.id = contrato.aluno_id where  ");
+			sql.append(getIntervaloMes((Integer)filtros.get("mesAtrasado"),(Integer)filtros.get("anoSelecionado")));
+			sql.append(" and (bol.cancelado is null or bol.cancelado = false)	 and bol.datapagamento is null  and (contrato.protestado is  null or contrato.protestado = false )");
+			
+			if (filtros.containsKey("escola")) {
+				String escolaSelecionada = filtros.get("escola").toString();
+				
+				for(EscolaEnum escola :EscolaEnum.values()) {
+					if (escolaSelecionada.equals(escola.name())) {
+						sql.append(" and aluno.escola = ");
+						sql.append(escola.ordinal());
+						
+					}
+				}
+			}
+			
+			Query query = em.createNativeQuery(sql.toString(),org.escolar.model.Boleto.class);
+			query.setFirstResult(first);
+			List<org.escolar.model.Boleto> codigo = (List<org.escolar.model.Boleto>) query.getResultList();
+			if(codigo == null){
+				return new ArrayList<>();
+			}
+			List<org.escolar.model.Boleto> alunos = new ArrayList<>();
+			for(org.escolar.model.Boleto id : codigo){
+				id.getPagador().getId();
+				id.getPagador().getContratos().size();
+				alunos.add(id);
+			}
+			
+			Collections.sort(alunos, new Comparator<org.escolar.model.Boleto>() {
+		        @Override
+		        public int compare(org.escolar.model.Boleto  b1, org.escolar.model.Boleto  b2) {
+		        		if(b1.getVencimento().after(b2.getVencimento())) {
+		        			return 1;
+		        		}else if(b1.getVencimento().before(b2.getVencimento())){
+		        			return -1;
+		        		}else {
+		        			return 0;
+		        		}
+		        	
+		        	
+		        }
+		    });
 			return alunos;
 	}
 	
