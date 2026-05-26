@@ -3446,6 +3446,160 @@ public class AlunoService extends Service {
 	    return contratosAtivosDTO;
 	}
 
+	/**
+     * Lista alunos do carro do membro (MOTORISTA ou MONITOR).
+     */
+    public java.util.List<org.aaf.escolar.AlunoDTO> findAlunosByMemberCarro(Long memberId) {
+        java.util.List<org.aaf.escolar.AlunoDTO> resultado = new java.util.ArrayList<>();
+        try {
+            org.escolar.model.Member member = em.find(org.escolar.model.Member.class, memberId);
+            if (member == null || member.getProfessor() == null) return resultado;
 
+            org.escolar.model.Funcionario funcionario = member.getProfessor();
+
+            java.util.List<org.escolar.model.FuncionarioCarro> carrosFuncionario =
+                em.createQuery(
+                    "SELECT pt from FuncionarioCarro pt where pt.professor.id = " + funcionario.getId(),
+                    org.escolar.model.FuncionarioCarro.class)
+                .getResultList();
+
+            if (carrosFuncionario.isEmpty()) return resultado;
+
+            org.escolar.model.Carro carro = carrosFuncionario.get(0).getTurma();
+            if (carro == null) return resultado;
+
+            // getAnoLetivo() → int (bytecode: ()I)
+            int anoAtual = configuracaoService.getConfiguracao().getAnoLetivo();
+
+            java.util.List<org.escolar.model.AlunoCarro> alunosCarros =
+                em.createQuery(
+                    "SELECT pt from AlunoCarro pt where pt.carro.id = "
+                    + carro.getId() + " and pt.anoLetivo = " + anoAtual,
+                    org.escolar.model.AlunoCarro.class)
+                .getResultList();
+
+            for (org.escolar.model.AlunoCarro ac : alunosCarros) {
+                org.escolar.model.Aluno aluno = ac.getAluno();
+                // getRemovido() → Boolean wrapper — null-safe
+                if (aluno != null && !Boolean.TRUE.equals(aluno.getRemovido())) {
+                    resultado.add(toDTO(aluno));
+                }
+            }
+
+            resultado.sort((a, b) -> {
+                if (a.getNomeAluno() == null) return 1;
+                if (b.getNomeAluno() == null) return -1;
+                return a.getNomeAluno().compareToIgnoreCase(b.getNomeAluno());
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultado;
+    }
+
+    /**
+     * Lista alunos por IDs vindos do MemberDTO.
+     * MemberDTO.getIdCrianca1() → String (confirmado no MemberDTO.java)
+     * Por isso recebe List<String> — o AlunoRest faz a conversão.
+     */
+    public java.util.List<org.aaf.escolar.AlunoDTO> findAlunosByIds(java.util.List<Long> ids) {
+        java.util.List<org.aaf.escolar.AlunoDTO> resultado = new java.util.ArrayList<>();
+        if (ids == null || ids.isEmpty()) return resultado;
+        for (Long id : ids) {
+            try {
+                org.escolar.model.Aluno aluno = findById(id); // find() existe no AlunoService ✓
+                if (aluno != null && !Boolean.TRUE.equals(aluno.getRemovido())) {
+                    resultado.add(toDTO(aluno));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return resultado;
+    }
+
+    /**
+     * Converte Aluno → AlunoDTO.
+     * Todos os tipos confirmados no AlunoDTO.java fonte.
+     */
+    public org.aaf.escolar.AlunoDTO toDTO(org.escolar.model.Aluno aluno) {
+        org.aaf.escolar.AlunoDTO dto = new org.aaf.escolar.AlunoDTO();
+
+        dto.setId(aluno.getId());
+        dto.setNomeAluno(aluno.getNomeAluno());
+        dto.setCodigo(aluno.getCodigo());
+
+        // serie: String no AlunoDTO — getSerie() retorna enum → .name() → String ✓
+        if (aluno.getSerie() != null)
+            dto.setSerie(aluno.getSerie().name());
+
+        // periodo: String no AlunoDTO — getPeriodo() retorna enum → .name() → String ✓
+        if (aluno.getPeriodo() != null)
+            dto.setPeriodo(aluno.getPeriodo().name());
+
+        // escola: EscolaEnum no AlunoDTO — getEscola() retorna EscolaEnum → passar directo ✓
+        // NÃO usar .getName() — setEscola(EscolaEnum), não setEscola(String)
+        if (aluno.getEscola() != null)
+            dto.setEscola(aluno.getEscola());
+
+        // idaVolta: int primitivo ✓
+        dto.setIdaVolta(aluno.getIdaVolta());
+
+        dto.setEnderecoAluno(aluno.getEndereco() != null ? aluno.getEndereco() : "");
+
+        // idIrmao1..4: String no AlunoDTO ✓
+        // getIrmao1() retorna Aluno → getId() → Long → String.valueOf()
+        if (aluno.getIrmao1() != null && aluno.getIrmao1().getId() != null)
+            dto.setIdIrmao1(String.valueOf(aluno.getIrmao1().getId()));
+        if (aluno.getIrmao2() != null && aluno.getIrmao2().getId() != null)
+            dto.setIdIrmao2(String.valueOf(aluno.getIrmao2().getId()));
+        if (aluno.getIrmao3() != null && aluno.getIrmao3().getId() != null)
+            dto.setIdIrmao3(String.valueOf(aluno.getIrmao3().getId()));
+        if (aluno.getIrmao4() != null && aluno.getIrmao4().getId() != null)
+            dto.setIdIrmao4(String.valueOf(aluno.getIrmao4().getId()));
+        // idIrmao5 não existe no Aluno model — fica null
+
+        // Contatos: todos String e Boolean ✓
+        dto.setContatoNome1(aluno.getContatoNome1());
+        dto.setContatoTelefone1(aluno.getContatoTelefone1());
+        dto.setContato1WhatsValido(aluno.isContato1WhatsValido());
+        dto.setContatoNome2(aluno.getContatoNome2());
+        dto.setContatoTelefone2(aluno.getContatoTelefone2());
+        dto.setContato2WhatsValido(aluno.isContato2WhatsValido());
+        dto.setContatoNome3(aluno.getContatoNome3());
+        dto.setContatoTelefone3(aluno.getContatoTelefone3());
+        dto.setContato3WhatsValido(aluno.isContato3WhatsValido());
+        dto.setContatoNome4(aluno.getContatoNome4());
+        dto.setContatoTelefone4(aluno.getContatoTelefone4());
+        dto.setContato4WhatsValido(aluno.isContato4WhatsValido());
+        dto.setContatoNome5(aluno.getContatoNome5());
+        dto.setContatoTelefone5(aluno.getContatoTelefone5());
+        dto.setContato5WhatsValido(aluno.isContato5WhatsValido());
+        dto.setContatoEmail1(aluno.getContatoEmail1());
+        dto.setContatoEmail2(aluno.getContatoEmail2());
+
+        return dto;
+    }
+
+    /** Busca Carro pelo ID — para PUT /students/{id}/carro */
+    public org.escolar.model.Carro findCarroById(Long id) {
+        try { return em.find(org.escolar.model.Carro.class, id); }
+        catch (Exception e) { e.printStackTrace(); return null; }
+    }
+
+    /** Chave Pix estática — substituir pela chave real antes de produção */
+    public String getPixKeyEmpresa() {
+        return "SEU_CNPJ_OU_EMAIL_PIX_AQUI";
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
 	
 }

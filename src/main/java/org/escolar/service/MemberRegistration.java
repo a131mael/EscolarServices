@@ -291,4 +291,15 @@ public class MemberRegistration {
 		return member;
 	}
     
+    /**
+     * Atualiza um Member existente (merge + flush).
+     * Chamado pelo MemberRest para actualizar token FCM e preferências.
+     */
+    public void atualizarMember(org.escolar.model.Member member) {
+        em.merge(member);
+        em.flush();
+    }
+
+
+    
 }

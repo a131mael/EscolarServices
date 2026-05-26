@@ -127,7 +127,7 @@ public class Member implements Serializable {
 		dto.setSenha(senha);
 		dto.setTokenFCM(tokenFCM);
 		dto.setTelefone(phoneNumber);
-		dto.setIdCrianca1(idCrianca1);
+		dto.setIdCrianca1(getIdCrianca1());
 		dto.setIdCrianca2(idCrianca2);
 		dto.setIdCrianca3(idCrianca3);
 		dto.setIdCrianca4(idCrianca4);
@@ -338,5 +338,15 @@ public class Member implements Serializable {
 
 	public void setTokenFCM(String tokenFCM) {
 		this.tokenFCM = tokenFCM;
+	}
+
+
+	public String getIdCrianca1() {
+		return idCrianca1;
+	}
+
+
+	public void setIdCrianca1(String idCrianca1) {
+		this.idCrianca1 = idCrianca1;
 	}
 }
