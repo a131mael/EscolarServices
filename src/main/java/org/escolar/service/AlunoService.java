@@ -3598,6 +3598,19 @@ public class AlunoService extends Service {
         } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
     }
 
+    public org.escolar.model.Carro findCarroByMemberId(Long memberId) {
+        try {
+            org.escolar.model.Member member = em.find(org.escolar.model.Member.class, memberId);
+            if (member == null || member.getProfessor() == null) return null;
+            List<org.escolar.model.FuncionarioCarro> carros = em.createQuery(
+                "SELECT fc FROM FuncionarioCarro fc WHERE fc.professor.id = :fid",
+                org.escolar.model.FuncionarioCarro.class)
+                .setParameter("fid", member.getProfessor().getId())
+                .getResultList();
+            return carros.isEmpty() ? null : carros.get(0).getTurma();
+        } catch (Exception e) { e.printStackTrace(); return null; }
+    }
+
     /** Chave Pix estática — substituir pela chave real antes de produção */
     public String getPixKeyEmpresa() {
         return "SEU_CNPJ_OU_EMAIL_PIX_AQUI";
