@@ -179,6 +179,12 @@ public class Aluno implements Serializable {
 	@Column
 	private String enderecoAluno;
 
+	@Column(columnDefinition = "double precision default 0")
+	private double latitudeAluno;
+
+	@Column(columnDefinition = "double precision default 0")
+	private double longitudeAluno;
+
 	@NotNull
 	private PerioddoEnum periodo;
 	
@@ -1259,6 +1265,22 @@ public class Aluno implements Serializable {
 
 	public void setEnderecoAluno(String enderecoAluno) {
 		this.enderecoAluno = enderecoAluno;
+	}
+
+	public double getLatitudeAluno() {
+		return latitudeAluno;
+	}
+
+	public void setLatitudeAluno(double latitudeAluno) {
+		this.latitudeAluno = latitudeAluno;
+	}
+
+	public double getLongitudeAluno() {
+		return longitudeAluno;
+	}
+
+	public void setLongitudeAluno(double longitudeAluno) {
+		this.longitudeAluno = longitudeAluno;
 	}
 
 	public BairroEnum getBairroAluno() {

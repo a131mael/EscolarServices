@@ -3546,7 +3546,10 @@ public class AlunoService extends Service {
         // idaVolta: int primitivo ✓
         dto.setIdaVolta(aluno.getIdaVolta());
 
-        dto.setEnderecoAluno(aluno.getEndereco() != null ? aluno.getEndereco() : "");
+        dto.setEnderecoAluno(aluno.getEnderecoAluno() != null ? aluno.getEnderecoAluno()
+                : (aluno.getEndereco() != null ? aluno.getEndereco() : ""));
+        dto.setLatitudeAluno(aluno.getLatitudeAluno());
+        dto.setLongitudeAluno(aluno.getLongitudeAluno());
 
         // idIrmao1..4: String no AlunoDTO ✓
         // getIrmao1() retorna Aluno → getId() → Long → String.valueOf()
