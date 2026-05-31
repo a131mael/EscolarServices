@@ -3591,6 +3591,13 @@ public class AlunoService extends Service {
         catch (Exception e) { e.printStackTrace(); return null; }
     }
 
+    public List<org.escolar.model.Carro> findAllCarros() {
+        try {
+            return em.createQuery("SELECT c FROM Carro c ORDER BY c.nome ASC", org.escolar.model.Carro.class)
+                     .getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+    }
+
     /** Chave Pix estática — substituir pela chave real antes de produção */
     public String getPixKeyEmpresa() {
         return "SEU_CNPJ_OU_EMAIL_PIX_AQUI";
