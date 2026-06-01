@@ -3598,6 +3598,20 @@ public class AlunoService extends Service {
         } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
     }
 
+    /** Todos os alunos activos (removido=false) — sem depender do configuracaoService */
+    @SuppressWarnings("unchecked")
+    public List<org.escolar.model.Aluno> findAlunosAtivos() {
+        try {
+            return em.createQuery(
+                "SELECT a FROM Aluno a WHERE a.removido = false ORDER BY a.nomeAluno ASC",
+                org.escolar.model.Aluno.class
+            ).setMaxResults(2000).getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
     public org.escolar.model.Carro findCarroByMemberId(Long memberId) {
         try {
             org.escolar.model.Member member = em.find(org.escolar.model.Member.class, memberId);
