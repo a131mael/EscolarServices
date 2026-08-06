@@ -81,6 +81,7 @@ public class TurmaService extends Service {
 			}
 			
 			user.setNome(professor.getNome());
+			user.setPlaca(professor.getPlaca());
 			em.persist(user);
 
 			

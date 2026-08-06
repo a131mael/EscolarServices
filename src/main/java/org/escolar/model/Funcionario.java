@@ -17,17 +17,23 @@
 package org.escolar.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Transient;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -97,13 +103,50 @@ public class Funcionario implements Serializable {
     @Column
     private String endereco ;
     
-    private String salario ;
-    
+    @Column
+    private String salario;
+
+    @Transient
+    private BigDecimal salarioBd;
+
+    @Column
+    private String chavePix;
+
+    @Column
+    private String tipoChavePix;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataCadastro;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataEdicaoChavePix;
+
+    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date ultimoPagamento;
+
+    @PrePersist
+    private void prePersist() {
+        if (dataCadastro == null) dataCadastro = new Date();
+    }
+
     @Column
     private String cpf ;
     
     @Column
     private String rg ;
+
+    /** Dados da CNH (Carteira Nacional de Habilitação) - usados no cadastro de motoristas (SCMobi/CT-e) */
+    @Column
+    private String cnhNumero;
+
+    @Column
+    private String cnhCategoria;
+
+    @Column
+    private Date cnhValidade;
 
     @OneToMany
     private List<FuncionarioCarro> turmas;
@@ -204,6 +247,21 @@ public class Funcionario implements Serializable {
 		this.salario = salario;
 	}
 
+	public BigDecimal getSalarioBd() {
+		if (salarioBd != null) return salarioBd;
+		if (salario == null || salario.trim().isEmpty()) return null;
+		try {
+			return new BigDecimal(salario.replace(",", ".").replaceAll("[^0-9.]", ""));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void setSalarioBd(BigDecimal bd) {
+		this.salarioBd = bd;
+		if (bd != null) this.salario = bd.setScale(2, RoundingMode.HALF_UP).toPlainString();
+	}
+
 	public String getCpf() {
 		return cpf;
 	}
@@ -218,6 +276,30 @@ public class Funcionario implements Serializable {
 
 	public void setRg(String rg) {
 		this.rg = rg;
+	}
+
+	public String getCnhNumero() {
+		return cnhNumero;
+	}
+
+	public void setCnhNumero(String cnhNumero) {
+		this.cnhNumero = cnhNumero;
+	}
+
+	public String getCnhCategoria() {
+		return cnhCategoria;
+	}
+
+	public void setCnhCategoria(String cnhCategoria) {
+		this.cnhCategoria = cnhCategoria;
+	}
+
+	public Date getCnhValidade() {
+		return cnhValidade;
+	}
+
+	public void setCnhValidade(Date cnhValidade) {
+		this.cnhValidade = cnhValidade;
 	}
 
 	public boolean isAtivo() {
@@ -305,5 +387,18 @@ public class Funcionario implements Serializable {
 		this.codigo = codigo;
 	}
 
-		
+	public String getChavePix() { return chavePix; }
+	public void setChavePix(String chavePix) { this.chavePix = chavePix; }
+
+	public String getTipoChavePix() { return tipoChavePix; }
+	public void setTipoChavePix(String tipoChavePix) { this.tipoChavePix = tipoChavePix; }
+
+	public Date getDataCadastro() { return dataCadastro; }
+	public void setDataCadastro(Date dataCadastro) { this.dataCadastro = dataCadastro; }
+
+	public Date getDataEdicaoChavePix() { return dataEdicaoChavePix; }
+	public void setDataEdicaoChavePix(Date dataEdicaoChavePix) { this.dataEdicaoChavePix = dataEdicaoChavePix; }
+
+	public Date getUltimoPagamento() { return ultimoPagamento; }
+	public void setUltimoPagamento(Date ultimoPagamento) { this.ultimoPagamento = ultimoPagamento; }
 }

@@ -2357,21 +2357,24 @@ public class AlunoService extends Service {
 
 		sql.append("where 1=2 ");
 		if (nome != null && !nome.equalsIgnoreCase("")) {
-			sql.append(" or cont.aluno.nomeAluno like '%");
+			sql.append(" or upper(cont.aluno.nomeAluno) like upper('%");
 			sql.append(nome);
-			sql.append("%' ");
+			sql.append("%') ");
 		} else {
 
 		}
 		if (nomeResponsavel != null && !nomeResponsavel.equalsIgnoreCase("")) {
-			sql.append(" or cont.nomeResponsavel like '%");
+			sql.append(" or upper(cont.nomeResponsavel) like upper('%");
 			sql.append(nomeResponsavel);
-			sql.append("%' ");
+			sql.append("%') ");
 		}
 
 		if (cpf != null && !cpf.equalsIgnoreCase("")) {
+			// cpf e salvo no banco so com digitos, mas o usuario pode colar com pontos/traco/espaco
+			// (ex.: "123.456.789-00") - remove tudo que nao for numero antes de buscar.
+			String cpfLimpo = cpf.replaceAll("[^0-9]", "");
 			sql.append(" or cont.cpfResponsavel like '%");
-			sql.append(cpf);
+			sql.append(cpfLimpo);
 			sql.append("%' ");
 		}
 

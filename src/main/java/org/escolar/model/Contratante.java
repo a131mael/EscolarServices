@@ -60,7 +60,32 @@ public class Contratante implements Serializable {
     
     @Column
     private String descricao;
-    
+
+    /** Endereco do tomador, usado em enderToma no CT-e OS */
+    @Column
+    private String logradouro;
+
+    @Column
+    private String numeroEndereco;
+
+    @Column
+    private String bairro;
+
+    @Column
+    private String codMunicipio;
+
+    @Column
+    private String municipio;
+
+    @Column
+    private String uf;
+
+    @Column
+    private String cep;
+
+    @Column
+    private String ie;
+
 	public String getNome() {
 		return nome;
 	}
@@ -131,6 +156,70 @@ public class Contratante implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getLogradouro() {
+		return logradouro;
+	}
+
+	public void setLogradouro(String logradouro) {
+		this.logradouro = logradouro;
+	}
+
+	public String getNumeroEndereco() {
+		return numeroEndereco;
+	}
+
+	public void setNumeroEndereco(String numeroEndereco) {
+		this.numeroEndereco = numeroEndereco;
+	}
+
+	public String getBairro() {
+		return bairro;
+	}
+
+	public void setBairro(String bairro) {
+		this.bairro = bairro;
+	}
+
+	public String getCodMunicipio() {
+		return codMunicipio;
+	}
+
+	public void setCodMunicipio(String codMunicipio) {
+		this.codMunicipio = codMunicipio;
+	}
+
+	public String getMunicipio() {
+		return municipio;
+	}
+
+	public void setMunicipio(String municipio) {
+		this.municipio = municipio;
+	}
+
+	public String getUf() {
+		return uf;
+	}
+
+	public void setUf(String uf) {
+		this.uf = uf;
+	}
+
+	public String getCep() {
+		return cep;
+	}
+
+	public void setCep(String cep) {
+		this.cep = cep;
+	}
+
+	public String getIe() {
+		return ie;
+	}
+
+	public void setIe(String ie) {
+		this.ie = ie;
 	}
 
 }

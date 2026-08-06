@@ -97,9 +97,42 @@ public class ConfiguracaoService extends Service {
 
 			user.setAnoLetivo(configuracao.getAnoLetivo());
 			user.setValordinheiroEmcaixa(configuracao.getValordinheiroEmcaixa());
-			
+
 			user.setSequencialArquivoCNAB(configuracao.getSequencialArquivoCNAB());
 			user.setAnoRematricula(configuracao.getAnoRematricula());
+
+			user.setCnpj(configuracao.getCnpj());
+			user.setIe(configuracao.getIe());
+			user.setRazaoSocial(configuracao.getRazaoSocial());
+			user.setNomeFantasia(configuracao.getNomeFantasia());
+			user.setCrt(configuracao.getCrt());
+			user.setLogradouro(configuracao.getLogradouro());
+			user.setNumeroEndereco(configuracao.getNumeroEndereco());
+			user.setComplementoEndereco(configuracao.getComplementoEndereco());
+			user.setBairro(configuracao.getBairro());
+			user.setCodMunicipio(configuracao.getCodMunicipio());
+			user.setMunicipio(configuracao.getMunicipio());
+			user.setUf(configuracao.getUf());
+			user.setCep(configuracao.getCep());
+			user.setTelefone(configuracao.getTelefone());
+			user.setTaf(configuracao.getTaf());
+			user.setNroRegEstadual(configuracao.getNroRegEstadual());
+			user.setSerieCte(configuracao.getSerieCte());
+			user.setProximoNumeroCte(configuracao.getProximoNumeroCte());
+			user.setTpAmb(configuracao.getTpAmb());
+			user.setCfop(configuracao.getCfop());
+			user.setNaturezaOperacao(configuracao.getNaturezaOperacao());
+			user.setAliquotaIcms(configuracao.getAliquotaIcms());
+			user.setCertificadoPath(configuracao.getCertificadoPath());
+			user.setCertificadoSenha(configuracao.getCertificadoSenha());
+			user.setSicoobClientId(configuracao.getSicoobClientId());
+			user.setSicoobNumeroContrato(configuracao.getSicoobNumeroContrato());
+			user.setSicoobCodigoModalidade(configuracao.getSicoobCodigoModalidade());
+			user.setSicoobAmbiente(configuracao.getSicoobAmbiente());
+			user.setSicoobCodigoAgencia(configuracao.getSicoobCodigoAgencia());
+			user.setPixValorMaximo(configuracao.getPixValorMaximo());
+			user.setPixSenha(configuracao.getPixSenha());
+			user.setSicoobPixClientId(configuracao.getSicoobPixClientId());
 
 			em.persist(user);
 

@@ -111,6 +111,16 @@ public class FinanceiroService extends Service {
 		}
 	}
 
+	public void atualizarStatusSicoob(Long boletoId, String statusSicoob, Date dataConsultaSicoob) {
+		org.escolar.model.Boleto bol = findBoletoByID(boletoId);
+		if (bol != null) {
+			bol.setStatusSicoob(statusSicoob);
+			bol.setDataConsultaSicoob(dataConsultaSicoob);
+			em.merge(bol);
+			em.flush();
+		}
+	}
+
 	public void save(org.escolar.model.Boleto boleto) {
 		if (boleto.getId() != null) {
 			org.escolar.model.Boleto bol = findBoletoByID(boleto.getId());
@@ -1156,6 +1166,7 @@ public class FinanceiroService extends Service {
 			break;
 		}
 		return sb.toString();
-		
+
 	}
+
 }

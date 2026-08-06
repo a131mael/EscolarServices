@@ -115,6 +115,18 @@ public class MemberRegistration {
   		return m;
   	}
     
+    public Member findByLogin(String login) {
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
+            Root<Member> member = criteria.from(Member.class);
+            criteria.select(member).where(cb.equal(member.get("login"), login));
+            return em.createQuery(criteria).getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public MemberDTO findByLoginSenha(String login, String senha) {
 		try {
 			System.out.println("ENTRANDO NO REGISTRATION USUARIO E SENHA");

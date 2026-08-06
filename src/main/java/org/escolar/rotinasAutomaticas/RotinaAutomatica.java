@@ -1,7 +1,9 @@
 package org.escolar.rotinasAutomaticas;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Schedule;
@@ -11,9 +13,14 @@ import javax.inject.Inject;
 
 import org.aaf.escolar.RetornoEnvioContratoDTO;
 import org.escolar.model.ContratoAluno;
+import org.escolar.model.Frete;
 import org.escolar.service.AlunoService;
 import org.escolar.service.DevedorService;
 import org.escolar.service.ExtratoBancarioService;
+import org.escolar.service.FreteService;
+import org.escolar.service.ScmobiService;
+import org.escolar.service.WhatsappMonitorService;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -36,6 +43,15 @@ public class RotinaAutomatica {
 	
 	@Inject
 	private ExtratoBancarioService extratoBancarioService;
+
+	@Inject
+	private FreteService freteService;
+
+	@Inject
+	private ScmobiService scmobiService;
+
+	@Inject
+	private WhatsappMonitorService whatsappMonitorService;
 
 	@Schedule(hour="*/03",  persistent = false)
 	public synchronized void removerAlunosSemContratoAtivo() {
@@ -137,5 +153,47 @@ public class RotinaAutomatica {
 		}
 	}
 
+	/** Monitor WhatsApp: verifica mensagens sem resposta há +5h e responde automaticamente.
+	 *  Roda às 8h, 11h, 15h e 18h horário Brasília (= 11h, 14h, 18h, 21h UTC). */
+	@Schedule(hour = "11,14,18,21", persistent = false)
+	public synchronized void monitorWhatsapp() {
+		try {
+			whatsappMonitorService.executar();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Consulta o scmobi-automation-service para os Fretes com geracao de licenca em andamento
+	 *  e, quando concluido (ou com erro), baixa os PDFs / salva a mensagem de erro. */
+	@Schedule(minute = "*/1", persistent = false)
+	public synchronized void verificarLicencasScmobiPendentes() {
+		try {
+			for (Frete frete : freteService.findFretesComLicencaScmobiProcessando()) {
+				try {
+					JSONObject status = scmobiService.consultarStatus(frete.getJobIdScmobi());
+					String situacao = status.getString("status");
+
+					if ("concluido".equals(situacao)) {
+						byte[] licenca = scmobiService.baixarLicencaPdf(frete.getJobIdScmobi());
+						byte[] passageiros = scmobiService.baixarPassageirosPdf(frete.getJobIdScmobi());
+						String dataGeracao = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
+						freteService.atualizarLicencaScmobiConcluida(frete.getId(), status.optInt("numeroContrato"),
+								licenca, passageiros, dataGeracao);
+
+					} else if ("erro".equals(situacao)) {
+						String erro = status.optString("erro", "Erro desconhecido no scmobi-automation-service");
+						freteService.atualizarLicencaScmobiErro(frete.getId(), erro);
+					}
+					// "processando" -> nada a fazer, tenta novamente no proximo ciclo
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }

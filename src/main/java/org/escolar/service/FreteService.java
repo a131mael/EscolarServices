@@ -2,6 +2,7 @@
 package org.escolar.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.escolar.model.Carro;
 import org.escolar.model.CarroFrete;
 import org.escolar.model.Contratante;
 import org.escolar.model.Frete;
+import org.escolar.model.Funcionario;
 import org.escolar.util.Service;
 
 @Stateless
@@ -40,6 +42,7 @@ public class FreteService extends Service {
 	public Frete findById(Long id) {
 		Frete f = em.find(Frete.class, id);
 		f.getCarroFrete().size();
+		f.getPassageiros().size();
 		return f;
 	}
 
@@ -48,7 +51,13 @@ public class FreteService extends Service {
 	}
 
 	public String remover(Long idFrete) {
-		em.remove(findById(idFrete));
+		Frete frete = findById(idFrete);
+		if (frete.getCarroFrete() != null) {
+			for (CarroFrete cf : frete.getCarroFrete()) {
+				em.remove(cf);
+			}
+		}
+		em.remove(frete);
 		em.flush();
 		return "index";
 	}
@@ -66,7 +75,10 @@ public class FreteService extends Service {
 			List<Frete> fretes = em.createQuery(criteria).getResultList();
 			for (Frete f : fretes) {
 				f.getCarroFrete().size();
+				f.getPassageiros().size();
 			}
+			fretes.sort(Comparator.comparing(Frete::getHorarioLocalOrigem,
+					Comparator.nullsLast(Comparator.<Date>reverseOrder())));
 			return fretes;
 
 		} catch (NoResultException nre) {
@@ -238,9 +250,15 @@ public class FreteService extends Service {
 			}
 			
 			if(evento.getContratante() != null) {
-				Contratante c = em.find(Contratante.class, evento.getContratante().getId());
-				em.flush();
+				Contratante c = saveContratante(evento.getContratante());
 				user.setContratante(c);
+			}
+
+			if(evento.getMotorista() != null && evento.getMotorista().getId() != null) {
+				Funcionario motorista = em.find(Funcionario.class, evento.getMotorista().getId());
+				user.setMotorista(motorista);
+			} else {
+				user.setMotorista(null);
 			}
 
 			user.setDescricao(evento.getDescricao());
@@ -252,6 +270,26 @@ public class FreteService extends Service {
 			user.setValorPago(evento.getValorPago());
 			user.setFormaPagamento(evento.getFormaPagamento());
 			user.setValorPagoMotorista(evento.getValorPagoMotorista());
+			user.setTpFretamento(evento.getTpFretamento());
+			user.setCodMunOrigem(evento.getCodMunOrigem());
+			user.setCodMunDestino(evento.getCodMunDestino());
+			user.setNumeroCte(evento.getNumeroCte());
+			user.setSerieCte(evento.getSerieCte());
+			user.setChaveCte(evento.getChaveCte());
+			user.setStatusCte(evento.getStatusCte());
+			user.setXmlCteOS(evento.getXmlCteOS());
+			user.setProtocoloCte(evento.getProtocoloCte());
+			user.setMotivoCte(evento.getMotivoCte());
+			user.setDataAutorizacaoCte(evento.getDataAutorizacaoCte());
+			user.setQuilometragem(evento.getQuilometragem());
+			user.setStatusLicencaScmobi(evento.getStatusLicencaScmobi());
+			user.setNumeroLicencaScmobi(evento.getNumeroLicencaScmobi());
+			user.setErroLicencaScmobi(evento.getErroLicencaScmobi());
+			user.setJobIdScmobi(evento.getJobIdScmobi());
+			user.setDataGeracaoLicencaScmobi(evento.getDataGeracaoLicencaScmobi());
+			user.setLicencaScmobiPdf(evento.getLicencaScmobiPdf());
+			user.setPassageirosScmobiPdf(evento.getPassageirosScmobiPdf());
+			user.gerarToken();
 			
 			em.persist(user);
 			em.flush();
@@ -260,11 +298,16 @@ public class FreteService extends Service {
 					Carro c = em.find(Carro.class, cf.getCarro().getId());
 					cf.setFrete(user);
 					cf.setCarro(c);
-					em.persist(cf);
+					if (cf.getId() == null) {
+						em.persist(cf);
+					} else {
+						em.merge(cf);
+					}
 				}
 			}
 
 			user.setCarroFrete(evento.getCarroFrete());
+			user.getPassageiros().size();
 
 		} catch (ConstraintViolationException ce) {
 			// Handle bean validation issues
@@ -307,6 +350,69 @@ public class FreteService extends Service {
 		}
 	}
 
+	public Frete findByTokenPublico(String token) {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Frete> criteria = cb.createQuery(Frete.class);
+			Root<Frete> member = criteria.from(Frete.class);
+
+			Predicate where = cb.equal(member.get("tokenPublico"), token);
+			criteria.select(member).where(where);
+
+			Frete f = em.createQuery(criteria).getSingleResult();
+			f.getPassageiros().size();
+			return f;
+
+		} catch (NoResultException nre) {
+			return null;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/** Fretes com geracao de licenca scMOBI em andamento (aguardando o microsservico concluir o job). */
+	public List<Frete> findFretesComLicencaScmobiProcessando() {
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Frete> criteria = cb.createQuery(Frete.class);
+			Root<Frete> member = criteria.from(Frete.class);
+
+			Predicate where = cb.equal(member.get("statusLicencaScmobi"), "PROCESSANDO");
+			criteria.select(member).where(where);
+
+			return em.createQuery(criteria).getResultList();
+
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+	}
+
+	/** Marca a licenca scMOBI como concluida, salvando o numero do contrato e os PDFs gerados. */
+	public void atualizarLicencaScmobiConcluida(Long freteId, Integer numeroContrato, byte[] licencaPdf,
+			byte[] passageirosPdf, String dataGeracao) {
+		Frete frete = em.find(Frete.class, freteId);
+		frete.setStatusLicencaScmobi("CONCLUIDO");
+		frete.setNumeroLicencaScmobi(numeroContrato);
+		frete.setLicencaScmobiPdf(licencaPdf);
+		frete.setPassageirosScmobiPdf(passageirosPdf);
+		frete.setDataGeracaoLicencaScmobi(dataGeracao);
+		frete.setErroLicencaScmobi(null);
+		em.merge(frete);
+		em.flush();
+	}
+
+	/** Marca a licenca scMOBI como erro, salvando a mensagem retornada pelo microsservico. */
+	public void atualizarLicencaScmobiErro(Long freteId, String erro) {
+		Frete frete = em.find(Frete.class, freteId);
+		frete.setStatusLicencaScmobi("ERRO");
+		frete.setErroLicencaScmobi(erro);
+		em.merge(frete);
+		em.flush();
+	}
+
 	public Contratante findContratanteByCPF(String cpf_CNPJ) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -346,6 +452,14 @@ public class FreteService extends Service {
 			user.setNome(contratante.getNome());
 			user.setTelefone1(contratante.getTelefone1());
 			user.setTelefone2(contratante.getTelefone2());
+			user.setIe(contratante.getIe());
+			user.setLogradouro(contratante.getLogradouro());
+			user.setNumeroEndereco(contratante.getNumeroEndereco());
+			user.setBairro(contratante.getBairro());
+			user.setCodMunicipio(contratante.getCodMunicipio());
+			user.setMunicipio(contratante.getMunicipio());
+			user.setUf(contratante.getUf());
+			user.setCep(contratante.getCep());
 
 			if (user.getId() == null) {
 				em.persist(user);

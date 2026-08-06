@@ -96,6 +96,23 @@ public class CombosEspeciaisMB implements Serializable {
 		return TipoBoleto.values();
 	}
 	
+	public ArrayList<SelectItem> getMotoristasSelectItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			items.add(new SelectItem(null, ""));
+
+			List<Funcionario> funcionarios = professorService.findAll();
+			for (Funcionario f : funcionarios) {
+				items.add(new SelectItem(f, f.getNome()));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+
 	public ArrayList<SelectItem> getCarrosSelectItem() {
 		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
 		try {
@@ -108,6 +125,21 @@ public class CombosEspeciaisMB implements Serializable {
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+
+	public ArrayList<SelectItem> getCarrosSelectItemMulti() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			List<Carro> professores = carroServeice.findAll();
+			for (Carro m : professores) {
+				items.add(new SelectItem(m, m.getNome()));
+			}
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -266,6 +298,21 @@ public class CombosEspeciaisMB implements Serializable {
 		return items;
 	}
 	
+	public ArrayList<SelectItem> getMunicipiosSCSelectItem() {
+		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
+		try {
+			items.add(new SelectItem(null, " "));
+			for (String nome : MunicipioIBGEUtil.listarMunicipios("SC").keySet()) {
+				items.add(new SelectItem(nome, nome));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return items;
+	}
+
 	public ArrayList<SelectItem> getBairroSelectIItem() {
 		ArrayList<SelectItem> items = new ArrayList<SelectItem>();
 		try {

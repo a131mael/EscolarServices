@@ -156,6 +156,13 @@
 			<version>2.16.1</version>
 		</dependency>
 
+		<!-- Emissao de CT-e OS (modelo 67) - https://github.com/Samuel-Oliveira/Java_CTe -->
+		<dependency>
+			<groupId>br.com.swconsultoria</groupId>
+			<artifactId>java-cte</artifactId>
+			<version>4.00.14</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

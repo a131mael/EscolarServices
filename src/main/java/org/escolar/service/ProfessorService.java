@@ -110,6 +110,9 @@ public class ProfessorService extends Service {
 			user.setNascimento(professor.getNascimento());
 			user.setNome(professor.getNome());
 			user.setRg(professor.getRg());
+			user.setCnhNumero(professor.getCnhNumero());
+			user.setCnhCategoria(professor.getCnhCategoria());
+			user.setCnhValidade(professor.getCnhValidade());
 			user.setSalario(professor.getSalario());
 			user.setTelefone1(professor.getTelefone1());
 			user.setTelefone2(professor.getTelefone2());
@@ -119,6 +122,15 @@ public class ProfessorService extends Service {
 			user.setLogin(professor.getLogin());
 			user.setSenha(professor.getSenha());
 			user.setAtivo(professor.isAtivo());
+
+			// Rastreia mudança de chave Pix para bloquear pagamento por 7 dias
+			String chaveAnterior = user.getChavePix();
+			boolean chaveAlterada = professor.getChavePix() != null
+					&& !professor.getChavePix().equals(chaveAnterior)
+					&& user.getId() != null;
+			user.setChavePix(professor.getChavePix());
+			user.setTipoChavePix(professor.getTipoChavePix());
+			if (chaveAlterada) user.setDataEdicaoChavePix(new java.util.Date());
 			
 			em.persist(user);
 			Member m = null;

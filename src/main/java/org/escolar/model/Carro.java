@@ -19,6 +19,7 @@ package org.escolar.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -42,10 +43,19 @@ public class Carro implements Serializable {
     @NotNull
     @Size(min = 1, max = 250)
     private String nome;
-    
+
+    @Column
+    private Long idGetrak;
+
+    @Column
+    private String placa;
+
+    @Column
+    private String renavam;
+
     @OneToMany
     private List<AlunoCarro> alunosTurmas;
-    
+
     @OneToMany
     private List<FuncionarioCarro> professoresTurma;
     
@@ -56,6 +66,30 @@ public class Carro implements Serializable {
 
 	public void setNome(String nome) {
 		this.nome = nome;
+	}
+
+	public Long getIdGetrak() {
+		return idGetrak;
+	}
+
+	public void setIdGetrak(Long idGetrak) {
+		this.idGetrak = idGetrak;
+	}
+
+	public String getPlaca() {
+		return placa;
+	}
+
+	public void setPlaca(String placa) {
+		this.placa = placa;
+	}
+
+	public String getRenavam() {
+		return renavam;
+	}
+
+	public void setRenavam(String renavam) {
+		this.renavam = renavam;
 	}
 
 	public Long getId() {

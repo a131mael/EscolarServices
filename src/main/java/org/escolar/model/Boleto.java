@@ -111,7 +111,15 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 	
 	@Column
 	private Boolean emailAvisoBoletoAtrasadoEnviado;
-	
+
+	/** Situacao do boleto retornada pela API de Cobranca Bancaria do Sicoob (ex: Em Aberto, Liquidado, Baixado) */
+	@Column
+	private String statusSicoob;
+
+	/** Data/hora da ultima consulta de situacao na API do Sicoob */
+	@Column
+	private Date dataConsultaSicoob;
+
 	public Long getId() {
 		return id;
 	}
@@ -325,6 +333,22 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	public void setEmailAvisoBoletoAtrasadoEnviado(Boolean emailAvisoBoletoAtrasadoEnviado) {
 		this.emailAvisoBoletoAtrasadoEnviado = emailAvisoBoletoAtrasadoEnviado;
+	}
+
+	public String getStatusSicoob() {
+		return statusSicoob;
+	}
+
+	public void setStatusSicoob(String statusSicoob) {
+		this.statusSicoob = statusSicoob;
+	}
+
+	public Date getDataConsultaSicoob() {
+		return dataConsultaSicoob;
+	}
+
+	public void setDataConsultaSicoob(Date dataConsultaSicoob) {
+		this.dataConsultaSicoob = dataConsultaSicoob;
 	}
 
 }
