@@ -2357,16 +2357,20 @@ public class AlunoService extends Service {
 
 		sql.append("where 1=2 ");
 		if (nome != null && !nome.equalsIgnoreCase("")) {
-			sql.append(" or upper(cont.aluno.nomeAluno) like upper('%");
+			// unaccent() (extensao do Postgres, habilitada no banco Escola) ignora acentos dos
+			// dois lados da comparacao, upper() ignora maiusculo/minusculo - assim "otavio",
+			// "Otavio" ou "otávio" acham um aluno cadastrado como "Otávio". FUNCTION(...) e a
+			// sintaxe JPQL/Hibernate pra chamar uma funcao nativa do banco que nao e padrao SQL.
+			sql.append(" or FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%");
 			sql.append(nome);
-			sql.append("%') ");
+			sql.append("%')) ");
 		} else {
 
 		}
 		if (nomeResponsavel != null && !nomeResponsavel.equalsIgnoreCase("")) {
-			sql.append(" or upper(cont.nomeResponsavel) like upper('%");
+			sql.append(" or FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%");
 			sql.append(nomeResponsavel);
-			sql.append("%') ");
+			sql.append("%')) ");
 		}
 
 		if (cpf != null && !cpf.equalsIgnoreCase("")) {
