@@ -2355,63 +2355,68 @@ public class AlunoService extends Service {
 		sql.append("SELECT distinct(cont) from  Boleto bol ");
 		sql.append("left join bol.contrato cont ");
 
-		sql.append("where 1=2 ");
-		if (nome != null && !nome.equalsIgnoreCase("")) {
+		// Cada campo preenchido vira uma condicao que TODAS precisam bater (AND) - preencher
+		// "Nome Crianca"=agatha e "Busca Geral"=adonai deve achar só a Agatha do Adonai, não
+		// todo mundo chamado agatha somado com todo mundo do Adonai (achado real 06/ago/2026:
+		// antes disso tudo era "ou", trazia resultado demais).
+		List<String> condicoes = new ArrayList<>();
+
+		if (nome != null && !nome.trim().equalsIgnoreCase("")) {
 			// unaccent() (extensao do Postgres, habilitada no banco Escolar) ignora acentos dos
 			// dois lados da comparacao, upper() ignora maiusculo/minusculo - assim "otavio",
 			// "Otavio" ou "otávio" acham um aluno cadastrado como "Otávio". FUNCTION(...) e a
 			// sintaxe JPQL/Hibernate pra chamar uma funcao nativa do banco que nao e padrao SQL.
-			sql.append(" or FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%");
-			sql.append(nome);
-			sql.append("%')) ");
-		} else {
-
+			condicoes.add("FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%"
+				+ nome.trim() + "%'))");
 		}
-		if (nomeResponsavel != null && !nomeResponsavel.equalsIgnoreCase("")) {
-			sql.append(" or FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%");
-			sql.append(nomeResponsavel);
-			sql.append("%')) ");
+		if (nomeResponsavel != null && !nomeResponsavel.trim().equalsIgnoreCase("")) {
+			condicoes.add("FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%"
+				+ nomeResponsavel.trim() + "%'))");
 		}
-
-		if (cpf != null && !cpf.equalsIgnoreCase("")) {
+		if (cpf != null && !cpf.trim().equalsIgnoreCase("")) {
 			// cpf e salvo no banco so com digitos, mas o usuario pode colar com pontos/traco/espaco
 			// (ex.: "123.456.789-00") - remove tudo que nao for numero antes de buscar.
 			String cpfLimpo = cpf.replaceAll("[^0-9]", "");
-			sql.append(" or cont.cpfResponsavel like '%");
-			sql.append(cpfLimpo);
-			sql.append("%' ");
+			condicoes.add("cont.cpfResponsavel like '%" + cpfLimpo + "%'");
 		}
-
 		if (buscaGeral != null && !buscaGeral.trim().equalsIgnoreCase("")) {
 			String termo = buscaGeral.trim();
 			// se, tirando espaco/ponto/traco/parenteses (formatacao comum de telefone/cpf), so
 			// sobrarem digitos, trata como busca numerica (cpf ou telefone do responsavel).
 			// senao, trata como busca de texto (nome do aluno, nome do responsavel, ou nome de
-			// uma escola cadastrada).
+			// uma escola cadastrada). Dentro do campo, as alternativas continuam em "ou" (e
+			// natural que o mesmo termo bata por qualquer um desses jeitos) - só entre campos
+			// diferentes que virou "e".
 			String semFormatacao = termo.replaceAll("[\\s.\\-()]", "");
 			boolean pareceNumero = semFormatacao.length() >= 3 && semFormatacao.matches("\\d+");
 
+			List<String> alternativas = new ArrayList<>();
 			if (pareceNumero) {
 				String digitos = termo.replaceAll("[^0-9]", "");
-				sql.append(" or cont.cpfResponsavel like '%").append(digitos).append("%' ");
-				sql.append(" or cont.telefone1 like '%").append(digitos).append("%' ");
-				sql.append(" or cont.telefone2 like '%").append(digitos).append("%' ");
-				sql.append(" or cont.aluno.contatoTelefone1 like '%").append(digitos).append("%' ");
-				sql.append(" or cont.aluno.contatoTelefone2 like '%").append(digitos).append("%' ");
-				sql.append(" or cont.aluno.contatoTelefone3 like '%").append(digitos).append("%' ");
-				sql.append(" or cont.aluno.contatoTelefone4 like '%").append(digitos).append("%' ");
+				alternativas.add("cont.cpfResponsavel like '%" + digitos + "%'");
+				alternativas.add("cont.telefone1 like '%" + digitos + "%'");
+				alternativas.add("cont.telefone2 like '%" + digitos + "%'");
+				alternativas.add("cont.aluno.contatoTelefone1 like '%" + digitos + "%'");
+				alternativas.add("cont.aluno.contatoTelefone2 like '%" + digitos + "%'");
+				alternativas.add("cont.aluno.contatoTelefone3 like '%" + digitos + "%'");
+				alternativas.add("cont.aluno.contatoTelefone4 like '%" + digitos + "%'");
 			} else {
-				sql.append(" or FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%")
-					.append(termo).append("%')) ");
-				sql.append(" or FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%")
-					.append(termo).append("%')) ");
+				alternativas.add("FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%"
+					+ termo + "%'))");
+				alternativas.add("FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%"
+					+ termo + "%'))");
 
-				List<EscolaEnum> escolasEncontradas = buscarEscolasPorNomeParcial(termo);
-				for (EscolaEnum escola : escolasEncontradas) {
-					sql.append(" or cont.aluno.escola = org.aaf.escolar.enums.EscolaEnum.")
-						.append(escola.name()).append(" ");
+				for (EscolaEnum escola : buscarEscolasPorNomeParcial(termo)) {
+					alternativas.add("cont.aluno.escola = org.aaf.escolar.enums.EscolaEnum." + escola.name());
 				}
 			}
+			condicoes.add("(" + String.join(" or ", alternativas) + ")");
+		}
+
+		if (condicoes.isEmpty()) {
+			sql.append("where 1=2 ");
+		} else {
+			sql.append("where ").append(String.join(" and ", condicoes)).append(" ");
 		}
 
 		Query query = em.createQuery(sql.toString());
