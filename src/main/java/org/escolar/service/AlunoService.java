@@ -2350,14 +2350,14 @@ public class AlunoService extends Service {
 		return codigo + 1;
 	}
 
-	public List<Aluno> findAluno(String nome, String nomeResponsavel, String cpf, String numeroDocumento) {
+	public List<Aluno> findAluno(String nome, String nomeResponsavel, String cpf, String buscaGeral) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT distinct(cont) from  Boleto bol ");
 		sql.append("left join bol.contrato cont ");
 
 		sql.append("where 1=2 ");
 		if (nome != null && !nome.equalsIgnoreCase("")) {
-			// unaccent() (extensao do Postgres, habilitada no banco Escola) ignora acentos dos
+			// unaccent() (extensao do Postgres, habilitada no banco Escolar) ignora acentos dos
 			// dois lados da comparacao, upper() ignora maiusculo/minusculo - assim "otavio",
 			// "Otavio" ou "otávio" acham um aluno cadastrado como "Otávio". FUNCTION(...) e a
 			// sintaxe JPQL/Hibernate pra chamar uma funcao nativa do banco que nao e padrao SQL.
@@ -2382,9 +2382,36 @@ public class AlunoService extends Service {
 			sql.append("%' ");
 		}
 
-		if (numeroDocumento != null && !numeroDocumento.equalsIgnoreCase("")) {
-			sql.append(" or bol.nossoNumero = ");
-			sql.append(numeroDocumento);
+		if (buscaGeral != null && !buscaGeral.trim().equalsIgnoreCase("")) {
+			String termo = buscaGeral.trim();
+			// se, tirando espaco/ponto/traco/parenteses (formatacao comum de telefone/cpf), so
+			// sobrarem digitos, trata como busca numerica (cpf ou telefone do responsavel).
+			// senao, trata como busca de texto (nome do aluno, nome do responsavel, ou nome de
+			// uma escola cadastrada).
+			String semFormatacao = termo.replaceAll("[\\s.\\-()]", "");
+			boolean pareceNumero = semFormatacao.length() >= 3 && semFormatacao.matches("\\d+");
+
+			if (pareceNumero) {
+				String digitos = termo.replaceAll("[^0-9]", "");
+				sql.append(" or cont.cpfResponsavel like '%").append(digitos).append("%' ");
+				sql.append(" or cont.telefone1 like '%").append(digitos).append("%' ");
+				sql.append(" or cont.telefone2 like '%").append(digitos).append("%' ");
+				sql.append(" or cont.aluno.contatoTelefone1 like '%").append(digitos).append("%' ");
+				sql.append(" or cont.aluno.contatoTelefone2 like '%").append(digitos).append("%' ");
+				sql.append(" or cont.aluno.contatoTelefone3 like '%").append(digitos).append("%' ");
+				sql.append(" or cont.aluno.contatoTelefone4 like '%").append(digitos).append("%' ");
+			} else {
+				sql.append(" or FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%")
+					.append(termo).append("%')) ");
+				sql.append(" or FUNCTION('unaccent', upper(cont.nomeResponsavel)) like FUNCTION('unaccent', upper('%")
+					.append(termo).append("%')) ");
+
+				List<EscolaEnum> escolasEncontradas = buscarEscolasPorNomeParcial(termo);
+				for (EscolaEnum escola : escolasEncontradas) {
+					sql.append(" or cont.aluno.escola = org.aaf.escolar.enums.EscolaEnum.")
+						.append(escola.name()).append(" ");
+				}
+			}
 		}
 
 		Query query = em.createQuery(sql.toString());
@@ -2410,6 +2437,30 @@ public class AlunoService extends Service {
 		}
 
 		return alunos;
+	}
+
+	// usado pela busca geral (findAluno) pra achar escolas cujo nome bate parcialmente com o
+	// termo digitado, ignorando acento/maiusculo - ex.: "silveira" acha "Ivo Silveira" e
+	// "João Silveira". Reaproveita a mesma normalizacao usada no EscolaEnum.fromName(), mas em
+	// modo "contains" em vez de match exato, ja que aqui e uma busca livre.
+	private List<EscolaEnum> buscarEscolasPorNomeParcial(String termo) {
+		String termoNormalizado = removerAcentos(termo).toLowerCase().trim();
+		List<EscolaEnum> resultado = new ArrayList<>();
+		for (EscolaEnum escola : EscolaEnum.values()) {
+			String nomeNormalizado = removerAcentos(escola.getName()).toLowerCase();
+			if (nomeNormalizado.contains(termoNormalizado)) {
+				resultado.add(escola);
+			}
+		}
+		return resultado;
+	}
+
+	private String removerAcentos(String texto) {
+		if (texto == null) {
+			return "";
+		}
+		String normalizado = java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD);
+		return normalizado.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 	}
 
 	public void removerCnabEnviado(Long id) {
