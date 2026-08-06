@@ -2394,12 +2394,14 @@ public class AlunoService extends Service {
 			if (pareceNumero) {
 				String digitos = termo.replaceAll("[^0-9]", "");
 				alternativas.add("cont.cpfResponsavel like '%" + digitos + "%'");
-				alternativas.add("cont.telefone1 like '%" + digitos + "%'");
-				alternativas.add("cont.telefone2 like '%" + digitos + "%'");
+				// ContratoAluno (cont) nao tem campo de telefone proprio - so Contratante tem
+				// telefone1/telefone2, e essa query nao junta com Contratante. O telefone
+				// disponivel aqui e o de contato cadastrado no proprio Aluno.
 				alternativas.add("cont.aluno.contatoTelefone1 like '%" + digitos + "%'");
 				alternativas.add("cont.aluno.contatoTelefone2 like '%" + digitos + "%'");
 				alternativas.add("cont.aluno.contatoTelefone3 like '%" + digitos + "%'");
 				alternativas.add("cont.aluno.contatoTelefone4 like '%" + digitos + "%'");
+				alternativas.add("cont.aluno.contatoTelefone5 like '%" + digitos + "%'");
 			} else {
 				alternativas.add("FUNCTION('unaccent', upper(cont.aluno.nomeAluno)) like FUNCTION('unaccent', upper('%"
 					+ termo + "%'))");
