@@ -18,6 +18,7 @@ import javax.persistence.criteria.Root;
 import org.escolar.enums.TipoMobilidadeEnum;
 import org.escolar.model.Aluno;
 import org.escolar.model.Carro;
+import org.escolar.model.PedidoCancelamento;
 import org.escolar.util.Service;
 
 
@@ -52,6 +53,41 @@ public class RelatorioService extends Service {
 		}
 	}
 	
+	public List<PedidoCancelamento> getPedidosCancelamentoPendentes(){
+		try{
+			StringBuilder sql = new StringBuilder();
+			sql.append(" select pc.id, a.nomealuno, ca.numero, ca.ano, ca.nomeresponsavel, pc.motivo, ");
+			sql.append(" pc.data_pedido, pc.data_ultimo_uso, pc.valor_multa ");
+			sql.append(" from pedido_cancelamento_contrato pc ");
+			sql.append(" join contratoaluno ca on ca.id = pc.contrato_id ");
+			sql.append(" join aluno a on a.id = pc.aluno_id ");
+			sql.append(" where coalesce(ca.cancelado, false) = false ");
+			sql.append(" order by pc.data_pedido desc ");
+
+			Query query = em.createNativeQuery(sql.toString());
+			List<Object[]> linhas = query.getResultList();
+
+			List<PedidoCancelamento> pedidos = new ArrayList<>();
+			for (Object[] l : linhas) {
+				PedidoCancelamento p = new PedidoCancelamento();
+				p.setId(l[0] == null ? null : ((Number) l[0]).longValue());
+				p.setNomeAluno((String) l[1]);
+				p.setNumeroContrato(l[2] == null ? "" : String.valueOf(l[2]));
+				p.setAno(l[3] == null ? "" : String.valueOf(l[3]));
+				p.setNomeResponsavel((String) l[4]);
+				p.setMotivo((String) l[5]);
+				p.setDataPedido(l[6] == null ? "" : l[6].toString());
+				p.setDataUltimoUso(l[7] == null ? "" : l[7].toString());
+				p.setValorMulta(l[8] == null ? "-" : l[8].toString());
+				pedidos.add(p);
+			}
+			return pedidos;
+		}catch(Exception e){
+			System.out.println(e);
+			return new ArrayList<>();
+		}
+	}
+
 	public List<String> getResponsaveisNotasEnviadas(int mes, int ano){
 		try{
 			StringBuilder sql = new StringBuilder();
