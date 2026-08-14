@@ -57,10 +57,17 @@ public class RelatorioService extends Service {
 		try{
 			StringBuilder sql = new StringBuilder();
 			sql.append(" select pc.id, a.nomealuno, ca.numero, ca.ano, ca.nomeresponsavel, pc.motivo, ");
-			sql.append(" pc.data_pedido, pc.data_ultimo_uso, pc.valor_multa ");
+			sql.append(" pc.data_pedido, pc.data_ultimo_uso, pc.valor_multa, bm.vencimento, ");
+			sql.append(" (select string_agg( ");
+			sql.append("    (case when x.posicao = 1 then 'Mes atual' else 'Aviso' end) || ': R$ ' || ");
+			sql.append("    to_char(b.valornominal, 'FM999999990.00') || ' (' || to_char(b.vencimento,'MM/YYYY') || ')', ");
+			sql.append("    ' + ' order by x.posicao) ");
+			sql.append("  from unnest(pc.boletos_mensalidade_ids) with ordinality as x(bid, posicao) ");
+			sql.append("  join boleto b on b.id = x.bid) as detalhe_mensalidades ");
 			sql.append(" from pedido_cancelamento_contrato pc ");
 			sql.append(" join contratoaluno ca on ca.id = pc.contrato_id ");
 			sql.append(" join aluno a on a.id = pc.aluno_id ");
+			sql.append(" left join boleto bm on bm.id = pc.boleto_multa_id ");
 			sql.append(" where coalesce(ca.cancelado, false) = false ");
 			sql.append(" order by pc.data_pedido desc ");
 
@@ -78,7 +85,9 @@ public class RelatorioService extends Service {
 				p.setMotivo((String) l[5]);
 				p.setDataPedido(l[6] == null ? "" : l[6].toString());
 				p.setDataUltimoUso(l[7] == null ? "" : l[7].toString());
-				p.setValorMulta(l[8] == null ? "-" : l[8].toString());
+				String vencMulta = l[9] == null ? "" : " (" + l[9].toString().substring(0, 7) + ")";
+				p.setValorMulta(l[8] == null ? "-" : ("R$ " + l[8].toString() + vencMulta));
+				p.setDetalheMensalidades(l[10] == null ? "-" : (String) l[10]);
 				pedidos.add(p);
 			}
 			return pedidos;

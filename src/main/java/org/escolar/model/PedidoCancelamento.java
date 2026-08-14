@@ -15,6 +15,7 @@ public class PedidoCancelamento implements Serializable {
     private String dataPedido;
     private String dataUltimoUso;
     private String valorMulta;
+    private String detalheMensalidades;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -42,4 +43,7 @@ public class PedidoCancelamento implements Serializable {
 
     public String getValorMulta() { return valorMulta; }
     public void setValorMulta(String valorMulta) { this.valorMulta = valorMulta; }
+
+    public String getDetalheMensalidades() { return detalheMensalidades; }
+    public void setDetalheMensalidades(String detalheMensalidades) { this.detalheMensalidades = detalheMensalidades; }
 }
