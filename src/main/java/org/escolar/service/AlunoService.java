@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -3031,9 +3033,18 @@ public class AlunoService extends Service {
 	}
 	
 	private String getTotalPago(int ano, ContratoAluno contrato) {
-		String total = (contrato.getNumeroParcelas() * contrato.getValorMensal())+"";
-		
-		return total;
+		double total = 0;
+		if (contrato.getBoletos() != null) {
+			for (Boleto boleto : contrato.getBoletos()) {
+				if (boleto.getValorPago() != null && boleto.getValorPago() > 0) {
+					total += boleto.getValorPago();
+				}
+			}
+		}
+
+		DecimalFormatSymbols simbolos = new DecimalFormatSymbols(new Locale("pt", "BR"));
+		DecimalFormat formatador = new DecimalFormat("#,##0.00", simbolos);
+		return formatador.format(total);
 	}
 	
 	
