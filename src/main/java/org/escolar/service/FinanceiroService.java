@@ -171,6 +171,88 @@ public class FinanceiroService extends Service {
 		return null;
 	}
 
+	/** Boletos com vencimento no dia 10 do mês/ano letivo atual, em aberto e com e-mail
+	 *  cadastrado — usado no aviso de vencimento enviado no dia 5. */
+	public List<org.escolar.model.Boleto> getBoletosAvisoVencimento() {
+		return getBoletosPorDiaComEmail(10, "emailAvisoVencimentoEnviado");
+	}
+
+	/** Mesmos boletos do aviso, mas enviados no próprio dia do vencimento (dia 10). */
+	public List<org.escolar.model.Boleto> getBoletosVenceHoje() {
+		return getBoletosPorDiaComEmail(10, "emailVenceHojeEnviado");
+	}
+
+	/** Boletos vencidos (vencimento antes de hoje), ainda em aberto — checagem sempre em
+	 *  tempo real (dataPagamento is null) — e com e-mail cadastrado. Usado nos lembretes
+	 *  de atraso enviados nos dias 15, 20 e 25. */
+	public List<org.escolar.model.Boleto> getBoletosAtrasados15() {
+		return getBoletosVencidosComEmail("emailAtrasado15Enviado");
+	}
+
+	public List<org.escolar.model.Boleto> getBoletosAtrasados20() {
+		return getBoletosVencidosComEmail("emailAtrasado20Enviado");
+	}
+
+	public List<org.escolar.model.Boleto> getBoletosAtrasados25() {
+		return getBoletosVencidosComEmail("emailAtrasado25Enviado");
+	}
+
+	private List<org.escolar.model.Boleto> getBoletosPorDiaComEmail(int diaVencimento, String campoFlagEnviado) {
+		try {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.DAY_OF_MONTH, diaVencimento);
+			c.set(Calendar.HOUR_OF_DAY, 0);
+			c.set(Calendar.MINUTE, 0);
+			c.set(Calendar.SECOND, 0);
+			Calendar c2 = (Calendar) c.clone();
+			c2.add(Calendar.DAY_OF_MONTH, 1);
+
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT bol from Boleto bol ");
+			sql.append("where 1=1 ");
+			sql.append(" and bol.vencimento >= '").append(c.getTime()).append("'");
+			sql.append(" and bol.vencimento < '").append(c2.getTime()).append("'");
+			sql.append(" AND (bol.cancelado = false or bol.cancelado is null)");
+			sql.append(" AND (bol.protestado = false or bol.protestado is null)");
+			sql.append(" AND (bol.baixaManual = false or bol.baixaManual is null)");
+			sql.append(" AND bol.dataPagamento is null");
+			sql.append(" AND (bol.statusSicoob is null or bol.statusSicoob <> 'Liquidado')");
+			sql.append(" AND (bol.pagador.contatoEmail1 is not null or bol.pagador.contatoEmail2 is not null)");
+			sql.append(" AND (bol.").append(campoFlagEnviado).append(" is null or bol.").append(campoFlagEnviado).append(" = false)");
+
+			Query query = em.createQuery(sql.toString());
+			return (List<org.escolar.model.Boleto>) query.getResultList();
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		}
+	}
+
+	private List<org.escolar.model.Boleto> getBoletosVencidosComEmail(String campoFlagEnviado) {
+		try {
+			Calendar hoje = Calendar.getInstance();
+			hoje.set(Calendar.HOUR_OF_DAY, 0);
+			hoje.set(Calendar.MINUTE, 0);
+			hoje.set(Calendar.SECOND, 0);
+
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT bol from Boleto bol ");
+			sql.append("where 1=1 ");
+			sql.append(" and bol.vencimento < '").append(hoje.getTime()).append("'");
+			sql.append(" AND (bol.cancelado = false or bol.cancelado is null)");
+			sql.append(" AND (bol.protestado = false or bol.protestado is null)");
+			sql.append(" AND (bol.baixaManual = false or bol.baixaManual is null)");
+			sql.append(" AND bol.dataPagamento is null");
+			sql.append(" AND (bol.statusSicoob is null or bol.statusSicoob <> 'Liquidado')");
+			sql.append(" AND (bol.pagador.contatoEmail1 is not null or bol.pagador.contatoEmail2 is not null)");
+			sql.append(" AND (bol.").append(campoFlagEnviado).append(" is null or bol.").append(campoFlagEnviado).append(" = false)");
+
+			Query query = em.createQuery(sql.toString());
+			return (List<org.escolar.model.Boleto>) query.getResultList();
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		}
+	}
+
 	public List<org.escolar.model.Boleto> getBoletosParaBaixa() {
 		try {
 

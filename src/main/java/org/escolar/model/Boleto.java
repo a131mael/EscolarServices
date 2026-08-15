@@ -112,6 +112,23 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 	@Column
 	private Boolean emailAvisoBoletoAtrasadoEnviado;
 
+	/** Lembretes automáticos por e-mail (dias 5/10/15/20, ver RotinaAutomatica) — cada
+	 *  etapa só é enviada uma vez por boleto. */
+	@Column
+	private Boolean emailAvisoVencimentoEnviado;
+
+	@Column
+	private Boolean emailVenceHojeEnviado;
+
+	@Column
+	private Boolean emailAtrasado15Enviado;
+
+	@Column
+	private Boolean emailAtrasado20Enviado;
+
+	@Column
+	private Boolean emailAtrasado25Enviado;
+
 	/** Situacao do boleto retornada pela API de Cobranca Bancaria do Sicoob (ex: Em Aberto, Liquidado, Baixado) */
 	@Column
 	private String statusSicoob;
@@ -333,6 +350,46 @@ public class Boleto implements Serializable, Comparable<Boleto> {
 
 	public void setEmailAvisoBoletoAtrasadoEnviado(Boolean emailAvisoBoletoAtrasadoEnviado) {
 		this.emailAvisoBoletoAtrasadoEnviado = emailAvisoBoletoAtrasadoEnviado;
+	}
+
+	public Boolean getEmailAvisoVencimentoEnviado() {
+		return emailAvisoVencimentoEnviado;
+	}
+
+	public void setEmailAvisoVencimentoEnviado(Boolean emailAvisoVencimentoEnviado) {
+		this.emailAvisoVencimentoEnviado = emailAvisoVencimentoEnviado;
+	}
+
+	public Boolean getEmailVenceHojeEnviado() {
+		return emailVenceHojeEnviado;
+	}
+
+	public void setEmailVenceHojeEnviado(Boolean emailVenceHojeEnviado) {
+		this.emailVenceHojeEnviado = emailVenceHojeEnviado;
+	}
+
+	public Boolean getEmailAtrasado15Enviado() {
+		return emailAtrasado15Enviado;
+	}
+
+	public void setEmailAtrasado15Enviado(Boolean emailAtrasado15Enviado) {
+		this.emailAtrasado15Enviado = emailAtrasado15Enviado;
+	}
+
+	public Boolean getEmailAtrasado20Enviado() {
+		return emailAtrasado20Enviado;
+	}
+
+	public void setEmailAtrasado20Enviado(Boolean emailAtrasado20Enviado) {
+		this.emailAtrasado20Enviado = emailAtrasado20Enviado;
+	}
+
+	public Boolean getEmailAtrasado25Enviado() {
+		return emailAtrasado25Enviado;
+	}
+
+	public void setEmailAtrasado25Enviado(Boolean emailAtrasado25Enviado) {
+		this.emailAtrasado25Enviado = emailAtrasado25Enviado;
 	}
 
 	public String getStatusSicoob() {

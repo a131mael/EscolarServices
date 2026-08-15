@@ -1,7 +1,7 @@
 package org.escolar.rotinasAutomaticas;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
 
@@ -13,85 +13,237 @@ import javax.naming.NamingException;
 import org.aaf.financeiro.model.Pagador;
 import org.aaf.financeiro.sicoob.util.CNAB240_SICOOB;
 import org.aaf.financeiro.util.OfficeUtil;
-import org.escolar.model.Aluno;
 import org.escolar.model.Boleto;
 import org.escolar.model.ContratoAluno;
+import org.escolar.service.ConfiguracaoService;
 import org.escolar.service.FinanceiroService;
+import org.escolar.service.SicoobBoletoService;
+import org.escolar.service.ZohoEmailService;
 import org.escolar.util.Formatador;
 import org.escolar.util.ServiceLocator;
 import org.escolar.util.Verificador;
 
+import java.util.Date;
+import java.util.logging.Logger;
+
+/** Lembretes automáticos de boleto por e-mail (aviso dia 5, vencimento dia 10, atraso dias
+ *  15/20/25 — ver RotinaAutomatica). Manda pela conta financeiro@tefamel.com via Zoho Mail
+ *  API (ZohoEmailService) — substituiu o envio antigo por SMTP direto (conta Gmail
+ *  tefameltur@gmail.com, defasada) em 14/ago/2026. */
 @Stateless
 @LocalBean
 public class EnviadorEmail {
 
+	private static final Logger LOG = Logger.getLogger(EnviadorEmail.class.getName());
+
 	@Inject
 	private FinanceiroService financeiroService;
 
-	public EnviadorEmail() {
-		if (financeiroService == null) {
-			try {
-				financeiroService = (FinanceiroService) ServiceLocator.getInstance().getFinanceiroService(
-						FinanceiroService.class.getSimpleName(), FinanceiroService.class.getName());
-			} catch (NamingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	@Inject
+	private SicoobBoletoService sicoobBoletoService;
+
+	@Inject
+	private ConfiguracaoService configuracaoService;
+
+	private final ZohoEmailService zohoEmailService = new ZohoEmailService();
+
+	/** Assinatura embutida em base64 (data URI) no corpo do e-mail em vez de linkada num
+	 *  host externo (i.ibb.co) — imagem hotlinkada de fora é padrão clássico de phishing
+	 *  e o Gmail marcava a mensagem como suspeita/escondia as imagens por causa disso. */
+	private static final String ASSINATURA_BASE64 = carregarAssinaturaBase64();
+
+	private static String carregarAssinaturaBase64() {
+		try (InputStream is = EnviadorEmail.class.getResourceAsStream("/img/assinatura-favo.jpg")) {
+			if (is == null) return null;
+			return Base64.getEncoder().encodeToString(is.readAllBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
-	public void enviarEmailBoletosMesAtual() {
-		Calendar c = Calendar.getInstance();
-		List<Boleto> boletos = financeiroService.getBoletoMes(c.get(Calendar.MONTH));
-		for (Boleto bol : boletos) {
-			if(bol.getEmailBoletoMesEnviado() == null || !bol.getEmailBoletoMesEnviado()){
-				enviarEmailBoletosMesAtual(bol);
-				bol.setEmailBoletoMesEnviado(true);
+	public EnviadorEmail() {
+		try {
+			if (financeiroService == null) {
+				financeiroService = (FinanceiroService) ServiceLocator.getInstance().getFinanceiroService(
+						FinanceiroService.class.getSimpleName(), FinanceiroService.class.getName());
+			}
+			if (sicoobBoletoService == null) {
+				sicoobBoletoService = (SicoobBoletoService) ServiceLocator.getInstance().getEjbGeneric(
+						SicoobBoletoService.class.getSimpleName(), SicoobBoletoService.class.getName());
+			}
+			if (configuracaoService == null) {
+				configuracaoService = (ConfiguracaoService) ServiceLocator.getInstance().getEjbGeneric(
+						ConfiguracaoService.class.getSimpleName(), ConfiguracaoService.class.getName());
+			}
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Confere a situação do boleto direto na API do Sicoob antes de mandar o lembrete —
+	 *  o campo statusSicoob salvo no banco pode estar desatualizado (só é sincronizado
+	 *  periodicamente), então aqui é sempre uma consulta ao vivo. Se a consulta falhar
+	 *  (Sicoob fora do ar, etc), não bloqueia o envio — só segue com o que já sabíamos
+	 *  pela query (dataPagamento/statusSicoob salvos). */
+	private boolean aindaEmAberto(Boleto bol) {
+		try {
+			String situacao = sicoobBoletoService.consultarSituacaoBoleto(
+					configuracaoService.getConfiguracao(), bol.getNossoNumero());
+			financeiroService.atualizarStatusSicoob(bol.getId(), situacao, new Date());
+			return situacao == null || !situacao.equalsIgnoreCase("Liquidado");
+		} catch (Exception e) {
+			LOG.warning("Sicoob: não deu pra confirmar a situação do boleto " + bol.getId()
+					+ " antes de enviar o lembrete, seguindo com o que já sabíamos: " + e.getMessage());
+			return true;
+		}
+	}
+
+	public void enviarAvisosVencimento() {
+		for (Boleto bol : financeiroService.getBoletosAvisoVencimento()) {
+			if (!aindaEmAberto(bol)) continue;
+			if (enviar(bol, "Seu boleto vence em breve", "#1a73e8",
+					"Passando pra avisar que o boleto do transporte escolar da <b>" + nomeAluno(bol)
+							+ "</b> vence em <b>" + Formatador.formataData(bol.getVencimento()) + "</b>.")) {
+				bol.setEmailAvisoVencimentoEnviado(true);
 				financeiroService.save(bol);
 			}
 		}
 	}
 
-	public void enviarEmailBoletosMesAtual(Boleto bol) {
+	public void enviarVenceHoje() {
+		for (Boleto bol : financeiroService.getBoletosVenceHoje()) {
+			if (!aindaEmAberto(bol)) continue;
+			if (enviar(bol, "Seu boleto vence hoje", "#1a73e8",
+					"O boleto do transporte escolar da <b>" + nomeAluno(bol) + "</b> vence <b>hoje</b>.")) {
+				bol.setEmailVenceHojeEnviado(true);
+				financeiroService.save(bol);
+			}
+		}
+	}
 
-		String destinatario = "";
+	public void enviarAtrasado15() {
+		for (Boleto bol : financeiroService.getBoletosAtrasados15()) {
+			if (!aindaEmAberto(bol)) continue;
+			if (enviar(bol, "Boleto em atraso", "#e8710a",
+					"O boleto do transporte escolar da <b>" + nomeAluno(bol)
+							+ "</b> venceu em <b>" + Formatador.formataData(bol.getVencimento())
+							+ "</b> e ainda consta em aberto por aqui.")) {
+				bol.setEmailAtrasado15Enviado(true);
+				financeiroService.save(bol);
+			}
+		}
+	}
 
-		if (bol.getPagador().getContatoEmail1() != null) {
-			destinatario += bol.getPagador().getContatoEmail1() + ",";
+	public void enviarAtrasado20() {
+		for (Boleto bol : financeiroService.getBoletosAtrasados20()) {
+			if (!aindaEmAberto(bol)) continue;
+			if (enviar(bol, "Boleto em atraso", "#e8710a",
+					"O boleto do transporte escolar da <b>" + nomeAluno(bol)
+							+ "</b> venceu em <b>" + Formatador.formataData(bol.getVencimento())
+							+ "</b> e ainda consta em aberto por aqui."
+							+ " Entre em contato o quanto antes pra regularizar a situação e evitar a suspensão do serviço de transporte.")) {
+				bol.setEmailAtrasado20Enviado(true);
+				financeiroService.save(bol);
+			}
 		}
-		if (bol.getPagador().getContatoEmail2() != null) {
-			destinatario += bol.getPagador().getContatoEmail2() + ",";
+	}
+
+	public void enviarAtrasado25() {
+		for (Boleto bol : financeiroService.getBoletosAtrasados25()) {
+			if (!aindaEmAberto(bol)) continue;
+			if (enviar(bol, "Boleto em atraso", "#d93025",
+					"O boleto do transporte escolar da <b>" + nomeAluno(bol)
+							+ "</b> venceu em <b>" + Formatador.formataData(bol.getVencimento())
+							+ "</b> e segue em aberto. Entre em contato com urgência pra regularizar a situação —"
+							+ " a manutenção do serviço de transporte depende do pagamento em dia.")) {
+				bol.setEmailAtrasado25Enviado(true);
+				financeiroService.save(bol);
+			}
 		}
-		if (bol.getPagador().getEmailMae() != null) {
-			destinatario += bol.getPagador().getEmailMae() + ",";
+	}
+
+	/** Reenvio manual pontual (botão no admin) — mesma lógica das rotinas automáticas,
+	 *  mas só pro aluno informado, sem esperar o horário agendado. */
+	public void enviarEmailBoletosMesAtualEAtrasados(Long idAluno) {
+		Calendar c = Calendar.getInstance();
+		Boleto boletoMesAtual = financeiroService.getBoletoMes(c.get(Calendar.MONTH), idAluno);
+		if (boletoMesAtual != null && (boletoMesAtual.getDataPagamento() == null)) {
+			enviar(boletoMesAtual, "Seu boleto do transporte escolar", "#1a73e8",
+					"Segue em anexo o boleto do transporte escolar da <b>" + nomeAluno(boletoMesAtual) + "</b>.");
 		}
-		if (bol.getPagador().getEmailPai() != null) {
-			destinatario += bol.getPagador().getEmailPai() + ",";
+
+		List<Boleto> boletosAtrasados = financeiroService.getBoletosAtrasadosAluno(c.get(Calendar.MONTH), idAluno);
+		if (boletosAtrasados != null) {
+			for (Boleto bol : boletosAtrasados) {
+				enviar(bol, "Boleto em atraso", "#e8710a",
+						"O boleto do transporte escolar da <b>" + nomeAluno(bol)
+								+ "</b> venceu em <b>" + Formatador.formataData(bol.getVencimento())
+								+ "</b> e ainda consta em aberto por aqui.");
+			}
 		}
-		
+	}
+
+	private boolean enviar(Boleto bol, String tituloDestaque, String corDestaque, String mensagem) {
+		String destinatario = enderecosPagador(bol);
+		if (destinatario.isEmpty()) return false;
+
 		byte[] anexoPDF = byteArrayPDFBoleto(getBoletoFinanceiro(bol), bol.getContrato());
+		String corpoEmail = montarCorpoEmail(tituloDestaque, corDestaque, mensagem, bol);
 
-		String corpoEmail = "<!DOCTYPE html><html><body><p><h2><center>Transporte Escolar Favo de Mel.</center></h2></p><br/>"
-				+ "<p>Bom dia #nomeResponsavel,<br/><br/>Você esta recebendo em anexo o seu boleto do Transporte Escolar Favo de Mel referente ao mês de <b>"
-				+ "<font size=\"2\" color=\"blue\"> #mesBoleto</font></b> .<h3><br/>"
-				+ "<br/><br/><center><font size=\"3\" color=\"blue\">Resumo da conta</font></center><br/><br/>"
-				+ "</h3>Vencimento  :<font size=\"2\" color=\"blue\"> #vencimentoBoleto</font>"
-				+ "<br/>Valor       :<font size=\"2\" color=\"blue\"> #valorAtualBoleto</font><br/>"
-				+ "<br/><center><h4><font size=\"3\" color=\"red\"> Caso já tenha efetuado o pagamento favor desconsiderar esse e-mail. </font></h4>"
-				+ "</center></p>" + "<br/>"
-				+ "<a href=\"https://www.tefamel.com\"><img src=\"https://i.ibb.co/pvtxPyH/assinatura.jpg\" "
-				+ "alt=\"assinatura_Tefamel\" style=\"width:365px;height:146px;border:0;\" border=\"0\"></a>"
+		return zohoEmailService.enviarEmailComAnexo(
+				destinatario, tituloDestaque + " — Transporte Escolar Favo de Mel", corpoEmail,
+				"boleto_" + bol.getId() + ".pdf", anexoPDF);
+	}
+
+	private String enderecosPagador(Boleto bol) {
+		StringBuilder destinatario = new StringBuilder();
+		if (bol.getPagador().getContatoEmail1() != null && !bol.getPagador().getContatoEmail1().trim().isEmpty()) {
+			destinatario.append(bol.getPagador().getContatoEmail1().trim()).append(",");
+		}
+		if (bol.getPagador().getContatoEmail2() != null && !bol.getPagador().getContatoEmail2().trim().isEmpty()) {
+			destinatario.append(bol.getPagador().getContatoEmail2().trim()).append(",");
+		}
+		if (destinatario.length() > 0) destinatario.setLength(destinatario.length() - 1);
+		return destinatario.toString();
+	}
+
+	private String nomeAluno(Boleto bol) {
+		return bol.getPagador() != null && bol.getPagador().getNomeAluno() != null
+				? bol.getPagador().getNomeAluno() : "seu filho(a)";
+	}
+
+	private String montarCorpoEmail(String tituloDestaque, String corDestaque, String mensagem, Boleto bol) {
+		return "<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif; background:#f4f4f4; padding:20px;\">"
+				+ "<div style=\"max-width:520px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden; border:1px solid #e0e0e0;\">"
+				+ "<div style=\"background:" + corDestaque + "; padding:20px; text-align:center;\">"
+				+ "<h2 style=\"color:#fff; margin:0; font-size:20px;\">" + tituloDestaque + "</h2>"
+				+ "</div>"
+				+ "<div style=\"padding:24px;\">"
+				+ "<p style=\"font-size:15px; color:#333;\">Olá, <b>" + bol.getContrato().getNomeResponsavel() + "</b>!</p>"
+				+ "<p style=\"font-size:15px; color:#333; line-height:1.5;\">" + mensagem + "</p>"
+				+ "<table style=\"width:100%; border-collapse:collapse; margin:20px 0; font-size:14px;\">"
+				+ "<tr><td style=\"padding:8px 0; color:#666;\">Vencimento</td>"
+				+ "<td style=\"padding:8px 0; text-align:right; font-weight:bold; color:#333;\">"
+				+ Formatador.formataData(bol.getVencimento()) + "</td></tr>"
+				+ "<tr><td style=\"padding:8px 0; color:#666;\">Valor</td>"
+				+ "<td style=\"padding:8px 0; text-align:right; font-weight:bold; color:#333;\">"
+				+ Formatador.valorFormatado(Verificador.getValorFinal(bol)) + "</td></tr>"
+				+ "</table>"
+				+ "<p style=\"font-size:13px; color:#666;\">O boleto está em anexo neste e-mail.</p>"
+				+ "<div style=\"background:#f0f7ff; border-radius:6px; padding:12px 16px; margin-top:20px;\">"
+				+ "<p style=\"font-size:13px; color:#555; margin:0;\">Se você já pagou esse boleto, "
+				+ "pode ignorar esta mensagem — os pagamentos levam um tempo pra atualizar no nosso sistema.</p>"
+				+ "</div>"
+				+ "</div>"
+				+ "<div style=\"background:#fafafa; padding:16px; text-align:center; border-top:1px solid #eee;\">"
+				+ (ASSINATURA_BASE64 != null
+					? "<img src=\"data:image/jpeg;base64," + ASSINATURA_BASE64 + "\" alt=\"Transporte Escolar Favo de Mel\" "
+						+ "style=\"max-width:260px; height:auto;\">"
+					: "<p style=\"margin:0; font-size:13px; color:#888;\">Transporte Escolar Favo de Mel<br>(48) 3093-0042</p>")
+				+ "</div>"
+				+ "</div>"
 				+ "</body></html>";
-
-		corpoEmail = corpoEmail.replace("#vencimentoBoleto", Formatador.formataData(bol.getVencimento()));
-		corpoEmail = corpoEmail.replace("#valorAtualBoleto", Formatador.valorFormatado(Verificador.getValorFinal(bol)));
-		corpoEmail = corpoEmail.replace("#nomeResponsavel", bol.getContrato().getNomeResponsavel());
-		corpoEmail = corpoEmail.replace("#mesBoleto", Formatador.getMes(bol.getVencimento()));
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(anexoPDF);
-		org.aaf.financeiro.util.EnviadorEmail.enviarEmail("Boleto - Transporte Escolar Favo de Mel", corpoEmail, bais,
-				destinatario, CONSTANTES.emailFinanceiro, CONSTANTES.senhaEmailFinanceiro);
-
 	}
 
 	private org.aaf.financeiro.model.Boleto getBoletoFinanceiro(Boleto boleto) {
@@ -120,84 +272,11 @@ public class EnviadorEmail {
 		pagador.setNome(contrato.getNomeResponsavel());
 		pagador.setNossoNumero(boleto.getNossoNumero() + "");
 		pagador.setUF("SC");
-		List<org.aaf.financeiro.model.Boleto> boletos = new ArrayList<>();
+		List<org.aaf.financeiro.model.Boleto> boletos = new java.util.ArrayList<>();
 		boletos.add(boleto);
 		pagador.setBoletos(boletos);
 
-		byte[] pdf = cnab.getBoletoPDF(pagador);
-
-		return pdf;
-	}
-
-	public void enviarEmailBoletoAtrasado(String remetente, String senhaRemetente) {
-		Calendar c = Calendar.getInstance();
-		List<Boleto> boletos = financeiroService.getBoletosAtrasados(c.get(Calendar.MONTH));
-		for (Boleto bol : boletos) {
-			enviarEmailBoletoAtrasado(bol, remetente, senhaRemetente);
-		}
-	}
-
-	public void enviarEmailBoletoAtrasado(Boleto bol, String remetente, String senhaRemetente) {
-
-		String destinatario = "";
-		if (bol.getPagador().getContatoEmail1() != null) {
-			destinatario += bol.getPagador().getContatoEmail1() + ",";
-		}
-		if (bol.getPagador().getContatoEmail2() != null) {
-			destinatario += bol.getPagador().getContatoEmail2() + ",";
-		}
-		if (bol.getPagador().getEmailMae() != null) {
-			destinatario += bol.getPagador().getEmailMae() + ",";
-		}
-		if (bol.getPagador().getEmailPai() != null) {
-			destinatario += bol.getPagador().getEmailPai() + ",";
-		}
-		String corpoEmail = "<!DOCTYPE html><html><body><p><h2><center>Transporte Escolar Favo de Mel.</center></h2></p><br/><br/>Prezado(a) #nomeResponsavel,<br/><p>Verificamos em nosso sistema que que o boleto com vencimento em  <b>#vencimentoBoleto </b>ainda está em aberto, o boleto encontra-se anexo no e-mail, você pode paga-lo em qualquer agência da Sicoob ou diretamente no escritório.<br/><br/><br/><br/>Caso deseje um boleto atualizado para pagamento em qualquer agência bancária ou pela internet entre em contato com o escritório e solicite.<br/><br/>O valor atual do boleto é R$ <b>#valorAtualBoleto .</b><br/><h4>Caso já tenha efetuado o pagamento favor desconsiderar esse e-mail. </h4></p>"
-				+ "<br/>"
-				+ "<a href=\"https://ibb.co/i3s83m\"><img src=\"https://preview.ibb.co/hX0Hw6/assinatura_Tefamel.png\" "
-				+ "alt=\"assinatura_Tefamel\" style=\"width:365px;height:146px;border:0;\" border=\"0\"></a>"
-				+ "</body></html>";
-		corpoEmail = corpoEmail.replace("#vencimentoBoleto", Formatador.formataData(bol.getVencimento()));
-		corpoEmail = corpoEmail.replace("#valorAtualBoleto", Formatador.valorFormatado(Verificador.getValorFinal(bol)));
-		corpoEmail = corpoEmail.replace("#nomeResponsavel", bol.getContrato().getNomeResponsavel());
-
-		byte[] anexoPDF = byteArrayPDFBoleto(getBoletoFinanceiro(bol), bol.getContrato());
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(anexoPDF);
-		org.aaf.financeiro.util.EnviadorEmail.enviarEmail("Transporte Escolar Favo de Mel - Boleto Atrasado",
-				corpoEmail, bais, destinatario, remetente, senhaRemetente);
-		try {
-			Thread.sleep(3000);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public void enviarEmailBoletosMesAtualEAtrasados(Long idAluno) {
-		Boleto boletoMesAtual = getBoletoMesAtual(idAluno);
-		if(boletoMesAtual != null){
-			enviarEmailBoletosMesAtual(boletoMesAtual);
-		}
-
-		List<Boleto> boletosAtrasados = getBoletosAtrasados(idAluno);
-		if (boletosAtrasados != null && !boletosAtrasados.isEmpty()) {
-			for (Boleto boleto : boletosAtrasados) {
-				enviarEmailBoletoAtrasado(boleto, CONSTANTES.emailFinanceiro, CONSTANTES.senhaEmailFinanceiro);
-			}
-		}
-	}
-
-	private List<Boleto> getBoletosAtrasados(Long idAluno) {
-		Calendar c = Calendar.getInstance();
-		List<Boleto> boletos = financeiroService.getBoletosAtrasadosAluno(c.get(Calendar.MONTH), idAluno);
-		return boletos;
-	}
-
-	private Boleto getBoletoMesAtual(Long idAluno) {
-		Calendar c = Calendar.getInstance();
-		Boleto boleto = financeiroService.getBoletoMes(c.get(Calendar.MONTH), idAluno);
-		return boleto;
+		return cnab.getBoletoPDF(pagador);
 	}
 
 }

@@ -2883,10 +2883,8 @@ public class AlunoService extends Service {
 		corpoEmail = corpoEmail.replace("#nomeResponsavel", bol.getContrato().getNomeResponsavel());
 		corpoEmail = corpoEmail.replace("#mesBoleto", org.escolar.util.Formatador.getMes(bol.getVencimento()));
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(anexoPDF);
-		org.aaf.financeiro.util.EnviadorEmail.enviarEmail("Boleto - Tefamel", corpoEmail, bais, email,
-				org.escolar.rotinasAutomaticas.CONSTANTES.emailFinanceiro,
-				org.escolar.rotinasAutomaticas.CONSTANTES.senhaEmailFinanceiro);
+		new org.escolar.service.ZohoEmailService().enviarEmailComAnexo(
+				email, "Boleto - Tefamel", corpoEmail, "boleto_" + bol.getId() + ".pdf", anexoPDF);
 		return null;
 	}
 

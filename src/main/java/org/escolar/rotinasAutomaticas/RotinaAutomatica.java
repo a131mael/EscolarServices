@@ -142,12 +142,59 @@ public class RotinaAutomatica {
 		}
 	}
 	
-	@Schedule(hour="*",minute="*/33", dayOfMonth="5-7",  persistent = false)
-	public synchronized void  enviarBoletoEmail() {
+	/** Lembretes automáticos de boleto por e-mail (financeiro@tefamel.com via Zoho, ver
+	 *  EnviadorEmail): dia 5 avisa que vence dia 10, dia 10 avisa que vence hoje, dias
+	 *  15/20/25 avisam que está em atraso (se ainda não tiver sido pago — a checagem é
+	 *  sempre em tempo real na query, então um boleto pago entre uma rodada e outra
+	 *  simplesmente some da lista). Cada etapa só é enviada uma vez por boleto (flags
+	 *  emailXxxEnviado) — rodar 3x no dia é só reforço caso a 1ª tentativa falhe (ex:
+	 *  container reiniciando), não gera reenvio duplicado. Roda às 9h, 13h e 17h
+	 *  horário Brasília (= 12h, 16h, 20h UTC) do dia relevante. */
+	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "5", persistent = false)
+	public synchronized void enviarAvisoVencimentoBoletoEmail() {
 		try {
-			System.out.println("Enviando Boleto por email");
-			EnviadorEmail enviador = new EnviadorEmail();
-			enviador.enviarEmailBoletosMesAtual();
+			System.out.println("E-mail: aviso de vencimento (dia 5)");
+			new EnviadorEmail().enviarAvisosVencimento();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "10", persistent = false)
+	public synchronized void enviarVenceHojeBoletoEmail() {
+		try {
+			System.out.println("E-mail: vence hoje (dia 10)");
+			new EnviadorEmail().enviarVenceHoje();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "15", persistent = false)
+	public synchronized void enviarAtrasado15BoletoEmail() {
+		try {
+			System.out.println("E-mail: boleto em atraso (dia 15)");
+			new EnviadorEmail().enviarAtrasado15();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "20", persistent = false)
+	public synchronized void enviarAtrasado20BoletoEmail() {
+		try {
+			System.out.println("E-mail: boleto em atraso (dia 20)");
+			new EnviadorEmail().enviarAtrasado20();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "25", persistent = false)
+	public synchronized void enviarAtrasado25BoletoEmail() {
+		try {
+			System.out.println("E-mail: boleto em atraso (dia 25)");
+			new EnviadorEmail().enviarAtrasado25();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
