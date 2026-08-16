@@ -234,17 +234,22 @@ public class FinanceiroService extends Service {
 			hoje.set(Calendar.MINUTE, 0);
 			hoje.set(Calendar.SECOND, 0);
 
-			// Só o ano letivo atual — sem isso, boleto antigo (ex: 2019) esquecido em
+			// Só o boleto do mês atual — sem isso, boleto antigo (ex: 2019) esquecido em
 			// aberto no banco entra como "atrasado" e manda lembrete de cobrança de anos
-			// atrás, o que é um erro sério de verdade (achado em produção 15/ago/2026).
-			Calendar inicioAnoLetivo = Calendar.getInstance();
-			inicioAnoLetivo.set(configuracaoService.getConfiguracao().getAnoLetivo(), Calendar.JANUARY, 1, 0, 0, 0);
+			// atrás pra dívida que às vezes nem existe mais (achado em produção 15/ago/2026,
+			// cliente real recebeu cobrança de boleto de 2019 já pago fora do sistema).
+			// Restrito a mês, não só ano — pedido explícito do Abimael depois do incidente.
+			Calendar inicioMes = Calendar.getInstance();
+			inicioMes.set(Calendar.DAY_OF_MONTH, 1);
+			inicioMes.set(Calendar.HOUR_OF_DAY, 0);
+			inicioMes.set(Calendar.MINUTE, 0);
+			inicioMes.set(Calendar.SECOND, 0);
 
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT bol from Boleto bol ");
 			sql.append("where 1=1 ");
 			sql.append(" and bol.vencimento < '").append(hoje.getTime()).append("'");
-			sql.append(" and bol.vencimento >= '").append(inicioAnoLetivo.getTime()).append("'");
+			sql.append(" and bol.vencimento >= '").append(inicioMes.getTime()).append("'");
 			sql.append(" AND (bol.cancelado = false or bol.cancelado is null)");
 			sql.append(" AND (bol.protestado = false or bol.protestado is null)");
 			sql.append(" AND (bol.baixaManual = false or bol.baixaManual is null)");
