@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -31,6 +33,14 @@ import br.com.aaf.base.base.ConstantesEscolaApi;
 import br.com.aaf.base.comunicadores.EnviadorJson;
 import br.com.aaf.base.whats.model.Parametro;
 
+// LockType.READ pra cada @Schedule poder rodar em paralelo com os outros — o padrão
+// (WRITE) faz o EJB travar a instância inteira do singleton por invocação, então uma
+// rotina lenta (ex: e-mail de boleto, várias chamadas de rede sequenciais por boleto)
+// bloqueava os outros jobs agendados até terminar (ImportarExtratoBancario chegou a
+// dar timeout de lock esperando, achado 15/ago/2026). Seguro aqui porque nenhum método
+// desta classe muta estado da própria instância — só usam os services @Inject, que são
+// setados uma vez pelo container e nunca reatribuídos.
+@Lock(LockType.READ)
 @Singleton
 @Startup
 public class RotinaAutomatica {
@@ -54,7 +64,7 @@ public class RotinaAutomatica {
 	private WhatsappMonitorService whatsappMonitorService;
 
 	@Schedule(hour="*/03",  persistent = false)
-	public synchronized void removerAlunosSemContratoAtivo() {
+	public void removerAlunosSemContratoAtivo() {
 		try {
 			System.out.println("Cancelando crianças sem contrato ativo ");
 			alunoService.cancelarAlunosSemContratoAtivo();
@@ -64,7 +74,7 @@ public class RotinaAutomatica {
 	}
 	
 	@Schedule(hour="*/02",  persistent = false)
-	public synchronized void colocarAlunosNaListaCobranca() {
+	public void colocarAlunosNaListaCobranca() {
 		try {
 			System.out.println("Colocar alunos na Lista de cobrança ");
 			alunoService.colocarAlunosNaListaDeCobranca();
@@ -74,7 +84,7 @@ public class RotinaAutomatica {
 	}
 	
 	@Schedule(hour="*/2", persistent = false)
-	public synchronized void atualizarStatusProtesto() {
+	public void atualizarStatusProtesto() {
 		try {
 			List<ContratoAluno> contratosProtestados = devedorService.findProtesto(0, 5000, null, null, null);
 			for(ContratoAluno contrato : contratosProtestados) {
@@ -133,7 +143,7 @@ public class RotinaAutomatica {
 
 	
 	@Schedule(hour="*",minute="*/4",  persistent = false)
-	public synchronized void ImportarExtratoBancario() {
+	public void ImportarExtratoBancario() {
 		try {
 			System.out.println("Importando Extrato 2");
 			extratoBancarioService.lerExtrato(CONSTANTES.PATH_EXTRATO_BANCARIO_ENVIAR);
@@ -151,7 +161,7 @@ public class RotinaAutomatica {
 	 *  container reiniciando), não gera reenvio duplicado. Roda às 9h, 13h e 17h
 	 *  horário Brasília (= 12h, 16h, 20h UTC) do dia relevante. */
 	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "5", persistent = false)
-	public synchronized void enviarAvisoVencimentoBoletoEmail() {
+	public void enviarAvisoVencimentoBoletoEmail() {
 		try {
 			System.out.println("E-mail: aviso de vencimento (dia 5)");
 			new EnviadorEmail().enviarAvisosVencimento();
@@ -161,7 +171,7 @@ public class RotinaAutomatica {
 	}
 
 	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "10", persistent = false)
-	public synchronized void enviarVenceHojeBoletoEmail() {
+	public void enviarVenceHojeBoletoEmail() {
 		try {
 			System.out.println("E-mail: vence hoje (dia 10)");
 			new EnviadorEmail().enviarVenceHoje();
@@ -171,7 +181,7 @@ public class RotinaAutomatica {
 	}
 
 	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "15", persistent = false)
-	public synchronized void enviarAtrasado15BoletoEmail() {
+	public void enviarAtrasado15BoletoEmail() {
 		try {
 			System.out.println("E-mail: boleto em atraso (dia 15)");
 			new EnviadorEmail().enviarAtrasado15();
@@ -181,7 +191,7 @@ public class RotinaAutomatica {
 	}
 
 	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "20", persistent = false)
-	public synchronized void enviarAtrasado20BoletoEmail() {
+	public void enviarAtrasado20BoletoEmail() {
 		try {
 			System.out.println("E-mail: boleto em atraso (dia 20)");
 			new EnviadorEmail().enviarAtrasado20();
@@ -191,7 +201,7 @@ public class RotinaAutomatica {
 	}
 
 	@Schedule(hour = "12,16,20", minute = "0", dayOfMonth = "25", persistent = false)
-	public synchronized void enviarAtrasado25BoletoEmail() {
+	public void enviarAtrasado25BoletoEmail() {
 		try {
 			System.out.println("E-mail: boleto em atraso (dia 25)");
 			new EnviadorEmail().enviarAtrasado25();
@@ -203,7 +213,7 @@ public class RotinaAutomatica {
 	/** Monitor WhatsApp: verifica mensagens sem resposta há +5h e responde automaticamente.
 	 *  Roda às 8h, 11h, 15h e 18h horário Brasília (= 11h, 14h, 18h, 21h UTC). */
 	@Schedule(hour = "11,14,18,21", persistent = false)
-	public synchronized void monitorWhatsapp() {
+	public void monitorWhatsapp() {
 		try {
 			whatsappMonitorService.executar();
 		} catch (Exception e) {
@@ -214,7 +224,7 @@ public class RotinaAutomatica {
 	/** Consulta o scmobi-automation-service para os Fretes com geracao de licenca em andamento
 	 *  e, quando concluido (ou com erro), baixa os PDFs / salva a mensagem de erro. */
 	@Schedule(minute = "*/1", persistent = false)
-	public synchronized void verificarLicencasScmobiPendentes() {
+	public void verificarLicencasScmobiPendentes() {
 		try {
 			for (Frete frete : freteService.findFretesComLicencaScmobiProcessando()) {
 				try {
