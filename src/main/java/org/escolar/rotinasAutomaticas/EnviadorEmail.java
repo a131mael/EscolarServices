@@ -1,9 +1,12 @@
 package org.escolar.rotinasAutomaticas;
 
 import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -213,6 +216,16 @@ public class EnviadorEmail {
 				? bol.getPagador().getNomeAluno() : "seu filho(a)";
 	}
 
+	// Formatador.valorFormatado usa NumberFormat.getCurrencyInstance() sem locale
+	// explícito, então no servidor (locale padrão não é pt-BR) sai "$" em vez de "R$"
+	// (achado em produção 15/ago/2026). Formata direto em pt-BR aqui pra não depender
+	// do locale da JVM.
+	private String formatarValorReal(double valor) {
+		DecimalFormatSymbols simbolos = new DecimalFormatSymbols(new Locale("pt", "BR"));
+		DecimalFormat formatador = new DecimalFormat("R$ #,##0.00", simbolos);
+		return formatador.format(valor);
+	}
+
 	private String montarCorpoEmail(String tituloDestaque, String corDestaque, String mensagem, Boleto bol) {
 		return "<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif; background:#f4f4f4; padding:20px;\">"
 				+ "<div style=\"max-width:520px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden; border:1px solid #e0e0e0;\">"
@@ -228,7 +241,7 @@ public class EnviadorEmail {
 				+ Formatador.formataData(bol.getVencimento()) + "</td></tr>"
 				+ "<tr><td style=\"padding:8px 0; color:#666;\">Valor</td>"
 				+ "<td style=\"padding:8px 0; text-align:right; font-weight:bold; color:#333;\">"
-				+ Formatador.valorFormatado(Verificador.getValorFinal(bol)) + "</td></tr>"
+				+ formatarValorReal(Verificador.getValorFinal(bol)) + "</td></tr>"
 				+ "</table>"
 				+ "<p style=\"font-size:13px; color:#666;\">O boleto está em anexo neste e-mail.</p>"
 				+ "<div style=\"background:#f0f7ff; border-radius:6px; padding:12px 16px; margin-top:20px;\">"
