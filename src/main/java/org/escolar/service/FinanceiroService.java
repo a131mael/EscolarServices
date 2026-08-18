@@ -615,6 +615,39 @@ public class FinanceiroService extends Service {
 		em.flush();
 	}
 
+	/** Busca o aluno cujo contatoEmail1 ou contatoEmail2 bate exatamente com o e-mail
+	 *  informado — usado pela limpeza automática de e-mail inválido (bounce do Zoho). */
+	public Aluno findAlunoPorEmailContato(String email) {
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT a from Aluno a ");
+			sql.append("where a.contatoEmail1 = :email or a.contatoEmail2 = :email");
+			Query query = em.createQuery(sql.toString());
+			query.setParameter("email", email);
+			List<Aluno> resultado = query.getResultList();
+			return resultado.isEmpty() ? null : resultado.get(0);
+		} catch (NoResultException nre) {
+			return null;
+		}
+	}
+
+	/** Corrige (se emailCorrigido != null) ou limpa (se null) o slot de e-mail do aluno
+	 *  que bateu com o e-mail que deu bounce. slotAntigo identifica qual dos dois campos
+	 *  (contatoEmail1/contatoEmail2) precisa ser alterado. */
+	public void atualizarEmailAlunoAposBounce(Long alunoId, String emailAntigo, String emailCorrigido) {
+		Aluno al = em.find(Aluno.class, alunoId);
+		if (al == null) return;
+		if (emailAntigo.equals(al.getContatoEmail1())) {
+			al.setContatoEmail1(emailCorrigido);
+		} else if (emailAntigo.equals(al.getContatoEmail2())) {
+			al.setContatoEmail2(emailCorrigido);
+		} else {
+			return;
+		}
+		em.merge(al);
+		em.flush();
+	}
+
 	public List<Aluno> getAlunosCNABNaoEnviado() {
 		try {
 			StringBuilder sql = new StringBuilder();

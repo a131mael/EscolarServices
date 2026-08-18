@@ -166,6 +166,39 @@ public class EnviadorEmail {
 		}
 	}
 
+	/** Verifica os bounces (e-mails que voltaram) da caixa financeiro@tefamel.com e limpa
+	 *  o cadastro dos alunos cujo e-mail está claramente errado — corrige se for um erro
+	 *  óbvio de digitação, senão limpa o campo (não adianta ficar tentando de novo pra
+	 *  sempre num endereço que não existe). Só mexe em bounce que indique claramente
+	 *  endereço inválido (nunca bloqueio de remetente, caixa cheia ou erro temporário —
+	 *  nesses casos o endereço pode continuar sendo válido). */
+	public void limparEmailsInvalidos() {
+		for (ZohoEmailService.Bounce bounce : zohoEmailService.listarBouncesNaoLidos()) {
+			try {
+				if (!zohoEmailService.indicaEnderecoInvalido(bounce.motivo)) {
+					// bounce real, mas não prova que o endereço é inválido (ex: bloqueio
+					// de remetente, caixa cheia) — só tira da caixa de entrada
+					zohoEmailService.arquivarMensagem(bounce.messageId);
+					continue;
+				}
+
+				org.escolar.model.Aluno aluno = financeiroService.findAlunoPorEmailContato(bounce.enderecoFalho);
+				if (aluno != null) {
+					String corrigido = zohoEmailService.tentarCorrigirEmail(bounce.enderecoFalho);
+					financeiroService.atualizarEmailAlunoAposBounce(aluno.getId(), bounce.enderecoFalho, corrigido);
+					LOG.warning((corrigido != null
+							? "Zoho: corrigido email invalido do aluno " + aluno.getId() + ": "
+									+ bounce.enderecoFalho + " -> " + corrigido
+							: "Zoho: removido email invalido do aluno " + aluno.getId() + ": "
+									+ bounce.enderecoFalho));
+				}
+				zohoEmailService.arquivarMensagem(bounce.messageId);
+			} catch (Exception e) {
+				LOG.warning("Zoho: falha ao processar bounce " + bounce.messageId + ": " + e.getMessage());
+			}
+		}
+	}
+
 	/** Reenvio manual pontual (botão no admin) — mesma lógica das rotinas automáticas,
 	 *  mas só pro aluno informado, sem esperar o horário agendado. */
 	public void enviarEmailBoletosMesAtualEAtrasados(Long idAluno) {

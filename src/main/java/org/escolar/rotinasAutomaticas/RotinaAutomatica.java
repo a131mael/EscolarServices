@@ -210,6 +210,20 @@ public class RotinaAutomatica {
 		}
 	}
 
+	/** Limpeza de e-mail inválido: roda todo dia à noite (22h UTC = 19h Brasília, depois
+	 *  de todas as janelas de envio do dia) e confere os bounces acumulados na caixa
+	 *  financeiro@tefamel.com, corrigindo ou limpando o cadastro do aluno. Roda todo dia
+	 *  (não só nos dias de envio) porque um bounce pode demorar a chegar. */
+	@Schedule(hour = "22", minute = "0", persistent = false)
+	public void limparEmailsInvalidosBoletoEmail() {
+		try {
+			System.out.println("E-mail: limpeza de endereços inválidos (bounces)");
+			new EnviadorEmail().limparEmailsInvalidos();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	/** Monitor WhatsApp: verifica mensagens sem resposta há +5h e responde automaticamente.
 	 *  Roda às 8h, 11h, 15h e 18h horário Brasília (= 11h, 14h, 18h, 21h UTC). */
 	@Schedule(hour = "11,14,18,21", persistent = false)
