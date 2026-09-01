@@ -7,6 +7,7 @@ public class PedidoCancelamento implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private Long alunoId;
     private String nomeAluno;
     private String numeroContrato;
     private String ano;
@@ -16,9 +17,14 @@ public class PedidoCancelamento implements Serializable {
     private String dataUltimoUso;
     private String valorMulta;
     private String detalheMensalidades;
+    private String status;
+    private String dataConfirmacao;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getAlunoId() { return alunoId; }
+    public void setAlunoId(Long alunoId) { this.alunoId = alunoId; }
 
     public String getNomeAluno() { return nomeAluno; }
     public void setNomeAluno(String nomeAluno) { this.nomeAluno = nomeAluno; }
@@ -46,4 +52,10 @@ public class PedidoCancelamento implements Serializable {
 
     public String getDetalheMensalidades() { return detalheMensalidades; }
     public void setDetalheMensalidades(String detalheMensalidades) { this.detalheMensalidades = detalheMensalidades; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getDataConfirmacao() { return dataConfirmacao; }
+    public void setDataConfirmacao(String dataConfirmacao) { this.dataConfirmacao = dataConfirmacao; }
 }

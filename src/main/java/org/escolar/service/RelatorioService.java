@@ -56,7 +56,7 @@ public class RelatorioService extends Service {
 	public List<PedidoCancelamento> getPedidosCancelamentoPendentes(){
 		try{
 			StringBuilder sql = new StringBuilder();
-			sql.append(" select pc.id, a.nomealuno, ca.numero, ca.ano, ca.nomeresponsavel, pc.motivo, ");
+			sql.append(" select pc.id, a.nomealuno, ca.numero, ca.ano, ca.nomeresponsavel, pc.motivo, pc.aluno_id, ");
 			sql.append(" pc.data_pedido, pc.data_ultimo_uso, pc.valor_multa, bm.vencimento, ");
 			sql.append(" (select string_agg( ");
 			sql.append("    (case when x.posicao = 1 then 'Mes atual' else 'Aviso' end) || ': R$ ' || ");
@@ -83,17 +83,80 @@ public class RelatorioService extends Service {
 				p.setAno(l[3] == null ? "" : String.valueOf(l[3]));
 				p.setNomeResponsavel((String) l[4]);
 				p.setMotivo((String) l[5]);
-				p.setDataPedido(l[6] == null ? "" : l[6].toString());
-				p.setDataUltimoUso(l[7] == null ? "" : l[7].toString());
-				String vencMulta = l[9] == null ? "" : " (" + l[9].toString().substring(0, 7) + ")";
-				p.setValorMulta(l[8] == null ? "-" : ("R$ " + l[8].toString() + vencMulta));
-				p.setDetalheMensalidades(l[10] == null ? "-" : (String) l[10]);
+				p.setAlunoId(l[6] == null ? null : ((Number) l[6]).longValue());
+				p.setDataPedido(l[7] == null ? "" : l[7].toString());
+				p.setDataUltimoUso(l[8] == null ? "" : l[8].toString());
+				String vencMulta = l[10] == null ? "" : " (" + l[10].toString().substring(0, 7) + ")";
+				p.setValorMulta(l[9] == null ? "-" : ("R$ " + l[9].toString() + vencMulta));
+				p.setDetalheMensalidades(l[11] == null ? "-" : (String) l[11]);
 				pedidos.add(p);
 			}
 			return pedidos;
 		}catch(Exception e){
 			System.out.println(e);
 			return new ArrayList<>();
+		}
+	}
+
+	/** Histórico completo de pedidos de cancelamento (log_pedido_cancelamento, nunca é
+	 * apagado) — mostra tanto os já confirmados (contrato cancelado de verdade) quanto os
+	 * ainda em aberto, com todos os detalhes (motivo, multa, datas). */
+	public List<PedidoCancelamento> getHistoricoCancelamentos(){
+		try{
+			StringBuilder sql = new StringBuilder();
+			sql.append(" select lpc.id, lpc.nome_aluno, ca.numero, ca.ano, lpc.nome_responsavel, lpc.motivo, lpc.aluno_id, ");
+			sql.append(" lpc.data_pedido, coalesce(lpc.data_ultimo_uso, to_char(lpc.pode_usar_ate,'DD/MM/YYYY')), lpc.valor_multa, bm.vencimento, ");
+			sql.append(" (select string_agg( ");
+			sql.append("    (case when x.posicao = 1 then 'Mes atual' else 'Aviso' end) || ': R$ ' || ");
+			sql.append("    to_char(b.valornominal, 'FM999999990.00') || ' (' || to_char(b.vencimento,'MM/YYYY') || ')', ");
+			sql.append("    ' + ' order by x.posicao) ");
+			sql.append("  from unnest(lpc.boletos_mensalidade_ids) with ordinality as x(bid, posicao) ");
+			sql.append("  join boleto b on b.id = x.bid) as detalhe_mensalidades, ");
+			sql.append(" coalesce(ca.cancelado, false) as confirmado, ca.datacancelamento ");
+			sql.append(" from log_pedido_cancelamento lpc ");
+			sql.append(" join contratoaluno ca on ca.id = lpc.contrato_id ");
+			sql.append(" left join boleto bm on bm.id = lpc.boleto_multa_id ");
+			sql.append(" order by lpc.data_pedido desc ");
+
+			Query query = em.createNativeQuery(sql.toString());
+			List<Object[]> linhas = query.getResultList();
+
+			List<PedidoCancelamento> pedidos = new ArrayList<>();
+			for (Object[] l : linhas) {
+				PedidoCancelamento p = new PedidoCancelamento();
+				p.setId(l[0] == null ? null : ((Number) l[0]).longValue());
+				p.setNomeAluno((String) l[1]);
+				p.setNumeroContrato(l[2] == null ? "" : String.valueOf(l[2]));
+				p.setAno(l[3] == null ? "" : String.valueOf(l[3]));
+				p.setNomeResponsavel((String) l[4]);
+				p.setMotivo((String) l[5]);
+				p.setAlunoId(l[6] == null ? null : ((Number) l[6]).longValue());
+				p.setDataPedido(l[7] == null ? "" : l[7].toString());
+				p.setDataUltimoUso(l[8] == null ? "" : l[8].toString());
+				String vencMulta = l[10] == null ? "" : " (" + l[10].toString().substring(0, 7) + ")";
+				p.setValorMulta(l[9] == null ? "-" : ("R$ " + l[9].toString() + vencMulta));
+				p.setDetalheMensalidades(l[11] == null ? "-" : (String) l[11]);
+				boolean confirmado = l[12] != null && (Boolean) l[12];
+				p.setStatus(confirmado ? "Confirmado" : "Em aberto");
+				p.setDataConfirmacao(confirmado && l[13] != null ? l[13].toString() : "-");
+				pedidos.add(p);
+			}
+			return pedidos;
+		}catch(Exception e){
+			System.out.println(e);
+			return new ArrayList<>();
+		}
+	}
+
+	/** Remove o pedido de cancelamento pendente (ex: cliente se arrependeu). Não mexe no
+	 * histórico permanente (log_pedido_cancelamento, no Portal), só tira da fila pendente. */
+	public void descancelarPedido(Long pedidoId){
+		try{
+			Query query = em.createNativeQuery("delete from pedido_cancelamento_contrato where id = :id");
+			query.setParameter("id", pedidoId);
+			query.executeUpdate();
+		}catch(Exception e){
+			System.out.println(e);
 		}
 	}
 
