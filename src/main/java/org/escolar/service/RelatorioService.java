@@ -57,7 +57,7 @@ public class RelatorioService extends Service {
 		try{
 			StringBuilder sql = new StringBuilder();
 			sql.append(" select pc.id, a.nomealuno, ca.numero, ca.ano, ca.nomeresponsavel, pc.motivo, pc.aluno_id, ");
-			sql.append(" pc.data_pedido, pc.data_ultimo_uso, pc.valor_multa, bm.vencimento, ");
+			sql.append(" to_char(pc.data_pedido, 'DD/MM/YYYY'), pc.data_ultimo_uso, pc.valor_multa, bm.vencimento, ");
 			sql.append(" (select string_agg( ");
 			sql.append("    (case when x.posicao = 1 then 'Mes atual' else 'Aviso' end) || ': R$ ' || ");
 			sql.append("    to_char(b.valornominal, 'FM999999990.00') || ' (' || to_char(b.vencimento,'MM/YYYY') || ')', ");
@@ -105,14 +105,14 @@ public class RelatorioService extends Service {
 		try{
 			StringBuilder sql = new StringBuilder();
 			sql.append(" select lpc.id, lpc.nome_aluno, ca.numero, ca.ano, lpc.nome_responsavel, lpc.motivo, lpc.aluno_id, ");
-			sql.append(" lpc.data_pedido, coalesce(lpc.data_ultimo_uso, to_char(lpc.pode_usar_ate,'DD/MM/YYYY')), lpc.valor_multa, bm.vencimento, ");
+			sql.append(" to_char(lpc.data_pedido, 'DD/MM/YYYY'), coalesce(lpc.data_ultimo_uso, to_char(lpc.pode_usar_ate,'DD/MM/YYYY')), lpc.valor_multa, bm.vencimento, ");
 			sql.append(" (select string_agg( ");
 			sql.append("    (case when x.posicao = 1 then 'Mes atual' else 'Aviso' end) || ': R$ ' || ");
 			sql.append("    to_char(b.valornominal, 'FM999999990.00') || ' (' || to_char(b.vencimento,'MM/YYYY') || ')', ");
 			sql.append("    ' + ' order by x.posicao) ");
 			sql.append("  from unnest(lpc.boletos_mensalidade_ids) with ordinality as x(bid, posicao) ");
 			sql.append("  join boleto b on b.id = x.bid) as detalhe_mensalidades, ");
-			sql.append(" coalesce(ca.cancelado, false) as confirmado, ca.datacancelamento ");
+			sql.append(" coalesce(ca.cancelado, false) as confirmado, to_char(ca.datacancelamento, 'DD/MM/YYYY') ");
 			sql.append(" from log_pedido_cancelamento lpc ");
 			sql.append(" join contratoaluno ca on ca.id = lpc.contrato_id ");
 			sql.append(" left join boleto bm on bm.id = lpc.boleto_multa_id ");
