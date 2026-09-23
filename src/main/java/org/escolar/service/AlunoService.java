@@ -2745,16 +2745,41 @@ public class AlunoService extends Service {
 		em.flush();
 	}
 
+	// Reescrito em 2026-09-23: a versão antiga usava findAll() (tabela aluno INTEIRA,
+	// todos os anos, ~1850 linhas) e pra cada aluno fazia lazy-load de contratosSux e,
+	// pra cada contrato, lazy-load de TODOS os boletos só pra checar status em Java —
+	// N+1 dentro de N+1, todo mundo entrando de uma vez no contexto do JPA sem nunca
+	// dar em.clear(). Isso estourava o heap da JVM (-Xmx512m) toda vez que essa rotina
+	// rodava (a cada 3h, ver RotinaAutomatica), travando o container escolarwebservice.
+	// A nova versão faz tudo num UPDATE só no banco: (1) só reconsidera alunos que
+	// ainda não foram removidos e que têm contrato no ANO ATUAL (anos anteriores já
+	// foram processados por execuções passadas desta mesma rotina, não precisa
+	// reconferir todo mundo de novo); (2) o "tem contrato ativo" vira um EXISTS
+	// correlacionado (contratoaluno.cancelado=false + boleto em aberto), reproduzindo
+	// exatamente a mesma regra de Verificador.possuiBoletoAberto (boleto não pago, não
+	// baixado, não cancelado, não com dívida perdoada) sem carregar nenhuma entidade.
+	private static final String SQL_BOLETO_ABERTO =
+			"COALESCE(c.cancelado, false) = false "
+			+ "AND COALESCE(b.cancelado, false) = false "
+			+ "AND COALESCE(b.baixamanual, false) = false "
+			+ "AND COALESCE(b.baixagerada, false) = false "
+			+ "AND COALESCE(b.dividaperdoada, false) = false "
+			+ "AND (b.datapagamento IS NULL OR b.valornominal - 30 > COALESCE(b.valorpago, 0))";
+
 	public void cancelarAlunosSemContratoAtivo() {
-		for (Aluno al : findAll()) {
-			if (!temContratoAtivo(al)) {
-				if (al.getIrmao1() != null && temContratoAtivo(al.getIrmao1())) {
-				} else if (al.getIrmao2() != null && temContratoAtivo(al.getIrmao2())) {
-				} else {
-					cancelar(al);
-				}
-			}
-		}
+		int anoAtual = Year.now().getValue();
+		String sql =
+				"UPDATE aluno a "
+				+ "SET datacancelamento = now(), removido = true "
+				+ "WHERE COALESCE(a.removido, false) = false "
+				+ "  AND EXISTS (SELECT 1 FROM contratoaluno cy WHERE cy.aluno_id = a.id AND cy.ano = :ano) "
+				+ "  AND NOT EXISTS (SELECT 1 FROM contratoaluno c JOIN boleto b ON b.contrato_id = c.id "
+				+ "                  WHERE c.aluno_id = a.id AND " + SQL_BOLETO_ABERTO + ") "
+				+ "  AND NOT EXISTS (SELECT 1 FROM contratoaluno c JOIN boleto b ON b.contrato_id = c.id "
+				+ "                  WHERE c.aluno_id = a.irmao1_id AND " + SQL_BOLETO_ABERTO + ") "
+				+ "  AND NOT EXISTS (SELECT 1 FROM contratoaluno c JOIN boleto b ON b.contrato_id = c.id "
+				+ "                  WHERE c.aluno_id = a.irmao2_id AND " + SQL_BOLETO_ABERTO + ")";
+		em.createNativeQuery(sql).setParameter("ano", anoAtual).executeUpdate();
 	}
 
 	public boolean temContratoAtivo(Aluno al) {
@@ -2770,16 +2795,6 @@ public class AlunoService extends Service {
 			}
 		}
 		return ativo;
-	}
-
-	private void cancelar(Aluno al) {
-		Aluno ap = findById(al.getId());
-		if (ap.getRemovido() == null || !ap.getRemovido()) {
-			ap.setDataCancelamento(new Date());
-			ap.setRemovido(true);
-			em.merge(ap);
-			em.flush();
-		}
 	}
 
 	public void saveContactado(Aluno al) {
