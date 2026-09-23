@@ -2825,8 +2825,32 @@ public class AlunoService extends Service {
 	public void saveStatusCntrato(Aluno al) {
 		Aluno ap = findById(al.getId());
 		ap.setStatusContrato(al.getStatusContrato());
-
 		em.merge(ap);
+
+		// O contrato entregue/assinado e sempre unico por familia -- ao mudar o
+		// status de um aluno, propaga o mesmo status pros irmaos dele (o
+		// cadastro de irmao no formulario nem sempre e preenchido nos dois
+		// lados, entao busca tanto pelos campos irmaoN deste aluno quanto por
+		// quem tem este aluno cadastrado como irmao).
+		List<Aluno> irmaos = new ArrayList<>();
+		if (ap.getIrmao1() != null) irmaos.add(findById(ap.getIrmao1().getId()));
+		if (ap.getIrmao2() != null) irmaos.add(findById(ap.getIrmao2().getId()));
+		if (ap.getIrmao3() != null) irmaos.add(findById(ap.getIrmao3().getId()));
+		if (ap.getIrmao4() != null) irmaos.add(findById(ap.getIrmao4().getId()));
+
+		Query queryReverso = em.createQuery(
+				"SELECT a FROM Aluno a WHERE a.irmao1.id = :id OR a.irmao2.id = :id "
+				+ "OR a.irmao3.id = :id OR a.irmao4.id = :id");
+		queryReverso.setParameter("id", ap.getId());
+		for (Object o : queryReverso.getResultList()) {
+			irmaos.add((Aluno) o);
+		}
+
+		for (Aluno irmao : irmaos) {
+			irmao.setStatusContrato(ap.getStatusContrato());
+			em.merge(irmao);
+		}
+
 		em.flush();
 	}
 
