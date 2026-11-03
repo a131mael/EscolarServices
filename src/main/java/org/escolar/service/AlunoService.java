@@ -329,6 +329,26 @@ public class AlunoService extends Service {
 		}
 	}
 
+	// Usado especificamente pela rematricula: alunos com contrato no ano
+	// informado, nao cancelado -- independe de ter boleto em aberto (diferente
+	// de temContratoAtivo, que exige boleto em aberto e serve pra cobranca).
+	@SuppressWarnings("unchecked")
+	public List<Aluno> findAlunosParaRematricula(int anoLetivo) {
+		try {
+			Query query = em.createQuery(
+					"SELECT DISTINCT ca.aluno FROM ContratoAluno ca "
+					+ "WHERE ca.ano = :ano AND (ca.cancelado IS NULL OR ca.cancelado = false) "
+					+ "ORDER BY ca.aluno.nomeAluno");
+			query.setParameter("ano", (short) anoLetivo);
+			return query.getResultList();
+		} catch (NoResultException nre) {
+			return new ArrayList<>();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+	}
+
 	public List<Aluno> findAll(Serie serie, PerioddoEnum periodo) {
 		List<Aluno> alunos = new ArrayList<>();
 		alunos.addAll(find(serie, periodo));
