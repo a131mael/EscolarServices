@@ -332,37 +332,46 @@ public class AlunoService extends Service {
 	// Usado especificamente pela rematricula: alunos com contrato no ano
 	// informado, nao cancelado -- independe de ter boleto em aberto (diferente
 	// de temContratoAtivo, que exige boleto em aberto e serve pra cobranca).
+	//
+	// Carrega tudo em lote (poucas queries) em vez de aluno por aluno (que
+	// virava centenas de idas e vindas ao banco e estourava o timeout de
+	// 100s do Cloudflare pra ~239 alunos).
 	@SuppressWarnings("unchecked")
 	public List<Aluno> findAlunosParaRematricula(int anoLetivo) {
 		try {
-			Query query = em.createQuery(
+			// 1) ids + irmaos (ManyToOne, sem risco de produto cartesiano)
+			Query idsQuery = em.createQuery(
 					"SELECT DISTINCT ca.aluno FROM ContratoAluno ca "
+					+ "LEFT JOIN FETCH ca.aluno.irmao1 "
+					+ "LEFT JOIN FETCH ca.aluno.irmao2 "
+					+ "LEFT JOIN FETCH ca.aluno.irmao3 "
+					+ "LEFT JOIN FETCH ca.aluno.irmao4 "
 					+ "WHERE ca.ano = :ano AND (ca.cancelado IS NULL OR ca.cancelado = false) "
 					+ "ORDER BY ca.aluno.nomeAluno");
-			query.setParameter("ano", (short) anoLetivo);
-			List<Aluno> alunos = query.getResultList();
-			// forca o carregamento dos contratos (e dos boletos de cada
-			// contrato) ainda dentro da sessao -- senao da
-			// LazyInitializationException quando o chamador (fora dessa
-			// transacao) acessa aluno.getUltimoContrato() ou isdevedor()
-			for (Aluno al : alunos) {
-				al.getContratos().size();
-				for (ContratoAluno ca : al.getContratos()) {
-					ca.getBoletos().size();
-				}
-				if (al.getIrmao1() != null) {
-					al.getIrmao1().getNomeAluno();
-				}
-				if (al.getIrmao2() != null) {
-					al.getIrmao2().getNomeAluno();
-				}
-				if (al.getIrmao3() != null) {
-					al.getIrmao3().getNomeAluno();
-				}
-				if (al.getIrmao4() != null) {
-					al.getIrmao4().getNomeAluno();
-				}
+			idsQuery.setParameter("ano", (short) anoLetivo);
+			List<Aluno> alunos = idsQuery.getResultList();
+
+			if (alunos.isEmpty()) {
+				return alunos;
 			}
+
+			List<Long> ids = new ArrayList<>();
+			for (Aluno al : alunos) {
+				ids.add(al.getId());
+			}
+
+			// 2) contratos + boletos (OneToMany) numa segunda passada, com
+			// DISTINCT pra absorver o produto cartesiano contratos x boletos.
+			// Os objetos ja estao na sessao (mesma identidade), entao isso so
+			// "completa" os alunos carregados no passo 1.
+			Query contratosQuery = em.createQuery(
+					"SELECT DISTINCT al FROM Aluno al "
+					+ "LEFT JOIN FETCH al.contratos c "
+					+ "LEFT JOIN FETCH c.boletos "
+					+ "WHERE al.id IN :ids");
+			contratosQuery.setParameter("ids", ids);
+			contratosQuery.getResultList();
+
 			return alunos;
 		} catch (NoResultException nre) {
 			return new ArrayList<>();
