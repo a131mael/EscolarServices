@@ -178,6 +178,7 @@ public class TabelaPrecoService extends Service {
 			case BROMELIAS:
 			case PARQUE_DAS_ROSAS:
 			case Tabuleiro:
+			case JAQUEIRA:
 				return "Bela Vista";
 			case PACHECOS:
 			case VILA_NOVA:
