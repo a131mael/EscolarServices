@@ -360,17 +360,25 @@ public class AlunoService extends Service {
 				ids.add(al.getId());
 			}
 
-			// 2) contratos + boletos (OneToMany) numa segunda passada, com
-			// DISTINCT pra absorver o produto cartesiano contratos x boletos.
-			// Os objetos ja estao na sessao (mesma identidade), entao isso so
-			// "completa" os alunos carregados no passo 1.
+			// 2) contratos (OneToMany) -- separado do passo 3 porque o
+			// Hibernate nao permite fetch join de duas colecoes (bags)
+			// aninhadas na mesma query (MultipleBagFetchException).
 			Query contratosQuery = em.createQuery(
 					"SELECT DISTINCT al FROM Aluno al "
-					+ "LEFT JOIN FETCH al.contratos c "
-					+ "LEFT JOIN FETCH c.boletos "
+					+ "LEFT JOIN FETCH al.contratos "
 					+ "WHERE al.id IN :ids");
 			contratosQuery.setParameter("ids", ids);
 			contratosQuery.getResultList();
+
+			// 3) boletos de cada contrato -- os ContratoAluno ja estao na
+			// sessao (mesma identidade do passo 2), entao isso so completa
+			// a colecao boletos de cada um.
+			Query boletosQuery = em.createQuery(
+					"SELECT DISTINCT c FROM ContratoAluno c "
+					+ "LEFT JOIN FETCH c.boletos "
+					+ "WHERE c.aluno.id IN :ids");
+			boletosQuery.setParameter("ids", ids);
+			boletosQuery.getResultList();
 
 			return alunos;
 		} catch (NoResultException nre) {
