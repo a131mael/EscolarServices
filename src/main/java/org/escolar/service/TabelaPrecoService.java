@@ -147,7 +147,7 @@ public class TabelaPrecoService extends Service {
 			if(mesMatricula == 1) {
 				valor = mesmoBairro ? 700 : 750;
 			}else {
-				valor = mesmoBairro ? 700 : 820;
+				valor = mesmoBairro ? 770 : 820;
 			}
 		}
 		if(irmaos == 2) {
