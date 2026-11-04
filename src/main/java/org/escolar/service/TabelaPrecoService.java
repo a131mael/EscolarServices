@@ -145,9 +145,9 @@ public class TabelaPrecoService extends Service {
 		if(irmaos == 1) {
 			boolean mesmoBairro = mesmoBairro(aluno.getBairroAluno(), aluno.getEscola().getBairroEnum());
 			if(mesMatricula == 1) {
-				valor = mesmoBairro ? 750 : 800;
+				valor = mesmoBairro ? 700 : 750;
 			}else {
-				valor = mesmoBairro ? 800 : 850;
+				valor = mesmoBairro ? 700 : 820;
 			}
 		}
 		if(irmaos == 2) {
