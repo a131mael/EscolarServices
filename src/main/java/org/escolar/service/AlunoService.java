@@ -341,13 +341,13 @@ public class AlunoService extends Service {
 		try {
 			// 1) ids + irmaos (ManyToOne, sem risco de produto cartesiano)
 			Query idsQuery = em.createQuery(
-					"SELECT DISTINCT ca.aluno FROM ContratoAluno ca "
-					+ "LEFT JOIN FETCH ca.aluno.irmao1 "
-					+ "LEFT JOIN FETCH ca.aluno.irmao2 "
-					+ "LEFT JOIN FETCH ca.aluno.irmao3 "
-					+ "LEFT JOIN FETCH ca.aluno.irmao4 "
+					"SELECT DISTINCT al FROM ContratoAluno ca JOIN ca.aluno al "
+					+ "LEFT JOIN FETCH al.irmao1 "
+					+ "LEFT JOIN FETCH al.irmao2 "
+					+ "LEFT JOIN FETCH al.irmao3 "
+					+ "LEFT JOIN FETCH al.irmao4 "
 					+ "WHERE ca.ano = :ano AND (ca.cancelado IS NULL OR ca.cancelado = false) "
-					+ "ORDER BY ca.aluno.nomeAluno");
+					+ "ORDER BY al.nomeAluno");
 			idsQuery.setParameter("ano", (short) anoLetivo);
 			List<Aluno> alunos = idsQuery.getResultList();
 
