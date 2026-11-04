@@ -143,10 +143,11 @@ public class TabelaPrecoService extends Service {
 		}
 		
 		if(irmaos == 1) {
+			boolean mesmoBairro = mesmoBairro(aluno.getBairroAluno(), aluno.getEscola().getBairroEnum());
 			if(mesMatricula == 1) {
-				valor = 700;
+				valor = mesmoBairro ? 750 : 800;
 			}else {
-				valor = 760;
+				valor = mesmoBairro ? 800 : 850;
 			}
 		}
 		if(irmaos == 2) {
@@ -160,6 +161,38 @@ public class TabelaPrecoService extends Service {
 		return valor;
 	}
 	
+	// Mesmos grupos usados na tabela de precos (bairros dentro do mesmo grupo
+	// contam como "mesmo bairro" -- ex: Vale Verde e Jardins fazem parte de
+	// Bela Vista, Vila Nova faz parte de Pachecos).
+	private static String grupoDoBairro(BairroEnum bairro) {
+		if (bairro == null) {
+			return null;
+		}
+		switch (bairro) {
+			case BELA_VISTA:
+			case JARDINS:
+			case MORADAS:
+			case TERRA_NOVA:
+			case VALE_VERDE:
+			case AZALEIA:
+			case BROMELIAS:
+			case PARQUE_DAS_ROSAS:
+			case Tabuleiro:
+				return "Bela Vista";
+			case PACHECOS:
+			case VILA_NOVA:
+				return "Pachecos";
+			default:
+				return bairro.name();
+		}
+	}
+
+	public boolean mesmoBairro(BairroEnum bairroCrianca, BairroEnum bairroEscola) {
+		String grupoCrianca = grupoDoBairro(bairroCrianca);
+		String grupoEscola = grupoDoBairro(bairroEscola);
+		return grupoCrianca != null && grupoCrianca.equals(grupoEscola);
+	}
+
 	public TabelaPrecos find(BairroEnum bairroCrianca, BairroEnum bairroEscola, int anoRematricula) {
 		try {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
