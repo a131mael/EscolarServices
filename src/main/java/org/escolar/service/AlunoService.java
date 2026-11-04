@@ -350,6 +350,18 @@ public class AlunoService extends Service {
 				for (ContratoAluno ca : al.getContratos()) {
 					ca.getBoletos().size();
 				}
+				if (al.getIrmao1() != null) {
+					al.getIrmao1().getNomeAluno();
+				}
+				if (al.getIrmao2() != null) {
+					al.getIrmao2().getNomeAluno();
+				}
+				if (al.getIrmao3() != null) {
+					al.getIrmao3().getNomeAluno();
+				}
+				if (al.getIrmao4() != null) {
+					al.getIrmao4().getNomeAluno();
+				}
 			}
 			return alunos;
 		} catch (NoResultException nre) {
