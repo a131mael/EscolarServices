@@ -340,7 +340,14 @@ public class AlunoService extends Service {
 					+ "WHERE ca.ano = :ano AND (ca.cancelado IS NULL OR ca.cancelado = false) "
 					+ "ORDER BY ca.aluno.nomeAluno");
 			query.setParameter("ano", (short) anoLetivo);
-			return query.getResultList();
+			List<Aluno> alunos = query.getResultList();
+			// forca o carregamento dos contratos ainda dentro da sessao --
+			// senao da LazyInitializationException quando o chamador (fora
+			// dessa transacao) tenta acessar aluno.getUltimoContrato()
+			for (Aluno al : alunos) {
+				al.getContratos().size();
+			}
+			return alunos;
 		} catch (NoResultException nre) {
 			return new ArrayList<>();
 		} catch (Exception e) {
