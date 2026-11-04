@@ -341,11 +341,15 @@ public class AlunoService extends Service {
 					+ "ORDER BY ca.aluno.nomeAluno");
 			query.setParameter("ano", (short) anoLetivo);
 			List<Aluno> alunos = query.getResultList();
-			// forca o carregamento dos contratos ainda dentro da sessao --
-			// senao da LazyInitializationException quando o chamador (fora
-			// dessa transacao) tenta acessar aluno.getUltimoContrato()
+			// forca o carregamento dos contratos (e dos boletos de cada
+			// contrato) ainda dentro da sessao -- senao da
+			// LazyInitializationException quando o chamador (fora dessa
+			// transacao) acessa aluno.getUltimoContrato() ou isdevedor()
 			for (Aluno al : alunos) {
 				al.getContratos().size();
+				for (ContratoAluno ca : al.getContratos()) {
+					ca.getBoletos().size();
+				}
 			}
 			return alunos;
 		} catch (NoResultException nre) {
