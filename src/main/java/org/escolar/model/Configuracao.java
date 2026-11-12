@@ -82,6 +82,13 @@ public class Configuracao implements Serializable {
     private String codMunicipio;
 
     @Column
+    private String inscricaoMunicipal;
+
+    /** "homologacao" ou "producao" -- NFSe nacional */
+    @Column
+    private String nfseAmbiente;
+
+    @Column
     private String municipio;
 
     @Column
@@ -297,6 +304,22 @@ public class Configuracao implements Serializable {
 
 	public void setBairro(String bairro) {
 		this.bairro = bairro;
+	}
+
+	public String getInscricaoMunicipal() {
+		return inscricaoMunicipal;
+	}
+
+	public void setInscricaoMunicipal(String inscricaoMunicipal) {
+		this.inscricaoMunicipal = inscricaoMunicipal;
+	}
+
+	public String getNfseAmbiente() {
+		return nfseAmbiente;
+	}
+
+	public void setNfseAmbiente(String nfseAmbiente) {
+		this.nfseAmbiente = nfseAmbiente;
 	}
 
 	public String getCodMunicipio() {
