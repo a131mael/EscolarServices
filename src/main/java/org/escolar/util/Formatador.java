@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.aaf.financeiro.util.OfficeUtil;
 import org.escolar.model.Boleto;
@@ -32,10 +33,31 @@ public class Formatador {
 	}
 	
 	public static String valorFormatado(Double valorF){
-		BigDecimal valor = new BigDecimal (valorF);  
-		NumberFormat nf = NumberFormat.getCurrencyInstance();  
+		BigDecimal valor = new BigDecimal (valorF);
+		NumberFormat nf = NumberFormat.getCurrencyInstance();
 		String formatado = nf.format (valor);
 		return formatado;
+	}
+
+	// Numero no padrao BR (virgula decimal, ponto de milhar), sem simbolo de
+	// moeda -- usado em contratos onde o "R$" ja vem fixo no texto/template.
+	public static String formataValorBR(double valor){
+		NumberFormat nf = NumberFormat.getNumberInstance(new Locale("pt", "BR"));
+		nf.setMinimumFractionDigits(2);
+		nf.setMaximumFractionDigits(2);
+		return nf.format(valor);
+	}
+
+	public static String formataCpf(String cpf){
+		if (cpf == null) {
+			return cpf;
+		}
+		String digitos = cpf.replaceAll("[^0-9]", "");
+		if (digitos.length() != 11) {
+			return cpf;
+		}
+		return digitos.substring(0, 3) + "." + digitos.substring(3, 6) + "." + digitos.substring(6, 9) + "-"
+				+ digitos.substring(9, 11);
 	}
 	
 	public static CharSequence getMes(Date vencimento) {
