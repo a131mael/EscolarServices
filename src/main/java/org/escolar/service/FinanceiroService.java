@@ -1053,12 +1053,13 @@ public class FinanceiroService extends Service {
 	
 	@SuppressWarnings("unchecked")
 	public List<Aluno> findAlunosStatusContrato(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
-			
+
+			int anoAtual = configuracaoService.getConfiguracao().getAnoLetivo();
 			StringBuilder sql = new StringBuilder();
-			
-			
+
+
 			sql.append("select distinct(aluno.id) from aluno aluno left join contratoaluno contrato on aluno.id = contrato.aluno_id where 1 = 1 and anoletivo = ");
-			sql.append(configuracaoService.getConfiguracao().getAnoLetivo());
+			sql.append(anoAtual);
 
 			sql.append(" and (contrato.cancelado is null or contrato.cancelado  = false)");
 			sql.append(" and (aluno.removido is null or aluno.removido  = false)");
@@ -1088,10 +1089,12 @@ public class FinanceiroService extends Service {
 			if(filtros.get("statusContrato") != null) {
 				sql.append(" and aluno.statusContrato = ");
 				sql.append(((StatusContratoEnum)filtros.get("statusContrato")).ordinal());
+				sql.append(" and aluno.anostatuscontrato = ");
+				sql.append(anoAtual);
 			}
-			
+
 			sql.append(" order by aluno.id desc ");
-			
+
 			Query query = em.createNativeQuery(sql.toString());
 			query.setFirstResult(first);
 			query.setMaxResults(size);
@@ -1101,9 +1104,14 @@ public class FinanceiroService extends Service {
 			}
 			List<Aluno> alunos = new ArrayList<>();
 			for(BigInteger id : codigo){
-				alunos.add(alunoService.findById(id.longValue()));
+				Aluno aluno = alunoService.findById(id.longValue());
+				// snapshot pra tela: mostra o status so se ele for do ano letivo
+				// atual, sem mexer no valor de verdade salvo no banco
+				em.detach(aluno);
+				aluno.setStatusContrato(aluno.getStatusContratoAtual(anoAtual));
+				alunos.add(aluno);
 			}
-			
+
 			return alunos;
 	}
 	

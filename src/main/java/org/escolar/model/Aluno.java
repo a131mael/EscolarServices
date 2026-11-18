@@ -188,8 +188,14 @@ public class Aluno implements Serializable {
 	@NotNull
 	private PerioddoEnum periodo;
 	
-	@Column(columnDefinition = "int default 0") 
+	@Column(columnDefinition = "int default 0")
 	private StatusContratoEnum statusContrato;
+
+	// Ano letivo a que o statusContrato acima se refere. Sem isso, um status
+	// "Assinado" marcado num ano continuava aparecendo pra sempre, mesmo
+	// depois de gerado o contrato do ano seguinte -- usar getStatusContratoAtual().
+	@Column
+	private Integer anoStatusContrato;
 
 	@Column
 	private String telefone;
@@ -1616,6 +1622,24 @@ public class Aluno implements Serializable {
 
 	public void setStatusContrato(StatusContratoEnum statusContrato) {
 		this.statusContrato = statusContrato;
+	}
+
+	public Integer getAnoStatusContrato() {
+		return anoStatusContrato;
+	}
+
+	public void setAnoStatusContrato(Integer anoStatusContrato) {
+		this.anoStatusContrato = anoStatusContrato;
+	}
+
+	// Retorna o status so se ele foi marcado no ciclo (ano letivo) atual --
+	// evita mostrar "Assinado"/"Convite enviado" etc. de um ano anterior
+	// como se fosse do contrato do ano corrente.
+	public StatusContratoEnum getStatusContratoAtual(int anoLetivoAtual) {
+		if (anoStatusContrato == null || anoStatusContrato != anoLetivoAtual) {
+			return null;
+		}
+		return statusContrato;
 	}
 
 	public boolean isRemocaoIrmao() {
