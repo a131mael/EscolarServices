@@ -2661,7 +2661,9 @@ public class AlunoService extends Service {
 		contratos.add(novoContrato);
 		aluno.setContratos(contratos);
 		aluno.setStatusContrato(StatusContratoEnum.ACEITO_CONTRATO_ENVIADO);
-		aluno.setAnoStatusContrato(configuracaoService.getConfiguracao().getAnoLetivo());
+		// usa o ano do proprio contrato (ja vem certo tanto pra rematricula
+		// quanto pra matricula nova -- ver AlunoController.gerarContrato)
+		aluno.setAnoStatusContrato((int) novoContrato.getAno());
 		em.merge(aluno);
 		em.flush();
 		return aluno;
@@ -2883,12 +2885,10 @@ public class AlunoService extends Service {
 		em.flush();
 	}
 
-	public void saveStatusCntrato(Aluno al) {
-		int anoAtual = configuracaoService.getConfiguracao().getAnoLetivo();
-
+	public void saveStatusCntrato(Aluno al, int anoSelecionado) {
 		Aluno ap = findById(al.getId());
 		ap.setStatusContrato(al.getStatusContrato());
-		ap.setAnoStatusContrato(anoAtual);
+		ap.setAnoStatusContrato(anoSelecionado);
 		em.merge(ap);
 
 		// O contrato entregue/assinado e sempre unico por familia -- ao mudar o
@@ -2912,7 +2912,7 @@ public class AlunoService extends Service {
 
 		for (Aluno irmao : irmaos) {
 			irmao.setStatusContrato(ap.getStatusContrato());
-			irmao.setAnoStatusContrato(anoAtual);
+			irmao.setAnoStatusContrato(anoSelecionado);
 			em.merge(irmao);
 		}
 
@@ -3429,10 +3429,10 @@ public class AlunoService extends Service {
 
 	}
 
-	public void setStatusCONVITE_ENVIADO(Aluno al) {
+	public void setStatusCONVITE_ENVIADO(Aluno al, int anoSelecionado) {
 		Aluno ap = findById(al.getId());
 		ap.setStatusContrato(StatusContratoEnum.CONVITE_ENVIADO);
-		ap.setAnoStatusContrato(configuracaoService.getConfiguracao().getAnoLetivo());
+		ap.setAnoStatusContrato(anoSelecionado);
 
 		em.merge(ap);
 		em.flush();

@@ -1055,6 +1055,12 @@ public class FinanceiroService extends Service {
 	public List<Aluno> findAlunosStatusContrato(int first, int size, String orderBy, String order,	Map<String, Object> filtros) {
 
 			int anoAtual = configuracaoService.getConfiguracao().getAnoLetivo();
+			// Ano do status de contrato (entregue/assinado) a considerar -- vem do
+			// seletor de ano global da tela inicial (RelatorioController.anoSelecionado),
+			// que pode ser diferente do ano letivo corrente (ex: rematricula do ano
+			// seguinte sendo feita com o ano letivo atual ainda em andamento).
+			Integer anoSelecionado = (Integer) filtros.get("anoSelecionado");
+			int anoStatus = anoSelecionado != null ? anoSelecionado : anoAtual;
 			StringBuilder sql = new StringBuilder();
 
 
@@ -1090,7 +1096,7 @@ public class FinanceiroService extends Service {
 				sql.append(" and aluno.statusContrato = ");
 				sql.append(((StatusContratoEnum)filtros.get("statusContrato")).ordinal());
 				sql.append(" and aluno.anostatuscontrato = ");
-				sql.append(anoAtual);
+				sql.append(anoStatus);
 			}
 
 			sql.append(" order by aluno.id desc ");
@@ -1108,7 +1114,7 @@ public class FinanceiroService extends Service {
 				// snapshot pra tela: mostra o status so se ele for do ano letivo
 				// atual, sem mexer no valor de verdade salvo no banco
 				em.detach(aluno);
-				aluno.setStatusContrato(aluno.getStatusContratoAtual(anoAtual));
+				aluno.setStatusContrato(aluno.getStatusContratoAtual(anoStatus));
 				alunos.add(aluno);
 			}
 
